@@ -228,10 +228,10 @@ abstract class Hoa_Compiler_Ll1 {
                 $buffer = abs($nextAction);
 
                 if(($buffer & 1) == 0)
-                    $this->_buffers[($buffer - 1) / 2] = null;
+                    $this->_buffers[($buffer - 2) / 2] = null;
                 else {
 
-                    $buffer /= 2;
+                    $buffer = ($buffer - 1) / 2;
 
                     if(!(isset($this->_buffers[$buffer])))
                         $this->_buffers[$buffer] = null;

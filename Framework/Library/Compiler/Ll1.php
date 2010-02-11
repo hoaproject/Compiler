@@ -239,8 +239,17 @@ abstract class Hoa_Compiler_Ll1 {
 
             if($i == $max) {
 
-                if(in_array($this->_states[$nextState], $this->_terminal))
+                if(in_array($this->_states[$nextState], $this->_terminal)) {
+
+                    if(false === $this->end())
+                        throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
+                            'End of code was reached but not correctly; ' .
+                            'maybe your program is not complete?',
+                            0
+                        );
+
                     return true;
+                }
 
                 throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
                     'End of code was reached but not correctly; ' .
@@ -382,6 +391,14 @@ abstract class Hoa_Compiler_Ll1 {
      * @return  void
      */
     abstract protected function consume ( $action );
+
+    /**
+     * Verify compiler state when ending the source code.
+     *
+     * @access  protected
+     * @return  bool
+     */
+    abstract protected function end ( );
 
     /**
      * Set initial line.

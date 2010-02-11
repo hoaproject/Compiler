@@ -239,17 +239,9 @@ abstract class Hoa_Compiler_Ll1 {
 
             if($i == $max) {
 
-                if(in_array($this->_states[$nextState], $this->_terminal)) {
-
-                    if(false === $this->end())
-                        throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
-                            'End of code was reached but not correctly; ' .
-                            'maybe your program is not complete?',
-                            0
-                        );
-
+                if(   in_array($this->_states[$nextState], $this->_terminal)
+                   && true === $this->end())
                     return true;
-                }
 
                 throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
                     'End of code was reached but not correctly; ' .

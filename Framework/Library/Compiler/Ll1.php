@@ -60,7 +60,7 @@ import('Compiler.Exception.IllegalToken');
 /**
  * Class Hoa_Compiler_Ll1.
  *
- * 
+ * Provide an abstract LL(1) compiler.
  *
  * @author      Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
  * @copyright   Copyright (c) 2007, 2009 Ivan ENDERLIN.

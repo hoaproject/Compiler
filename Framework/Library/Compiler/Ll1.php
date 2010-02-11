@@ -42,6 +42,22 @@ require_once 'Framework.php';
 import('Compiler.Exception');
 
 /**
+ * Hoa_Compiler_Exception_FinalStateHasNotBeenReached
+ */
+import('Compiler.Exception.FinalStateHasNotBeenReached');
+
+/**
+ * Hoa_Compiler_Exception_IllegalToken
+ */
+import('Compiler.Exception.IllegalToken');
+
+/**
+ * Define the __ constant, so usefull in compiler :-).
+ */
+!defined('GO') and define('GO', 'GO');
+!defined('__') and define('__', '__');
+
+/**
  * Class Hoa_Compiler_Ll1.
  *
  * 
@@ -56,21 +72,128 @@ import('Compiler.Exception');
 
 abstract class Hoa_Compiler_Ll1 {
 
+    /**
+     * Initial line.
+     * If we try to compile a code inside another code, the initial line would
+     * not probably be 0.
+     *
+     * @var Hoa_Compiler_Ll1 int
+     */
+    protected $_initialLine = 0;
+
+    /**
+     * Tokens to skip (will be totally skip, no way to get it).
+     * Tokens rules could be apply here (i.e. normal and special tokens are
+     * understood).
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_skip        = array();
+
+    /**
+     * Tokens.
+     * A token should be:
+     *     * simple, it means just a single char, e.g. ':';
+     *     * special, strings and/or a regular expressions, and must begin with
+     *       a sharp (#), e.g. '#foobar', '#[a-zA-Z]' or '#fo?bar'.
+     * Note: if we want the token #, we should write '##'.
+     * PCRE expressions are fully-supported.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_tokens      = array();
+
+    /**
+     * States.
+     * Note: the constant GO or the string 'GO' must be used to represent the
+     *       initial state.
+     * Note: the constant __ or the string '__' must be used to represent the
+     *       null/unrecognized/error state.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_states      = array();
+
+    /**
+     * Terminal states (defined in the states set).
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_terminal    = array();
+
+    /**
+     * Transitions table.
+     * It's actually a matrix, such as: TT(TOKENS × STATES), i.e.:
+     * array(
+     *                 a     b     c     d
+     *     __  array( __ ,  __ ,  __ ,  __ ),
+     *     GO  array('AA', 'BB', 'CC',  __ ),
+     *     AA  array('AA',  __ ,  __ ,  __ ),
+     *     BB  array( __ , 'BB',  __ ,  __ ),
+     *     CC  array( __ ,  __ , 'CC', 'EN'),
+     *     EN  array( __ ,  __ ,  __ ,  __ )
+     * )
+     * Note: tokens and states should be declared in the strict same order as
+     *       defined previously.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_transitions = array();
+
+    /**
+     * Actions table.
+     * It's actually a matrix, such as: AT(TOKENS × STATES), i.e.:
+     * array(
+     *                a   b   c   d
+     *     __  array( n,  …,  …,  m),
+     *     GO  array( …,  …,  …,  …),
+     *     AA  array( …,  …,  …,  …),
+     *     BB  array( …,  …,  …,  …),
+     *     CC  array( …,  …,  …,  …),
+     *     EN  array( …,  …,  …,  p)
+     * )
+     * AT is filled with integer n.
+     * If n > 0, it means a normal action.
+     * If n = 0, it means no action.
+     * If n < 0, it means a special action.
+     *
+     * When we write our consume() method, it's just a simple switch receiving
+     * an action. It receives only positive/normal actions. It's like a “goto”
+     * in our compiler, and allows us to execute code when skiming through the
+     * graph.
+     *
+     * Negative/special actions are used to auto-fill or empty buffers.
+     * E.g: -1 will fill the buffer 0, -2 will empty the buffer 0,
+     *      -3 will fill the buffer 1, -4 will empty the buffer 1,
+     *      -5 will fill the buffer 2, -6 will empty the buffer 2 etc.
+     * A formula appears:
+     *      y = |x|
+     *      fill  buffer (x - 2) / 2 if x & 1 = 1
+     *      empty buffer (x - 1) / 2 if x & 1 = 0
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
     protected $_actions     = array();
-    protected $_buffers     = array();
+
+    /**
+     * Buffers.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
+    protected $buffers     = array();
 
 
 
     /**
      * Singleton, and set parameters.
      *
-     * @access  private
-     * @param   array    $parameters    Parameters.
+     * @access  public
+     * @param   array   $skip           Skip.
+     * @param   array   $tokens         Tokens.
+     * @param   array   $states         States.
+     * @param   array   $terminal       Terminal states.
+     * @param   array   $transitions    Transitions table.
+     * @param   array   $actions        Actions table.
      * @return  void
      */
     public function __construct ( Array $skip,
@@ -90,6 +213,13 @@ abstract class Hoa_Compiler_Ll1 {
         return;
     }
 
+    /**
+     * Compile a source code.
+     *
+     * @access  public
+     * @param   string  $in    Source code.
+     * @return  void
+     */
     public function compile ( $in ) {
 
         $_skip      = array_flip($this->_skip);
@@ -101,26 +231,22 @@ abstract class Hoa_Compiler_Ll1 {
         $nextState  = $_states['GO'];
         $nextAction = $_states['GO'];
 
-        $iError     = 0;
+        $iError     = $this->getInitialLine();
         $nError     = 0;
-        $tError     = 0;
+        $tError     = $iError;
 
         for($i = 0, $max = strlen($in); $i <= $max; $i++, $iError++) {
 
             if($i == $max) {
 
-                if(in_array($this->_states[$nextState], $this->_terminal)) {
+                if(in_array($this->_states[$nextState], $this->_terminal))
+                    return true;
 
-                    echo '*** Code was parsed successfully!' . "\n";
-
-                    break;
-                }
-
-                echo '*** End-parse error' . "\n" .
-                     '*** Error: end of code was reached but not correctly; ' . "\n" .
-                     '           maybe your program is not complete?' . "\n";
-
-                break;
+                throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
+                    'End of code was reached but not correctly; ' .
+                    'maybe your program is not complete?',
+                    0
+                );
             }
 
             $nextChar = $in[$i];
@@ -213,12 +339,11 @@ abstract class Hoa_Compiler_Ll1 {
                 $error = explode("\n", $in);
                 $error = $error[$nError];
 
-                echo '*** Illegal token (' . ($nError + 1) . 'L/' . ($iError + 1) . 'C):' . "\n" .
-                     '*** Error:  ' . $error . "\n" .
-                     '            ' . str_repeat(' ', $iError) . '↑' . "\n" .
-                     '*** Tokens: ' . $nextChar .   "\n";
-
-                exit;
+                throw new Hoa_Compiler_Exception_IllegalToken(
+                    'Illegal token at line ' . ($nError + 1) . ' and column ' .
+                    ($iError + 1) . "\n" . $error . "\n" . str_repeat(' ', $iError) . '↑',
+                    0, array(), $nError + 1, $iError + 1
+                );
             }
 
             $iError = $tError;
@@ -228,15 +353,15 @@ abstract class Hoa_Compiler_Ll1 {
                 $buffer = abs($nextAction);
 
                 if(($buffer & 1) == 0)
-                    $this->_buffers[($buffer - 2) / 2] = null;
+                    $this->buffers[($buffer - 2) / 2] = null;
                 else {
 
                     $buffer = ($buffer - 1) / 2;
 
-                    if(!(isset($this->_buffers[$buffer])))
-                        $this->_buffers[$buffer] = null;
+                    if(!(isset($this->buffers[$buffer])))
+                        $this->buffers[$buffer] = null;
 
-                    $this->_buffers[$buffer] .= $nextChar;
+                    $this->buffers[$buffer] .= $nextChar;
                 }
 
                 continue;
@@ -248,8 +373,38 @@ abstract class Hoa_Compiler_Ll1 {
         return;
     }
 
+    /**
+     * Consume actions.
+     * Please, see the actions table definition to learn more.
+     *
+     * @access  protected
+     * @param   int        $action    Action.
+     * @return  void
+     */
     abstract protected function consume ( $action );
 
+    /**
+     * Set initial line.
+     *
+     * @access  public
+     * @param   int     $line    Initial line.
+     * @return  int
+     */
+    public function setInitialLine ( $line ) {
+
+        $old                = $this->_initialLine;
+        $this->_initialLine = $line;
+
+        return $old;
+    }
+
+    /**
+     * Set tokens to skip.
+     *
+     * @access  public
+     * @param   array   $skip    Skip.
+     * @return  array
+     */
     public function setSkip ( Array $skip ) {
 
         $old         = $this->_skip;
@@ -258,6 +413,14 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+
+    /**
+     * Set tokens.
+     *
+     * @access  public
+     * @param   array   $tokens    Tokens.
+     * @return  array
+     */
     public function setTokens ( Array $tokens ) {
 
         $old           = $this->_tokens;
@@ -266,6 +429,13 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+    /**
+     * Set states.
+     *
+     * @access  public
+     * @param   array   $states    States.
+     * @return  array
+     */
     public function setStates ( Array $states ) {
 
         $old           = $this->_states;
@@ -274,6 +444,13 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+    /**
+     * Set terminal states.
+     *
+     * @access  public
+     * @param   array   $terminal    Terminal states.
+     * @return  array
+     */
     public function setTerminal ( Array $terminal ) {
 
         $old             = $this->_terminal;
@@ -282,6 +459,13 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+    /**
+     * Set transitions table.
+     *
+     * @access  public
+     * @param   array   $transitions    Transitions table.
+     * @return  array
+     */
     public function setTransitions ( Array $transitions ) {
 
         $old                = $this->_transitions;
@@ -290,6 +474,13 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+    /**
+     * Set actions table.
+     *
+     * @access  public
+     * @param   array   $actions    Actions table.
+     * @return  array
+     */
     public function setActions ( Array $actions ) {
 
         $old            = $this->_actions;
@@ -298,31 +489,78 @@ abstract class Hoa_Compiler_Ll1 {
         return $old;
     }
 
+    /**
+     * Get initial line.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function getInitialLine ( ) {
+
+        return $this->_initialLine;
+    }
+
+    /**
+     * Get skip tokens.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getSkip ( ) {
 
         return $this->_skip;
     }
 
+    /**
+     * Get tokens.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getTokens ( ) {
 
         return $this->_tokens;
     }
 
+    /**
+     * Get states.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getStates ( ) {
 
         return $this->_states;
     }
 
+    /**
+     * Get terminal states.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getTerminal ( ) {
 
         return $this->_terminal;
     }
 
+    /**
+     * Get transitions table.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getTransitions ( ) {
 
         return $this->_transitions;
     }
 
+    /**
+     * Get actions table.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getActions ( ) {
 
         return $this->_actions;

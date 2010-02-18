@@ -293,7 +293,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $continue = false;
                 $handle   = substr($in, $i);
 
-                foreach($this->_skip[$c] as $e => $sk) {
+                foreach($_skip as $sk => $e) {
 
                     if($sk[0] != '#')
                         continue;
@@ -332,7 +332,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $nextToken = false;
                 $handle    = substr($in, $i);
 
-                foreach($this->_tokens[$c] as $e => $token) {
+                foreach($_tokens as $token => $e) {
 
                     if($token[0] != '#')
                         continue;
@@ -409,8 +409,6 @@ abstract class Hoa_Compiler_Ll1 {
 
                     $current = array_pop($this->_stack);
                     $d--;
-
-                    /* if null $current */
 
                     list($c, $nextState) = $current;
                     //print_r($current);

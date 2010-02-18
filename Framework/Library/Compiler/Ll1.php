@@ -237,11 +237,11 @@ abstract class Hoa_Compiler_Ll1 {
     public function compile ( $in ) {
 
         $d              = 0;
-
         $c              = 0; // current automata.
         $_skip          = array_flip($this->_skip[$c]);
         $_tokens        = array_flip($this->_tokens[$c]);
         $_states        = array_flip($this->_states[$c]);
+        $_actions       = array($c => 0);
 
         $nextChar       = null;
         $nextToken      = null;
@@ -320,6 +320,37 @@ abstract class Hoa_Compiler_Ll1 {
                     continue;
             }
 
+            // Epsilon-transition.
+            if(   array_key_exists($nextToken, $this->_actions[$c][$nextState])
+               && ($foo = $this->_actions[$c][$nextState][$nextToken]) > 0) {
+
+                if($_actions[$c] == 0) {
+
+                    //echo '*** Change automata (up)' . "\n";
+
+                    $_actions[$c] = 1;
+
+                    $this->_stack[$d] = array($c, $nextState, $nextToken);
+                    end($this->_stack);
+
+                    $c                = $foo - 1;
+                    $_skip            = array_flip($this->_skip[$c]);
+                    $_tokens          = array_flip($this->_tokens[$c]);
+                    $_states          = array_flip($this->_states[$c]);
+                    $_actions         = $this->_actions[$c];
+
+                    $nextState        = $_states['GO'];
+                    $nextAction       = $_states['GO'];
+                    $nextToken        = $_tokens[$token];
+
+                    $_actions[$c] = 0;
+
+                    $d++;
+                }
+                elseif($_actions[$c] == 2)
+                    $_actions[$c] = 0;
+            }
+
             // Token.
             if(isset($_tokens[$nextChar])) {
 
@@ -365,53 +396,26 @@ abstract class Hoa_Compiler_Ll1 {
             // Got it!
             if(false !== $nextToken) {
 
-                $state = $this->_transitions[$c][$nextState][$nextToken];
-
-                // Go to a new automata.
-                if(is_int($state)) {
-
-                    //echo '*** Change automata (up)' . "\n";
-
-                    $this->_stack[$d] = array($c, $nextState);
-                    end($this->_stack);
-
-                    $c                = $state;
-                    $_skip            = array_flip($this->_skip[$c]);
-                    $_tokens          = array_flip($this->_tokens[$c]);
-                    $_states          = array_flip($this->_states[$c]);
-
-                    $nextState        = $_states['GO'];
-                    $nextAction       = $_states['GO'];
-                    $nextToken        = $_tokens[$token];
-
-                    /*
-                    echo '*** Automata   ' . $c . "\n";
-                    print_r($this->_stack);
-                    */
-
-                    $state            = $this->_transitions[$c][$nextState][$nextToken];
-
-                    $d++;
-                }
-
                 $nextAction = $this->_actions[$c][$nextState][$nextToken];
-                $nextState  = $_states[$state];
+                $nextState  = $_states[$this->_transitions[$c][$nextState][$nextToken]];
             }
 
             // Oh :-(.
             if(false === $nextToken || $nextState === $_states['__']) {
 
+                $pop = array_pop($this->_stack);
+                $d--;
+
                 // Go back to an old automata.
-                if(   in_array($this->_states[$c][$nextState], $this->_terminal[$c])
-                   || $nextState === $_states['__']) {
+                if(   (in_array($this->_states[$c][$nextState], $this->_terminal[$c])
+                   &&  null !== $pop)
+                   ||  $nextState === $_states['__']) {
 
                     //echo '!!! Change automata (down)' . "\n";
 
-                    $current = array_pop($this->_stack);
-                    $d--;
+                    list($c, $nextState, $nextToken) = $pop;
 
-                    list($c, $nextState) = $current;
-                    //print_r($current);
+                    $_actions[$c] = 2;
 
                     $i       -= strlen($token);
                     $_skip    = array_flip($this->_skip[$c]);

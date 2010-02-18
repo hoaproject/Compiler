@@ -180,7 +180,21 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $buffers     = array();
+    protected $buffers      = array();
+
+    /**
+     * Recursive stack.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
+    protected $_stack       = array();
+
+    /**
+     * Current transition table.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
+    protected $_transition  = array();
 
 
 
@@ -222,26 +236,36 @@ abstract class Hoa_Compiler_Ll1 {
      */
     public function compile ( $in ) {
 
-        $_skip      = array_flip($this->_skip);
-        $_tokens    = array_flip($this->_tokens);
-        $_states    = array_flip($this->_states);
+        $d              = 0;
 
-        $nextChar   = null;
-        $nextToken  = null;
-        $nextState  = $_states['GO'];
-        $nextAction = $_states['GO'];
+        $c              = 0; // current automata.
+        $_skip          = array_flip($this->_skip[$c]);
+        $_tokens        = array_flip($this->_tokens[$c]);
+        $_states        = array_flip($this->_states[$c]);
 
-        $iError     = $this->getInitialLine();
-        $nError     = 0;
-        $tError     = $iError;
+        $nextChar       = null;
+        $nextToken      = null;
+        $nextState      = $_states['GO'];
+        $nextAction     = $_states['GO'];
+
+        $iError         = $this->getInitialLine();
+        $nError         = 0;
+        $tError         = $iError;
 
         for($i = 0, $max = strlen($in); $i <= $max; $i++, $iError++) {
 
+            //echo "\n---\n\n";
+
+            // End of parsing (not automata).
             if($i == $max) {
 
-                if(   in_array($this->_states[$nextState], $this->_terminal)
-                   && true === $this->end())
+                if(   in_array($this->_states[$c][$nextState], $this->_terminal[$c])
+                   && true === $this->end()) {
+
+                    //echo '*********** END REACHED **********' . "\n";
+
                     return true;
+                }
 
                 throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
                     'End of code has beenreached but not correctly; ' .
@@ -258,6 +282,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $nError++;
             }
 
+            // Skip.
             if(isset($_skip[$nextChar])) {
 
                 $iError--;
@@ -268,7 +293,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $continue = false;
                 $handle   = substr($in, $i);
 
-                foreach($this->_skip as $e => $sk) {
+                foreach($this->_skip[$c] as $e => $sk) {
 
                     if($sk[0] != '#')
                         continue;
@@ -295,9 +320,11 @@ abstract class Hoa_Compiler_Ll1 {
                     continue;
             }
 
+            // Token.
             if(isset($_tokens[$nextChar])) {
 
-                $nextToken = $_tokens[$nextChar];
+                $token     = $nextChar;
+                $nextToken = $_tokens[$token];
                 $tError    = $iError;
             }
             else {
@@ -305,14 +332,14 @@ abstract class Hoa_Compiler_Ll1 {
                 $nextToken = false;
                 $handle    = substr($in, $i);
 
-                foreach($this->_tokens as $e => $token) {
+                foreach($this->_tokens[$c] as $e => $token) {
 
                     if($token[0] != '#')
                         continue;
 
-                    $token = str_replace('#', '\#', substr($token, 1));
+                    $ntoken = str_replace('#', '\#', substr($token, 1));
 
-                    if(0 != preg_match('#^(' . $token . ')#', $handle, $match)) {
+                    if(0 != preg_match('#^(' . $ntoken . ')#', $handle, $match)) {
 
                         $strlen = strlen($match[1]);
 
@@ -329,13 +356,77 @@ abstract class Hoa_Compiler_Ll1 {
                 }
             }
 
+            /*
+            echo '>>> Automata   ' . $c . "\n" .
+                 '>>> Next state ' . $nextState . "\n" .
+                 '>>> Token      ' . $token . "\n";
+            */
+
+            // Got it!
             if(false !== $nextToken) {
 
-                $nextAction = $this->_actions[$nextState][$nextToken];
-                $nextState  = $_states[$this->_transitions[$nextState][$nextToken]];
+                $state = $this->_transitions[$c][$nextState][$nextToken];
+
+                // Go to a new automata.
+                if(is_int($state)) {
+
+                    //echo '*** Change automata (up)' . "\n";
+
+                    $this->_stack[$d] = array($c, $nextState);
+                    end($this->_stack);
+
+                    $c                = $state;
+                    $_skip            = array_flip($this->_skip[$c]);
+                    $_tokens          = array_flip($this->_tokens[$c]);
+                    $_states          = array_flip($this->_states[$c]);
+
+                    $nextState        = $_states['GO'];
+                    $nextAction       = $_states['GO'];
+                    $nextToken        = $_tokens[$token];
+
+                    /*
+                    echo '*** Automata   ' . $c . "\n";
+                    print_r($this->_stack);
+                    */
+
+                    $state            = $this->_transitions[$c][$nextState][$nextToken];
+
+                    $d++;
+                }
+
+                $nextAction = $this->_actions[$c][$nextState][$nextToken];
+                $nextState  = $_states[$state];
             }
 
+            // Oh :-(.
             if(false === $nextToken || $nextState === $_states['__']) {
+
+                // Go back to an old automata.
+                if(   in_array($this->_states[$c][$nextState], $this->_terminal[$c])
+                   || $nextState === $_states['__']) {
+
+                    //echo '!!! Change automata (down)' . "\n";
+
+                    $current = array_pop($this->_stack);
+                    $d--;
+
+                    /* if null $current */
+
+                    list($c, $nextState) = $current;
+                    //print_r($current);
+
+                    $i       -= strlen($token);
+                    $_skip    = array_flip($this->_skip[$c]);
+                    $_tokens  = array_flip($this->_tokens[$c]);
+                    $_states  = array_flip($this->_states[$c]);
+
+                    /*
+                    echo '!!! Automata   ' . $c . "\n" .
+                         '!!! Next state ' . $nextState . "\n";
+                    */
+
+                    continue;
+                }
 
                 $error = explode("\n", $in);
                 $error = $error[$nError];
@@ -349,6 +440,9 @@ abstract class Hoa_Compiler_Ll1 {
 
             $iError = $tError;
 
+            //echo '<<< Next state ' . $nextState . "\n";
+
+            // Special actions.
             if($nextAction < 0) {
 
                 $buffer = abs($nextAction);
@@ -373,6 +467,12 @@ abstract class Hoa_Compiler_Ll1 {
 
         return;
     }
+
+    /**
+     *
+     * add pre() and post() method.
+     *
+     */
 
     /**
      * Consume actions.

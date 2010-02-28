@@ -464,7 +464,8 @@ abstract class Hoa_Compiler_Ll1 {
                 continue;
             }
 
-            $this->consume($nextAction);
+            if(0 !== $nextAction)
+                $this->consume($nextAction);
         }
 
         return;

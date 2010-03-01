@@ -176,13 +176,6 @@ abstract class Hoa_Compiler_Ll1 {
     protected $_actions     = array();
 
     /**
-     * Buffers.
-     *
-     * @var Hoa_Compiler_Ll1 array
-     */
-    protected $buffers      = array();
-
-    /**
      * Recursive stack.
      *
      * @var Hoa_Compiler_Ll1 array
@@ -195,6 +188,27 @@ abstract class Hoa_Compiler_Ll1 {
      * @var Hoa_Compiler_Ll1 array
      */
     protected $_transition  = array();
+
+    /**
+     * Buffers.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
+    protected $buffers      = array();
+
+    /**
+     * Current token's line.
+     *
+     * @var Hoa_Compiler_Ll1 int
+     */
+    protected $line         = 0;
+
+    /**
+     * Current token's column.
+     *
+     * @var Hoa_Compiler_Ll1 int
+     */
+    protected $column       = 0;
 
 
 
@@ -248,13 +262,13 @@ abstract class Hoa_Compiler_Ll1 {
         $nextState      = $_states['GO'];
         $nextAction     = $_states['GO'];
 
-        $iError         = $this->getInitialLine();
-        $nError         = 0;
-        $tError         = $iError;
+        $this->line     = $this->getInitialLine();
+        $this->column   = 0;
+
+        $line           = $this->line;
+        $column         = $this->column;
 
         for($i = 0, $max = strlen($in); $i <= $max; $i++) {
-
-            $fError = false;
 
             //echo "\n---\n\n";
 
@@ -278,19 +292,16 @@ abstract class Hoa_Compiler_Ll1 {
 
             $nextChar = $in[$i];
 
-            if($nextChar == "\n") {
-
-                $iError = 0;
-                $nError++;
-            }
-
             // Skip.
             if(isset($_skip[$nextChar])) {
 
-                $iError++;
+                if($nextChar == "\n") {
 
-                if($nextChar == "\n")
-                    $nError--;
+                    $line++;
+                    $column = 0;
+                }
+                else
+                    $column++;
 
                 continue;
             }
@@ -313,11 +324,11 @@ abstract class Hoa_Compiler_Ll1 {
                         if($strlen > 0) {
 
                             if(false !== $offset = strrpos($match[1], "\n"))
-                                $iError = $strlen - $offset - 1;
+                                $column  = $strlen - $offset - 1;
                             else
-                                $iError += $strlen;
+                                $column += $strlen;
 
-                            $nError   += substr_count($match[1], "\n") - 1;
+                            $line     += substr_count($match[1], "\n");
                             $i        += $strlen - 1;
                             $continue  = true;
 
@@ -365,7 +376,14 @@ abstract class Hoa_Compiler_Ll1 {
 
                 $token      = $nextChar;
                 $nextToken  = $_tokens[$token];
-                $iError++;
+
+                if($nextChar == "\n") {
+
+                    $line++;
+                    $column = 0;
+                }
+                else
+                    $column++;
             }
             else {
 
@@ -385,10 +403,15 @@ abstract class Hoa_Compiler_Ll1 {
 
                         if($strlen > 0) {
 
+                            if(false !== $offset = strrpos($match[1], "\n"))
+                                $column  = $strlen - $offset - 1;
+                            else
+                                $column += $strlen;
+
                             $nextChar   = $match[1];
                             $nextToken  = $e;
                             $i         += $strlen - 1;
-                            $iError    += $strlen;
+                            $line      += substr_count($match[1], "\n");
 
                             break;
                         }
@@ -418,7 +441,8 @@ abstract class Hoa_Compiler_Ll1 {
                 // Go back to an old automata.
                 if(   (in_array($this->_states[$c][$nextState], $this->_terminal[$c])
                    &&  null !== $pop)
-                   ||  $nextState === $_states['__']) {
+                   || ($nextState === $_states['__']
+                   &&  null !== $pop)) {
 
                     //echo '!!! Change automata (down)' . "\n";
 
@@ -439,14 +463,18 @@ abstract class Hoa_Compiler_Ll1 {
                 }
 
                 $error = explode("\n", $in);
-                $error = $error[$nError];
+                $error = $error[$this->line];
 
                 throw new Hoa_Compiler_Exception_IllegalToken(
-                    'Illegal token at line ' . ($nError + 1) . ' and column ' .
-                    ($iError + 1) . "\n" . $error . "\n" . str_repeat(' ', $iError) . '↑',
-                    0, array(), $nError + 1, $iError + 1
+                    'Illegal token at line ' . ($this->line + 1) . ' and column ' .
+                    ($this->column + 1) . "\n" . $error . "\n" .
+                    str_repeat(' ', $this->column) . '↑',
+                    0, array(), $this->line + 1, $this->column + 1
                 );
             }
+
+            $this->line   = $line;
+            $this->column = $column;
 
             //echo '<<< Next state ' . $nextState . "\n";
 

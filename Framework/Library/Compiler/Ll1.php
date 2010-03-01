@@ -343,14 +343,14 @@ abstract class Hoa_Compiler_Ll1 {
                     $this->_stack[$d] = array($c, $nextState, $nextToken);
                     end($this->_stack);
 
-                    $c                = $foo - 1;
-                    $_tokens          = array_flip($this->_tokens[$c]);
-                    $_states          = array_flip($this->_states[$c]);
-                    $_actions         = $this->_actions[$c];
+                    $c            = $foo - 1;
+                    $_tokens      = array_flip($this->_tokens[$c]);
+                    $_states      = array_flip($this->_states[$c]);
+                    $_actions     = $this->_actions[$c];
 
-                    $nextState        = $_states['GO'];
-                    $nextAction       = $_states['GO'];
-                    $nextToken        = $_tokens[$token];
+                    $nextState    = $_states['GO'];
+                    $nextAction   = $_states['GO'];
+                    $nextToken    = $_tokens[$token];
 
                     $_actions[$c] = 0;
 

@@ -238,7 +238,7 @@ abstract class Hoa_Compiler_Ll1 {
 
         $d              = 0;
         $c              = 0; // current automata.
-        $_skip          = array_flip($this->_skip[$c]);
+        $_skip          = array_flip($this->_skip);
         $_tokens        = array_flip($this->_tokens[$c]);
         $_states        = array_flip($this->_states[$c]);
         $_actions       = array($c => 0);
@@ -344,7 +344,6 @@ abstract class Hoa_Compiler_Ll1 {
                     end($this->_stack);
 
                     $c                = $foo - 1;
-                    $_skip            = array_flip($this->_skip[$c]);
                     $_tokens          = array_flip($this->_tokens[$c]);
                     $_states          = array_flip($this->_states[$c]);
                     $_actions         = $this->_actions[$c];
@@ -428,7 +427,6 @@ abstract class Hoa_Compiler_Ll1 {
                     $_actions[$c] = 2;
 
                     $i       -= strlen($token);
-                    $_skip    = array_flip($this->_skip[$c]);
                     $_tokens  = array_flip($this->_tokens[$c]);
                     $_states  = array_flip($this->_states[$c]);
 

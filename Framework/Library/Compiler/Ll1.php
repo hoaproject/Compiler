@@ -252,7 +252,9 @@ abstract class Hoa_Compiler_Ll1 {
         $nError         = 0;
         $tError         = $iError;
 
-        for($i = 0, $max = strlen($in); $i <= $max; $i++, $iError++) {
+        for($i = 0, $max = strlen($in); $i <= $max; $i++) {
+
+            $fError = false;
 
             //echo "\n---\n\n";
 
@@ -285,7 +287,11 @@ abstract class Hoa_Compiler_Ll1 {
             // Skip.
             if(isset($_skip[$nextChar])) {
 
-                $iError--;
+                $iError++;
+
+                if($nextChar == "\n")
+                    $nError--;
+
                 continue;
             }
             else {
@@ -306,8 +312,12 @@ abstract class Hoa_Compiler_Ll1 {
 
                         if($strlen > 0) {
 
-                            $iError--;
-                            $nError   += substr_count($match[1], "\n");
+                            if(false !== $offset = strrpos($match[1], "\n"))
+                                $iError = $strlen - $offset - 1;
+                            else
+                                $iError += $strlen;
+
+                            $nError   += substr_count($match[1], "\n") - 1;
                             $i        += $strlen - 1;
                             $continue  = true;
 
@@ -354,9 +364,9 @@ abstract class Hoa_Compiler_Ll1 {
             // Token.
             if(isset($_tokens[$nextChar])) {
 
-                $token     = $nextChar;
-                $nextToken = $_tokens[$token];
-                $tError    = $iError;
+                $token      = $nextChar;
+                $nextToken  = $_tokens[$token];
+                $iError++;
             }
             else {
 
@@ -379,7 +389,7 @@ abstract class Hoa_Compiler_Ll1 {
                             $nextChar   = $match[1];
                             $nextToken  = $e;
                             $i         += $strlen - 1;
-                            $tError     = $iError + $strlen - 1;
+                            $iError    += $strlen;
 
                             break;
                         }
@@ -439,8 +449,6 @@ abstract class Hoa_Compiler_Ll1 {
                     0, array(), $nError + 1, $iError + 1
                 );
             }
-
-            $iError = $tError;
 
             //echo '<<< Next state ' . $nextState . "\n";
 

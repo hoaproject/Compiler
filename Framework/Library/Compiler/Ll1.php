@@ -60,7 +60,7 @@ import('Compiler.Exception.IllegalToken');
 /**
  * Class Hoa_Compiler_Ll1.
  *
- * Provide an abstract LL(1) compiler.
+ * Provide an abstract LL(1) compiler, based on sub-automata and stacks.
  *
  * @author      Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
  * @copyright   Copyright (c) 2007, 2009 Ivan ENDERLIN.
@@ -83,8 +83,14 @@ abstract class Hoa_Compiler_Ll1 {
 
     /**
      * Tokens to skip (will be totally skip, no way to get it).
-     * Tokens rules could be apply here (i.e. normal and special tokens are
+     * Tokens' rules could be apply here (i.e. normal and special tokens are
      * understood).
+     * Example:
+     *     array(
+     *         '#\s+',           // white spaces
+     *         '#//.*',          // inline comment
+     *         '#/\*(.|\n)*\*\/' // block comment
+     *     )
      *
      * @var Hoa_Compiler_Ll1 array
      */
@@ -95,9 +101,28 @@ abstract class Hoa_Compiler_Ll1 {
      * A token should be:
      *     * simple, it means just a single char, e.g. ':';
      *     * special, strings and/or a regular expressions, and must begin with
-     *       a sharp (#), e.g. '#foobar', '#[a-zA-Z]' or '#fo?bar'.
+     *       a sharp (#), e.g. '#foobar', '#[a-zA-Z]' or '#foo?bar'.
      * Note: if we want the token #, we should write '##'.
      * PCRE expressions are fully-supported.
+     * We got an array of arrays because of sub-automata, one sub-array per
+     * sub-automaton.
+     * Example:
+     *     array(
+     *         array(
+     *             '{'  // open brack
+     *         ),
+     *         array(
+     *             '"',            // quote
+     *             ':',            // semi-colon
+     *             ',',            // comma
+     *             '{',            // open bracket
+     *             '}'             // close bracket
+     *         ),
+     *         array(
+     *             '#[a-z_\ \n]+", // id/string
+     *             '"'             // quote
+     *         )
+     *     )
      *
      * @var Hoa_Compiler_Ll1 array
      */
@@ -105,6 +130,32 @@ abstract class Hoa_Compiler_Ll1 {
 
     /**
      * States.
+     * We got an array of arrays because of sub-automata, one sub-array per
+     * sub-automaton.
+     * Example:
+     *     array(
+     *         array(
+     *              __ , // error
+     *             'GO', // start
+     *             'OK'  // terminal
+     *         ),
+     *         array(
+     *              __ , // error
+     *             'GO', // start
+     *             'KE', // key
+     *             'CO', // colon
+     *             'VA', // value
+     *             'BL', // block
+     *             'OK'  // terminal
+     *         ),
+     *         array(
+     *              __ , // error
+     *             'GO', // start
+     *             'ST', // string
+     *             'OK'  // terminal
+     *         )
+     *     )
+     *
      * Note: the constant GO or the string 'GO' must be used to represent the
      *       initial state.
      * Note: the constant __ or the string '__' must be used to represent the
@@ -116,6 +167,14 @@ abstract class Hoa_Compiler_Ll1 {
 
     /**
      * Terminal states (defined in the states set).
+     * We got an array of arrays because of sub-automata, one sub-array per
+     * sub-automaton.
+     * Example:
+     *     array(
+     *         array('OK'),
+     *         array('OK'),
+     *         array('OK')
+     *     )
      *
      * @var Hoa_Compiler_Ll1 array
      */
@@ -123,16 +182,36 @@ abstract class Hoa_Compiler_Ll1 {
 
     /**
      * Transitions table.
-     * It's actually a matrix, such as: TT(TOKENS × STATES), i.e.:
-     * array(
-     *                 a     b     c     d
-     *     __  array( __ ,  __ ,  __ ,  __ ),
-     *     GO  array('AA', 'BB', 'CC',  __ ),
-     *     AA  array('AA',  __ ,  __ ,  __ ),
-     *     BB  array( __ , 'BB',  __ ,  __ ),
-     *     CC  array( __ ,  __ , 'CC', 'EN'),
-     *     EN  array( __ ,  __ ,  __ ,  __ )
-     * )
+     * It's actually a matrix, such as: TT(TOKENS × STATES).
+     * We got an array of arrays because of sub-automata, one sub-array per
+     * sub-automaton.
+     * Example:
+     *     array(
+     *         array(
+     *                        {
+     *             __  array( __ ),
+     *             GO  array('OK'),
+     *             OK  array( __ ),
+     *         ),
+     *         array(
+     *                        "     :     ,     {     }
+     *             __  array( __ ,  __ ,  __ ,  __ ,  __ ),
+     *             GO  array('KE',  __ ,  __ ,  __ , 'OK'),
+     *             KE  array( __ , 'CO',  __ ,  __ ,  __ ),
+     *             CO  array('VA',  __ ,  __ , 'BL',  __ ),
+     *             VA  array( __ ,  __ , 'GO',  __ , 'OK'),
+     *             BL  array( __ ,  __ , 'GO',  __ , 'OK'),
+     *             OK  array( __ ,  __ ,  __ ,  __ ,  __ )
+     *         ),
+     *         array(
+     *                        id    "
+     *             __  array( __ ,  __ ),
+     *             GO  array('ST', 'OK'),
+     *             ST  array( __ , 'OK'),
+     *             OK  array( __ ,  __ )
+     *         )
+     *     )
+     *
      * Note: tokens and states should be declared in the strict same order as
      *       defined previously.
      *
@@ -142,25 +221,45 @@ abstract class Hoa_Compiler_Ll1 {
 
     /**
      * Actions table.
-     * It's actually a matrix, such as: AT(TOKENS × STATES), i.e.:
-     * array(
-     *                a   b   c   d
-     *     __  array( n,  …,  …,  m),
-     *     GO  array( …,  …,  …,  …),
-     *     AA  array( …,  …,  …,  …),
-     *     BB  array( …,  …,  …,  …),
-     *     CC  array( …,  …,  …,  …),
-     *     EN  array( …,  …,  …,  p)
-     * )
-     * AT is filled with integer n.
-     * If n > 0, it means a normal action.
-     * If n = 0, it means no action.
+     * It's actually a matrix, such as: AT(TOKENS × STATES).
+     * We got an array of arrays because of sub-automata, one sub-array per
+     * sub-automaton.
+     * Example:
+     *     array(
+     *         array(
+     *                        {
+     *             __  array( 0),
+     *             GO  array( 0),
+     *             OK  array( 2),
+     *         ),
+     *         array(
+     *                        "   :    ,    {    }
+     *             __  array( 0,  0 ,  0 ,  0 ,  0 ),
+     *             GO  array( 0,  0 ,  0 ,  0 , 'd'),
+     *             KE  array( 3, 'k',  0 ,  0 ,  0 ),
+     *             CO  array( 0,  0 ,  0 , 'u',  0 ),
+     *             VA  array( 3,  0 , 'v',  0 , 'x'),
+     *             BL  array( 0,  0 ,  0 ,  2 , 'd'),
+     *             OK  array( 0,  0 ,  0 ,  0 ,  0 )
+     *         ),
+     *         array(
+     *                       id  "
+     *             __  array( 0, 0),
+     *             GO  array(-1, 0),
+     *             ST  array( 0, 0),
+     *             OK  array( 0, 0)
+     *         )
+     *     )
+     *
+     * AT is filled with integer or char n.
+     * If n is a char, it means an action.
      * If n < 0, it means a special action.
+     * If n = 0, it means not action.
+     * If n > 0, it means a link to a sub-automata (sub-automata index + 1).
      *
      * When we write our consume() method, it's just a simple switch receiving
-     * an action. It receives only positive/normal actions. It's like a “goto”
-     * in our compiler, and allows us to execute code when skiming through the
-     * graph.
+     * an action. It receives only character. It's like a “goto” in our
+     * compiler, and allows us to execute code when skiming through the graph.
      *
      * Negative/special actions are used to auto-fill or empty buffers.
      * E.g: -1 will fill the buffer 0, -2 will empty the buffer 0,
@@ -171,6 +270,19 @@ abstract class Hoa_Compiler_Ll1 {
      *      fill  buffer (x - 2) / 2 if x & 1 = 1
      *      empty buffer (x - 1) / 2 if x & 1 = 0
      *
+     * Positive/link actions are used to make an epsilon-transition (or a link)
+     * between two sub-automata.
+     * Sub-automata are indexed from 0, but our links must be index + 1. Example
+     * given: the sub-automata 0 in our example has a link to the sub-automata 1
+     * through OK[{] = 2. Take attention to this :-).
+     * And another thing which must be carefully studying is the place of the
+     * link. For example, with our sub-automata 1 (the big one), we have an
+     * epsilon-transition to the sub-automata 2 through VA["] = 3. It means:
+     * when we arrived in the state VA from the token ", we go in the
+     * sub-automata 3 (the 2nd one actually). And when the linked sub-automata
+     * has finished, we are back in our state and continue our parsing. Take
+     * care of this :-).
+     *
      * @var Hoa_Compiler_Ll1 array
      */
     protected $_actions     = array();
@@ -180,14 +292,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_stack       = array();
-
-    /**
-     * Current transition table.
-     *
-     * @var Hoa_Compiler_Ll1 array
-     */
-    protected $_transition  = array();
+    private   $_stack       = array();
 
     /**
      * Buffers.
@@ -268,6 +373,8 @@ abstract class Hoa_Compiler_Ll1 {
         $line           = $this->line;
         $column         = $this->column;
 
+        $this->pre($in);
+
         for($i = 0, $max = strlen($in); $i <= $max; $i++) {
 
             //echo "\n---\n\n";
@@ -275,7 +382,12 @@ abstract class Hoa_Compiler_Ll1 {
             // End of parsing (not automata).
             if($i == $max) {
 
+                while(   $c > 0
+                      && in_array($this->_states[$c][$nextState], $this->_terminal[$c]))
+                    list($c, $nextState, ) = array_pop($this->_stack);
+
                 if(   in_array($this->_states[$c][$nextState], $this->_terminal[$c])
+                   && 0    === $c
                    && true === $this->end()) {
 
                     //echo '*********** END REACHED **********' . "\n";
@@ -438,7 +550,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $pop = array_pop($this->_stack);
                 $d--;
 
-                // Go back to an old automata.
+                // Go back to a parent automata.
                 if(   (in_array($this->_states[$c][$nextState], $this->_terminal[$c])
                    &&  null !== $pop)
                    || ($nextState === $_states['__']
@@ -506,12 +618,6 @@ abstract class Hoa_Compiler_Ll1 {
     }
 
     /**
-     *
-     * add pre() and post() method.
-     *
-     */
-
-    /**
      * Consume actions.
      * Please, see the actions table definition to learn more.
      *
@@ -520,6 +626,15 @@ abstract class Hoa_Compiler_Ll1 {
      * @return  void
      */
     abstract protected function consume ( $action );
+
+    /**
+     * Compute source code before compiling it.
+     *
+     * @access  protected
+     * @param   string  $in    Source code.
+     * @return  void
+     */
+    abstract protected function pre ( &$in );
 
     /**
      * Verify compiler state when ending the source code.

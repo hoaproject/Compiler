@@ -473,7 +473,7 @@ abstract class Hoa_Compiler_Ll1 {
 
                     $nextState    = $_states['GO'];
                     $nextAction   = $_states['GO'];
-                    $nextToken    = $_tokens[$token];
+                    $nextToken    = false;
 
                     $_actions[$c] = 0;
 

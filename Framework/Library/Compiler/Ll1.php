@@ -562,7 +562,7 @@ abstract class Hoa_Compiler_Ll1 {
 
                     $_actions[$c] = 2;
 
-                    $i       -= strlen($token);
+                    $i       -= strlen($nextChar);
                     $_tokens  = array_flip($this->_tokens[$c]);
                     $_states  = array_flip($this->_states[$c]);
 

@@ -355,23 +355,23 @@ abstract class Hoa_Compiler_Ll1 {
      */
     public function compile ( $in ) {
 
-        $d              = 0;
-        $c              = 0; // current automata.
-        $_skip          = array_flip($this->_skip);
-        $_tokens        = array_flip($this->_tokens[$c]);
-        $_states        = array_flip($this->_states[$c]);
-        $_actions       = array($c => 0);
+        $d            = 0;
+        $c            = 0; // current automata.
+        $_skip        = array_flip($this->_skip);
+        $_tokens      = array_flip($this->_tokens[$c]);
+        $_states      = array_flip($this->_states[$c]);
+        $_actions     = array($c => 0);
 
-        $nextChar       = null;
-        $nextToken      = null;
-        $nextState      = $_states['GO'];
-        $nextAction     = $_states['GO'];
+        $nextChar     = null;
+        $nextToken    = null;
+        $nextState    = $_states['GO'];
+        $nextAction   = $_states['GO'];
 
-        $this->line     = $this->getInitialLine();
-        $this->column   = 0;
+        $this->line   = $this->getInitialLine();
+        $this->column = 0;
 
-        $line           = $this->line;
-        $column         = $this->column;
+        $line         = $this->line;
+        $column       = $this->column;
 
         $this->pre($in);
 
@@ -454,8 +454,11 @@ abstract class Hoa_Compiler_Ll1 {
             }
 
             // Epsilon-transition.
-            if(   array_key_exists($nextToken, $this->_actions[$c][$nextState])
-               && ($foo = $this->_actions[$c][$nextState][$nextToken]) > 0) {
+            $epsilon = false;
+            while(   array_key_exists($nextToken, $this->_actions[$c][$nextState])
+                  && (0 < $foo = $this->_actions[$c][$nextState][$nextToken])) {
+
+                $epsilon = true;
 
                 if($_actions[$c] == 0) {
 
@@ -469,18 +472,26 @@ abstract class Hoa_Compiler_Ll1 {
                     $c            = $foo - 1;
                     $_tokens      = array_flip($this->_tokens[$c]);
                     $_states      = array_flip($this->_states[$c]);
-                    $_actions     = $this->_actions[$c];
 
                     $nextState    = $_states['GO'];
                     $nextAction   = $_states['GO'];
-                    $nextToken    = false;
+                    $nextToken    = 0;
 
                     $_actions[$c] = 0;
 
                     $d++;
                 }
-                elseif($_actions[$c] == 2)
+                elseif($_actions[$c] == 2) {
+
                     $_actions[$c] = 0;
+                    break;
+                }
+            }
+
+            if(true === $epsilon) {
+
+                $epsilon   = false;
+                $nextToken = false;
             }
 
             // Token.
@@ -534,7 +545,8 @@ abstract class Hoa_Compiler_Ll1 {
             /*
             echo '>>> Automata   ' . $c . "\n" .
                  '>>> Next state ' . $nextState . "\n" .
-                 '>>> Token      ' . $token . "\n";
+                 '>>> Token      ' . $token . "\n" .
+                 '>>> Next char  ' . $nextChar . "\n";
             */
 
             // Got it!
@@ -560,11 +572,11 @@ abstract class Hoa_Compiler_Ll1 {
 
                     list($c, $nextState, $nextToken) = $pop;
 
-                    $_actions[$c] = 2;
+                    $_actions[$c]  = 2;
 
-                    $i       -= strlen($nextChar);
-                    $_tokens  = array_flip($this->_tokens[$c]);
-                    $_states  = array_flip($this->_states[$c]);
+                    $i            -= strlen($nextChar);
+                    $_tokens       = array_flip($this->_tokens[$c]);
+                    $_states       = array_flip($this->_states[$c]);
 
                     /*
                     echo '!!! Automata   ' . $c . "\n" .

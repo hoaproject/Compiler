@@ -926,12 +926,42 @@ abstract class Hoa_Compiler_Ll1 {
 
             $out .= '        node[shape=circle];' . "\n";
 
-            foreach($this->_states[$e] as $i => $state)
-                if(__ != $state)
-                    $out .= '        "' . $e . '_' . $state . '" ' .
-                            '[label="' . $state . '"];' . "\n";
+            foreach($this->_states[$e] as $i => $state) {
 
-            foreach($automata as $i => $transition)
+                $_states = array_flip($this->_states[$e]);
+                $name    = array();
+                $label   = $state;
+
+                if(__ != $state) {
+
+                    foreach($this->_transitions[$e][$i] as $j => $foo) {
+
+                        $ep = $this->_actions[$e][$i][$j];
+
+                        if(is_array($ep))
+                            $ep = $ep[0];
+
+                        if(is_int($ep)) {
+
+                            $ep--;
+
+                            if(0 < $ep && !isset($name[$ep]))
+                                $name[$ep] = $ep;
+                        }
+                    }
+
+                    if(!empty($name))
+                        $label .= ' (' . implode(', ', $name) . ')';
+
+                    $out .= '        "' . $e . '_' . $state . '" ' .
+                            '[label="' . $label . '"];' . "\n";
+                }
+            }
+
+            foreach($automata as $i => $transition) {
+
+                $transition = array_reverse($transition, true);
+
                 foreach($transition as $j => $state)
                     if(   __ != $this->_states[$e][$i]
                        && __ != $state) {
@@ -946,20 +976,11 @@ abstract class Hoa_Compiler_Ll1 {
                                 '" -> "' . $e . '_' . $state . '"' .
                                 ' [label="' . $label . '"];' . "\n";
                     }
+            }
             
             $out .= '        node[shape=point,label=""] "' . $e . '_";' . "\n" .
-                    '        "' . $e . '_" -> "' . $e . '_GO";' . "\n";
-
-            foreach($this->_actions[$e] as $i => $action)
-                foreach($action as $j => $epsilon)
-                    if(   is_int($this->_actions[$e][$i][$j])
-                       && 0 < $foo = $this->_actions[$e][$i][$j])
-                        $out .= '        node[shape=none] "' . $e . '__' . $j . '";' . "\n" .
-                                '        "' . $e . '_' .  $this->_states[$e][$i] .
-                                '" -> "' . $e . '__' . $j . '"' .
-                                ' [label="' . ($foo - 1) . '",arrowhead=onormal,arrowsize=0.7];' . "\n";
-
-            $out .= '    }';
+                    '        "' . $e . '_" -> "' . $e . '_GO";' . "\n" .
+                    '    }';
         }
 
         $out .= "\n" . '}' . "\n";

@@ -283,6 +283,10 @@ abstract class Hoa_Compiler_Ll1 {
      * has finished, we are back in our state and continue our parsing. Take
      * care of this :-).
      *
+     * Finally, it is possible to combine positive and char action, separated by
+     a comma. Thus: 7,f is equivalent to make an epsilon-transition to the
+     * automata 7, then consume the action f.
+     *
      * @var Hoa_Compiler_Ll1 array
      */
     protected $_actions     = array();

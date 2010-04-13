@@ -288,6 +288,11 @@ abstract class Hoa_Compiler_Ll1 {
     protected $_actions     = array();
 
     /**
+     * Names of automata.
+     */
+    protected $_names       = array();
+
+    /**
      * Recursive stack.
      *
      * @var Hoa_Compiler_Ll1 array
@@ -327,6 +332,7 @@ abstract class Hoa_Compiler_Ll1 {
      * @param   array   $terminal       Terminal states.
      * @param   array   $transitions    Transitions table.
      * @param   array   $actions        Actions table.
+     * @param   array   $names          Names of automata.
      * @return  void
      */
     public function __construct ( Array $skip,
@@ -334,7 +340,8 @@ abstract class Hoa_Compiler_Ll1 {
                                   Array $states,
                                   Array $terminal,
                                   Array $transitions,
-                                  Array $actions      ) {
+                                  Array $actions,
+                                  Array $names = array() ) {
 
         $this->setSkip($skip);
         $this->setTokens($tokens);
@@ -342,6 +349,7 @@ abstract class Hoa_Compiler_Ll1 {
         $this->setTerminal($terminal);
         $this->setTransitions($transitions);
         $this->setActions($actions);
+        $this->setNames($names);
 
         return;
     }
@@ -647,7 +655,7 @@ abstract class Hoa_Compiler_Ll1 {
      * Please, see the actions table definition to learn more.
      *
      * @access  protected
-     * @param   int        $action    Action.
+     * @param   int  $action    Action.
      * @return  void
      */
     abstract protected function consume ( $action );
@@ -656,10 +664,13 @@ abstract class Hoa_Compiler_Ll1 {
      * Compute source code before compiling it.
      *
      * @access  protected
-     * @param   string  $in    Source code.
+     * @param   string  &$in    Source code.
      * @return  void
      */
-    abstract protected function pre ( &$in );
+    protected function pre ( &$in ) {
+
+        return;
+    }
 
     /**
      * Verify compiler state when ending the source code.
@@ -667,7 +678,10 @@ abstract class Hoa_Compiler_Ll1 {
      * @access  protected
      * @return  bool
      */
-    abstract protected function end ( );
+    protected function end ( ) {
+
+        return true;
+    }
 
     /**
      * Set initial line.
@@ -782,6 +796,21 @@ abstract class Hoa_Compiler_Ll1 {
     }
 
     /**
+     * Set names of automata.
+     *
+     * @access  public
+     * @param   array   $names    Names of automata.
+     * @return  array
+     */
+    public function setNames ( Array $names ) {
+
+        $old          = $this->_names;
+        $this->_names = $names;
+
+        return $old;
+    }
+
+    /**
      * Get initial line.
      *
      * @access  public
@@ -856,5 +885,85 @@ abstract class Hoa_Compiler_Ll1 {
     public function getActions ( ) {
 
         return $this->_actions;
+    }
+
+    /**
+     * Get names of automata.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getNames ( ) {
+
+        return $this->_names;
+    }
+
+    /**
+     * Transform automatas into DOT language.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function __toString ( ) {
+
+        $out  = 'digraph ' . get_class($this) . ' {' . "\n" .
+                '    rankdir=LR;' . "\n" .
+                '    label="Automata of ' . get_class($this) . '";';
+
+        $transitions = array_reverse($this->_transitions, true);
+
+        foreach($transitions as $e => $automata) {
+
+            $out .= "\n\n" . '    subgraph cluster_' . $e . ' {' . "\n" .
+                    '        label="Automata #' . $e .
+                    (isset($this->_names[$e])
+                        ? ' (' . str_replace('"', '\\"', $this->_names[$e]) . ')'
+                        : '') . '";' . "\n";
+
+            if(!empty($this->_terminal[$e]))
+                $out .= '        node[shape=doublecircle] "' . $e . '_' .
+                        implode('" "' . $e . '_', $this->_terminal[$e]) . '";' . "\n";
+
+            $out .= '        node[shape=circle];' . "\n";
+
+            foreach($this->_states[$e] as $i => $state)
+                if(__ != $state)
+                    $out .= '        "' . $e . '_' . $state . '" ' .
+                            '[label="' . $state . '"];' . "\n";
+
+            foreach($automata as $i => $transition)
+                foreach($transition as $j => $state)
+                    if(   __ != $this->_states[$e][$i]
+                       && __ != $state) {
+
+                        $label = str_replace('\\', '\\\\', $this->_tokens[$e][$j]);
+                        $label = str_replace('"', '\\"', $label);
+
+                        if('#' == $label[0])
+                            $label = substr($label, 1);
+
+                        $out .= '        "' . $e . '_' . $this->_states[$e][$i] .
+                                '" -> "' . $e . '_' . $state . '"' .
+                                ' [label="' . $label . '"];' . "\n";
+                    }
+            
+            $out .= '        node[shape=point,label=""] "' . $e . '_";' . "\n" .
+                    '        "' . $e . '_" -> "' . $e . '_GO";' . "\n";
+
+            foreach($this->_actions[$e] as $i => $action)
+                foreach($action as $j => $epsilon)
+                    if(   is_int($this->_actions[$e][$i][$j])
+                       && 0 < $foo = $this->_actions[$e][$i][$j])
+                        $out .= '        node[shape=none] "' . $e . '__' . $j . '";' . "\n" .
+                                '        "' . $e . '_' .  $this->_states[$e][$i] .
+                                '" -> "' . $e . '__' . $j . '"' .
+                                ' [label="' . ($foo - 1) . '",arrowhead=onormal,arrowsize=0.7];' . "\n";
+
+            $out .= '    }';
+        }
+
+        $out .= "\n" . '}' . "\n";
+
+        return $out;
     }
 }

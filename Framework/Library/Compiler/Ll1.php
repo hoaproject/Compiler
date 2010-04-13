@@ -455,14 +455,24 @@ abstract class Hoa_Compiler_Ll1 {
 
             // Epsilon-transition.
             $epsilon = false;
-            while(   array_key_exists($nextToken, $this->_actions[$c][$nextState])
-                  && (0 < $foo = $this->_actions[$c][$nextState][$nextToken])) {
+            while(    array_key_exists($nextToken, $this->_actions[$c][$nextState])
+                  && (
+                      (
+                          is_array($this->_actions[$c][$nextState][$nextToken])
+                       && 0 < $foo = $this->_actions[$c][$nextState][$nextToken][0]
+                      )
+                   || (
+                          is_int($this->_actions[$c][$nextState][$nextToken])
+                       && 0 < $foo = $this->_actions[$c][$nextState][$nextToken]
+                      )
+                     )
+                 ) {
 
                 $epsilon = true;
 
                 if($_actions[$c] == 0) {
 
-                    //echo '*** Change automata (up)' . "\n";
+                    //echo '*** Change automata (up to ' . $foo . ')' . "\n";
 
                     $_actions[$c] = 1;
 
@@ -552,8 +562,11 @@ abstract class Hoa_Compiler_Ll1 {
             // Got it!
             if(false !== $nextToken) {
 
-                $nextAction = $this->_actions[$c][$nextState][$nextToken];
-                $nextState  = $_states[$this->_transitions[$c][$nextState][$nextToken]];
+                if(is_array($this->_actions[$c][$nextState][$nextToken]))
+                    $nextAction = $this->_actions[$c][$nextState][$nextToken][1];
+                else
+                    $nextAction = $this->_actions[$c][$nextState][$nextToken];
+                $nextState      = $_states[$this->_transitions[$c][$nextState][$nextToken]];
             }
 
             // Oh :-(.
@@ -755,6 +768,12 @@ abstract class Hoa_Compiler_Ll1 {
      * @return  array
      */
     public function setActions ( Array $actions ) {
+
+        foreach($actions as $e => $automata)
+            foreach($automata as $i => $state)
+                foreach($state as $j => $token)
+                    if(0 != preg_match('#^(\d+),(.*)$#', $token, $matches))
+                        $actions[$e][$i][$j] = array((int) $matches[1], $matches[2]);
 
         $old            = $this->_actions;
         $this->_actions = $actions;

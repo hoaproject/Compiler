@@ -408,7 +408,7 @@ abstract class Hoa_Compiler_Ll1 {
                 }
 
                 throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
-                    'End of code has beenreached but not correctly; ' .
+                    'End of code has been reached but not correctly; ' .
                     'maybe your program is not complete?',
                     0
                 );

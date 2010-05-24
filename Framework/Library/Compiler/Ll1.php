@@ -375,7 +375,7 @@ abstract class Hoa_Compiler_Ll1 {
         $_actions     = array($c => 0);
 
         $nextChar     = null;
-        $nextToken    = null;
+        $nextToken    = 0;
         $nextState    = $_states['GO'];
         $nextAction   = $_states['GO'];
 

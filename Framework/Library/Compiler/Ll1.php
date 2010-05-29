@@ -629,6 +629,8 @@ abstract class Hoa_Compiler_Ll1 {
 
             //echo '<<< Next state ' . $nextState . "\n";
 
+            $this->buffers[-1] = $nextChar;
+
             // Special actions.
             if($nextAction < 0) {
 

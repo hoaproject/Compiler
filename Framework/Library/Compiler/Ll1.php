@@ -367,23 +367,25 @@ abstract class Hoa_Compiler_Ll1 {
      */
     public function compile ( $in ) {
 
-        $d            = 0;
-        $c            = 0; // current automata.
-        $_skip        = array_flip($this->_skip);
-        $_tokens      = array_flip($this->_tokens[$c]);
-        $_states      = array_flip($this->_states[$c]);
-        $_actions     = array($c => 0);
+        $d             = 0;
+        $c             = 0; // current automata.
+        $_skip         = array_flip($this->_skip);
+        $_tokens       = array_flip($this->_tokens[$c]);
+        $_states       = array_flip($this->_states[$c]);
+        $_actions      = array($c => 0);
 
-        $nextChar     = null;
-        $nextToken    = 0;
-        $nextState    = $_states['GO'];
-        $nextAction   = $_states['GO'];
+        $nextChar      = null;
+        $nextToken     = 0;
+        $nextState     = $_states['GO'];
+        $nextAction    = $_states['GO'];
 
-        $this->line   = $this->getInitialLine();
-        $this->column = 0;
+        $this->line    = $this->getInitialLine();
+        $this->column  = 0;
 
-        $line         = $this->line;
-        $column       = $this->column;
+        $this->buffers = array();
+
+        $line          = $this->line;
+        $column        = $this->column;
 
         $this->pre($in);
 
@@ -484,7 +486,7 @@ abstract class Hoa_Compiler_Ll1 {
 
                 if($_actions[$c] == 0) {
 
-                    //echo '*** Change automata (up to ' . $foo . ')' . "\n";
+                    //echo '*** Change automata (up to ' . ($foo - 1) . ')' . "\n";
 
                     $_actions[$c] = 1;
 

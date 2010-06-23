@@ -54,8 +54,8 @@ import('Compiler.Exception.IllegalToken');
 /**
  * Define the __ constant, so usefull in compiler :-).
  */
-!defined('GO') and define('GO', 'GO');
-!defined('__') and define('__', '__');
+define('GO', 'GO');
+define('__', '__');
 
 /**
  * Class Hoa_Compiler_Ll1.

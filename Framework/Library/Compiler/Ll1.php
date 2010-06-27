@@ -32,9 +32,9 @@
  */
 
 /**
- * Hoa_Framework
+ * Hoa_Core
  */
-require_once 'Framework.php';
+require_once 'Core.php';
 
 /**
  * Hoa_Compiler_Ll1_Exception
@@ -79,7 +79,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 int
      */
-    protected $_initialLine = 0;
+    protected $_initialLine         = 0;
 
     /**
      * Tokens to skip (will be totally skip, no way to get it).
@@ -94,7 +94,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_skip        = array();
+    protected $_skip                = array();
 
     /**
      * Tokens.
@@ -126,7 +126,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_tokens      = array();
+    protected $_tokens              = array();
 
     /**
      * States.
@@ -163,7 +163,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_states      = array();
+    protected $_states              = array();
 
     /**
      * Terminal states (defined in the states set).
@@ -178,7 +178,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_terminal    = array();
+    protected $_terminal            = array();
 
     /**
      * Transitions table.
@@ -217,7 +217,7 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_transitions = array();
+    protected $_transitions         = array();
 
     /**
      * Actions table.
@@ -289,40 +289,54 @@ abstract class Hoa_Compiler_Ll1 {
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $_actions     = array();
+    protected $_actions             = array();
 
     /**
      * Names of automata.
      */
-    protected $_names       = array();
+    protected $_names               = array();
 
     /**
      * Recursive stack.
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    private   $_stack       = array();
+    private   $_stack               = array();
 
     /**
      * Buffers.
      *
      * @var Hoa_Compiler_Ll1 array
      */
-    protected $buffers      = array();
+    protected $buffers              = array();
 
     /**
      * Current token's line.
      *
      * @var Hoa_Compiler_Ll1 int
      */
-    protected $line         = 0;
+    protected $line                 = 0;
 
     /**
      * Current token's column.
      *
      * @var Hoa_Compiler_Ll1 int
      */
-    protected $column       = 0;
+    protected $column               = 0;
+
+    /**
+     * Cache compiling result.
+     *
+     * @var Hoa_Compiler_Ll1 array
+     */
+    protected static $_cache        = array();
+
+    /**
+     * Whether cache is enabled or not.
+     *
+     * @var Hoa_Compiler_Ll1 bool
+     */
+    protected static $_cacheEnabled = true;
 
 
 
@@ -367,6 +381,12 @@ abstract class Hoa_Compiler_Ll1 {
      */
     public function compile ( $in ) {
 
+        $cacheId = md5($in);
+
+        if(   true === self::$_cacheEnabled
+           && true === array_key_exists($cacheId, self::$_cache))
+            return self::$_cache[$cacheId];
+
         $d             = 0;
         $c             = 0; // current automata.
         $_skip         = array_flip($this->_skip);
@@ -405,6 +425,9 @@ abstract class Hoa_Compiler_Ll1 {
                    && true === $this->end()) {
 
                     //echo '*********** END REACHED **********' . "\n";
+
+                    if(true === self::$_cacheEnabled)
+                        self::$_cache[$cacheId] = $this->getResult();
 
                     return true;
                 }
@@ -692,6 +715,14 @@ abstract class Hoa_Compiler_Ll1 {
     }
 
     /**
+     * Get the result of the compiling.
+     *
+     * @access  public
+     * @return  mixed
+     */
+    abstract public function getResult ( );
+
+    /**
      * Set initial line.
      *
      * @access  public
@@ -904,6 +935,34 @@ abstract class Hoa_Compiler_Ll1 {
     public function getNames ( ) {
 
         return $this->_names;
+    }
+
+    /**
+     * Enable cache
+     *
+     * @access  public
+     * @return  bool
+     */
+    public static function enableCache ( ) {
+
+        $old                 = self::$_cacheEnabled;
+        self::$_cacheEnabled = true;
+
+        return $old;
+    }
+
+    /**
+     * Disable cache
+     *
+     * @access  public
+     * @return  bool
+     */
+    public static function disableCache ( ) {
+
+        $old                 = self::$_cacheEnabled;
+        self::$_cacheEnabled = false;
+
+        return $old;
     }
 
     /**

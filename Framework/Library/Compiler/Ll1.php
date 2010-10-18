@@ -52,7 +52,7 @@ import('Compiler.Exception.FinalStateHasNotBeenReached');
 import('Compiler.Exception.IllegalToken');
 
 /**
- * Define the __ constant, so usefull in compiler :-).
+ * Define the __ constant, so useful in compiler :-).
  */
 define('GO', 'GO');
 define('__', '__');

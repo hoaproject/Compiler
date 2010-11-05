@@ -511,8 +511,6 @@ abstract class Hoa_Compiler_Ll1 {
 
                     //echo '*** Change automata (up to ' . ($foo - 1) . ')' . "\n";
 
-                    $_actions[$c] = 1;
-
                     $this->_stack[$d] = array($c, $nextState, $nextToken);
                     end($this->_stack);
 

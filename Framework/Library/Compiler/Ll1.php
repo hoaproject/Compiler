@@ -32,11 +32,6 @@
  */
 
 /**
- * Hoa_Core
- */
-require_once 'Core.php';
-
-/**
  * Hoa_Compiler_Ll1_Exception
  */
 import('Compiler.Exception');

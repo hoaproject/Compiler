@@ -461,7 +461,7 @@ abstract class Hoa_Compiler_Ll1 {
 
                     $sk = str_replace('#', '\#', substr($sk, 1));
 
-                    if(0 != preg_match('#^(' . $sk . ')#', $handle, $match)) {
+                    if(0 != preg_match('#^(' . $sk . ')#u', $handle, $match)) {
 
                         $strlen = strlen($match[1]);
 
@@ -560,7 +560,7 @@ abstract class Hoa_Compiler_Ll1 {
 
                     $ntoken = str_replace('#', '\#', substr($token, 1));
 
-                    if(0 != preg_match('#^(' . $ntoken . ')#', $handle, $match)) {
+                    if(0 != preg_match('#^(' . $ntoken . ')#u', $handle, $match)) {
 
                         $strlen = strlen($match[1]);
 

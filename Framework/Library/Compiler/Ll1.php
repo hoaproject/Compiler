@@ -24,27 +24,21 @@
  * You should have received a copy of the GNU General Public License
  * along with HOA Open Accessibility; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- *
- * @category    Framework
- * @package     Hoa_Compiler_Ll1
- *
  */
 
-/**
- * Hoa_Compiler_Ll1_Exception
- */
-import('Compiler.Exception');
+namespace {
+
+from('Hoa')
 
 /**
- * Hoa_Compiler_Exception_FinalStateHasNotBeenReached
+ * \Hoa\Compiler\Exception\FinalStateHasNotBeenReached
  */
-import('Compiler.Exception.FinalStateHasNotBeenReached');
+-> import('Compiler.Exception.FinalStateHasNotBeenReached')
 
 /**
- * Hoa_Compiler_Exception_IllegalToken
+ * \Hoa\Compiler\Exception\IllegalToken
  */
-import('Compiler.Exception.IllegalToken');
+-> import('Compiler.Exception.IllegalToken');
 
 /**
  * Define the __ constant, so useful in compiler :-).
@@ -52,27 +46,28 @@ import('Compiler.Exception.IllegalToken');
 define('GO', 'GO');
 define('__', '__');
 
+}
+
+namespace Hoa\Compiler {
+
 /**
- * Class Hoa_Compiler_Ll1.
+ * Class \Hoa\Compiler\Ll1.
  *
  * Provide an abstract LL(1) compiler, based on sub-automata and stacks.
  *
- * @author      Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
- * @copyright   Copyright (c) 2007, 2010 Ivan ENDERLIN.
- * @license     http://gnu.org/licenses/gpl.txt GNU GPL
- * @since       PHP 5
- * @version     0.1
- * @package     Hoa_Compiler_Ll1
+ * @author     Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright (c) 2007, 2010 Ivan ENDERLIN.
+ * @license    http://gnu.org/licenses/gpl.txt GNU GPL
  */
 
-abstract class Hoa_Compiler_Ll1 {
+abstract class Ll1 {
 
     /**
      * Initial line.
      * If we try to compile a code inside another code, the initial line would
      * not probably be 0.
      *
-     * @var Hoa_Compiler_Ll1 int
+     * @var \Hoa\Compiler\Ll1 int
      */
     protected $_initialLine         = 0;
 
@@ -87,7 +82,7 @@ abstract class Hoa_Compiler_Ll1 {
      *         '#/\*(.|\n)*\*\/' // block comment
      *     )
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_skip                = array();
 
@@ -119,7 +114,7 @@ abstract class Hoa_Compiler_Ll1 {
      *         )
      *     )
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_tokens              = array();
 
@@ -156,7 +151,7 @@ abstract class Hoa_Compiler_Ll1 {
      * Note: the constant __ or the string '__' must be used to represent the
      *       null/unrecognized/error state.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_states              = array();
 
@@ -171,7 +166,7 @@ abstract class Hoa_Compiler_Ll1 {
      *         array('OK')
      *     )
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_terminal            = array();
 
@@ -210,7 +205,7 @@ abstract class Hoa_Compiler_Ll1 {
      * Note: tokens and states should be declared in the strict same order as
      *       defined previously.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_transitions         = array();
 
@@ -282,7 +277,7 @@ abstract class Hoa_Compiler_Ll1 {
      a comma. Thus: 7,f is equivalent to make an epsilon-transition to the
      * automata 7, then consume the action f.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $_actions             = array();
 
@@ -294,42 +289,42 @@ abstract class Hoa_Compiler_Ll1 {
     /**
      * Recursive stack.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     private   $_stack               = array();
 
     /**
      * Buffers.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected $buffers              = array();
 
     /**
      * Current token's line.
      *
-     * @var Hoa_Compiler_Ll1 int
+     * @var \Hoa\Compiler\Ll1 int
      */
     protected $line                 = 0;
 
     /**
      * Current token's column.
      *
-     * @var Hoa_Compiler_Ll1 int
+     * @var \Hoa\Compiler\Ll1 int
      */
     protected $column               = 0;
 
     /**
      * Cache compiling result.
      *
-     * @var Hoa_Compiler_Ll1 array
+     * @var \Hoa\Compiler\Ll1 array
      */
     protected static $_cache        = array();
 
     /**
      * Whether cache is enabled or not.
      *
-     * @var Hoa_Compiler_Ll1 bool
+     * @var \Hoa\Compiler\Ll1 bool
      */
     protected static $_cacheEnabled = true;
 
@@ -427,7 +422,7 @@ abstract class Hoa_Compiler_Ll1 {
                     return true;
                 }
 
-                throw new Hoa_Compiler_Exception_FinalStateHasNotBeenReached(
+                throw new \Hoa\Compiler\Exception\FinalStateHasNotBeenReached(
                     'End of code has been reached but not correctly; ' .
                     'maybe your program is not complete?',
                     0
@@ -632,7 +627,7 @@ abstract class Hoa_Compiler_Ll1 {
                 $error = explode("\n", $in);
                 $error = $error[$this->line];
 
-                throw new Hoa_Compiler_Exception_IllegalToken(
+                throw new \Hoa\Compiler\Exception\IllegalToken(
                     'Illegal token at line ' . ($this->line + 1) . ' and column ' .
                     ($this->column + 1) . "\n" . $error . "\n" .
                     str_repeat(' ', $this->column) . '↑',
@@ -1047,4 +1042,6 @@ abstract class Hoa_Compiler_Ll1 {
 
         return $out;
     }
+}
+
 }

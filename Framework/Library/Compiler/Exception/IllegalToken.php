@@ -24,39 +24,37 @@
  * You should have received a copy of the GNU General Public License
  * along with HOA Open Accessibility; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- *
- * @category    Framework
- * @package     Hoa_Compiler
- * @subpackage  Hoa_Compiler_Exception_IllegalToken
- *
  */
+
+namespace {
+
+from('Hoa')
 
 /**
- * Hoa_Compiler_Exception
+ * \Hoa\Compiler\Exception
  */
-import('Compiler.Exception');
+-> import('Compiler.Exception');
+
+}
+
+namespace Hoa\Compiler\Exception {
 
 /**
- * Class Hoa_Compiler_Exception_IllegalToken.
+ * Class \Hoa\Compiler\Exception\IllegalToken.
  *
- * Extending the Hoa_Compiler_Exception class.
+ * Extending the \Hoa\Compiler\Exception class.
  *
- * @author      Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
- * @copyright   Copyright (c) 2007, 2010 Ivan ENDERLIN.
- * @license     http://gnu.org/licenses/gpl.txt GNU GPL
- * @since       PHP 5
- * @version     0.1
- * @package     Hoa_Compiler
- * @subpackage  Hoa_Compiler_Exception_IllegalToken
+ * @author     Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright (c) 2007, 2010 Ivan ENDERLIN.
+ * @license    http://gnu.org/licenses/gpl.txt GNU GPL
  */
 
-class Hoa_Compiler_Exception_IllegalToken extends Hoa_Compiler_Exception {
+class IllegalToken extends Exception {
 
     /**
      * Column.
      *
-     * @var Hoa_Compiler_Exception_IllegalToken int
+     * @var \Hoa\Compiler\Exception\IllegalToken int
      */
     protected $column = 0;
 
@@ -93,4 +91,6 @@ class Hoa_Compiler_Exception_IllegalToken extends Hoa_Compiler_Exception {
 
         return $this->column;
     }
+}
+
 }

@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright (c) 2007-2011, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2011, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -64,7 +64,7 @@ namespace Hoa\Compiler {
  * Provide an abstract LL(1) compiler, based on sub-automata and stacks.
  *
  * @author     Ivan ENDERLIN <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright (c) 2007-2011 Ivan ENDERLIN.
+ * @copyright  Copyright © 2007-2011 Ivan ENDERLIN.
  * @license    New BSD License
  */
 

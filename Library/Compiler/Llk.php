@@ -228,6 +228,7 @@ class Llk {
      */
      protected function lexMe ( $text, Array $skip, Array $tokens ) {
 
+        $_text     = $text;
         $offset    = 0;
         $tokenized = array();
 
@@ -236,7 +237,12 @@ class Llk {
             $nextToken = $this->nextToken($text, $skip, $tokens);
 
             if(null === $nextToken)
-                throw new Exception('Unable to analyze: %s.', 2, $offset);
+                throw new Exception\IllegalToken(
+                    'Illegal token "%s" at line 1 and column %d:' .
+                    "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
+                    2, array($this->getCurrentToken('value'), $offset + 1, $_text),
+                    1, $offset
+                );
 
             if($nextToken['keep']) {
 

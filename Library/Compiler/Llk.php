@@ -44,6 +44,11 @@ from('Hoa')
 -> import('Compiler.TreeNode')
 
 /**
+ * \Hoa\Compiler\Exception
+ */
+-> import('Compiler.Exception.~')
+
+/**
  * \Hoa\Compiler\Exception\IllegalToken
  */
 -> import('Compiler.Exception.IllegalToken')
@@ -172,6 +177,109 @@ class Llk {
         return;
     }
 
+    /**
+     * Load parser from a file that contains the grammar.
+     * Example:
+     *     %skip  space     \s
+     *
+     *     %token word      [a-zA-Z]+
+     *     %token number    [0-9]+(\.[0-9]+)?
+     *     %token open_par  \(
+     *     %token close_par \)
+     *     %token equal     =
+     *     %token plus      \+
+     *     %token minus     \-
+     *     %token divide    \/
+     *     %token times     \*
+     *
+     *     #equation:
+     *         formula() ::equal:: <number>
+     *
+     *     formula:
+     *         factor()
+     *         (
+     *             ::plus::  formula() #addition
+     *           | ::minus:: formula() #substraction
+     *         )?
+     *
+     *     factor:
+     *         operand()
+     *         (
+     *             ::times::  factor() #product
+     *           | ::divide:: factor() #division
+     *         )?
+     *
+     *     operand:
+     *           <word>
+     *         | ::minus::? <number> #number
+     *         | ::open_par:: formula() ::close_par::
+     *
+     * Use tabs or spaces, it does not matter.
+     * Instructions follow the form: %<instruction>. Only %skip and %token are
+     * supported.
+     * Rules follow the form: <rule name>:<new line>[<space><rule><new line>]*.
+     *
+     * @access  public
+     * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
+     *                                             grammar.
+     * @return  \Hoa\Compiler\Llk
+     * @throw   \Hoa\Compiler\Exception
+     */
+    public static function load ( \Hoa\Stream\IStream\In $stream,
+                                  $debug = false ) {
+
+        $pp     = $stream->readAll();
+        $lines  = explode("\n", $pp);
+        $skips  = array();
+        $tokens = array();
+        $rules  = array();
+
+        for($i = 0, $m = count($lines); $i < $m; ++$i) {
+
+            $line = $lines[$i];
+
+            if(0 === strlen($line))
+                continue;
+
+            if('%' == $line[0]) {
+
+                if(0 !== preg_match(
+                    '#^%skip\s+([^\s]+)\s+(.*)$#',
+                    $line,
+                    $matches))
+                    $skip[$matches[1]] = $matches[2];
+
+                elseif(0 !== preg_match(
+                    '#^%token\s+([^\s]+)\s+(.*)$#',
+                    $line,
+                    $matches))
+                    $tokens[$matches[1]] = $matches[2];
+
+                else
+                    throw new Exception(
+                        'Unrecognized instructions:' . "\n" .
+                        '    %s' . "\n" . 'in file %s at line %d.',
+                        0, array($line, $stream->getStreamName(), $i + 1));
+
+                continue;
+            }
+
+            $ruleName = substr($line, 0, -1);
+            $rule     = null;
+            ++$i;
+
+            while(   isset($lines[$i][0])
+                  && (' ' == $lines[$i][0] || "\t" == $lines[$i][0]))
+                $rule .= ' ' . trim($lines[$i++]);
+
+            if(isset($lines[$i][0]))
+                --$i;
+
+            $rules[$ruleName] = $rule;
+        }
+
+        return new self($skip, $tokens, $rules, $debug);
+    }
 
     /**
      * Text processor: analyses the text in parameter and possibly builds a tree.
@@ -331,7 +439,7 @@ class Llk {
     private function analyzeRules ( Array $rules ) {
 
         // Error case: no rule specified.
-        if(0 === count($rules))
+        if(empty($rules))
             throw new Exception\Rule('No rules specified!', 2);
 
         // Definition of grammar tokens.
@@ -353,7 +461,7 @@ class Llk {
             'node'          => '#[a-zA-Z][a-zA-Z0-9]+'
         );
 
-        // Ee-initialization of on-the-fly declared functions.
+        // Re-initialization of on-the-fly declared functions.
         $this->_createdFunctions = array();
         $this->_functionsCode    = array();
 
@@ -383,7 +491,7 @@ class Llk {
             // Error if parsing failed.
             if(null === $r)
                 throw new Exception\Rule(
-                    'Error while parsing rule %s.', 3, $rule);
+                    'Error while parsing rule %s.', 3, $key);
 
             // If parsing succeeded, creation of the function calling the main
             // rule application.

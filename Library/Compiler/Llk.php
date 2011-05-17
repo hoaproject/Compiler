@@ -989,7 +989,7 @@ class Llk {
      * @param   string    $code        Code (debug only).
      * @return  void
      */
-    protected function registerFunction ($function, $code = '' ) {
+    protected function registerFunction ( $function, $code = '' ) {
 
         $name                           = substr($function, 1);
         $this->_createdFunctions[$name] = $function;

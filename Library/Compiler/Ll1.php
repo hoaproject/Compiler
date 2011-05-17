@@ -299,7 +299,7 @@ abstract class Ll1 {
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    private   $_stack               = array();
+    private $_stack                 = array();
 
     /**
      * Buffers.
@@ -430,7 +430,7 @@ abstract class Ll1 {
                     return true;
                 }
 
-                throw new \Hoa\Compiler\Exception\FinalStateHasNotBeenReached(
+                throw new Exception\FinalStateHasNotBeenReached(
                     'End of code has been reached but not correctly; ' .
                     'maybe your program is not complete?',
                     0
@@ -635,7 +635,7 @@ abstract class Ll1 {
                 $error = explode("\n", $in);
                 $error = $error[$this->line];
 
-                throw new \Hoa\Compiler\Exception\IllegalToken(
+                throw new Exception\IllegalToken(
                     'Illegal token at line ' . ($this->line + 1) . ' and column ' .
                     ($this->column + 1) . "\n" . $error . "\n" .
                     str_repeat(' ', $this->column) . '↑',

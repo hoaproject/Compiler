@@ -41,7 +41,12 @@ from('Hoa')
 /**
  * \Hoa\Compiler\Exception
  */
--> import('Compiler.Exception.~');
+-> import('Compiler.Exception.~')
+
+/**
+ * \Hoa\Visitor\Element
+ */
+-> import('Visitor.Element');
 
 }
 
@@ -58,7 +63,7 @@ namespace Hoa\Compiler {
  * @license    New BSD License
  */
 
-class TreeNode {
+class TreeNode implements \Hoa\Visitor\Element {
 
     /**
      * ID (should be something like #ruleName or token).
@@ -233,6 +238,21 @@ class TreeNode {
             $child->dump(' > ' . $ind);
 
         return;
+    }
+
+    /**
+     * Accept a visitor.
+     *
+     * @access  public
+     * @param   \Hoa\Visitor\Visit  $visitor    Visitor.
+     * @param   mixed               &$handle    Handle (reference).
+     * @param   mixed               $eldnah     Handle (no reference).
+     * @return  mixed
+     */
+    public function accept ( \Hoa\Visitor\Visit $visitor,
+                             &$handle = null, $eldnah = null ) {
+
+        return $visitor->visit($this, $handle, $eldnah);
     }
 }
 

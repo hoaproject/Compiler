@@ -243,7 +243,7 @@ class Llk {
 
             $line = $lines[$i];
 
-            if(0 === strlen($line))
+            if(0 === strlen($line) || '//' == substr($line, 0, 2))
                 continue;
 
             if('%' == $line[0]) {

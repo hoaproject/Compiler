@@ -159,6 +159,28 @@ class TreeNode implements \Hoa\Visitor\Element {
     }
 
     /**
+     * Get value token.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getValueToken ( ) {
+
+        return $this->_value['token'];
+    }
+
+    /**
+     * Get value value.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getValueValue ( ) {
+
+        return $this->_value['value'];
+    }
+
+    /**
      * Add child.
      *
      * @access  public
@@ -218,26 +240,6 @@ class TreeNode implements \Hoa\Visitor\Element {
     public function getChildrenNumber ( ) {
 
         return count($this->_children);
-    }
-
-    /**
-     * Dump.
-     *
-     * @access  public
-     * @return  void
-     */
-    public function dump ( $ind = '' ) {
-
-        echo $ind, $this->getId(),
-             (null !== $this->_value
-                 ? ' (' . $this->_value['token'] . ', ' . $this->_value['value'] . ')'
-                 : ''),
-              "\n";
-
-        foreach($this->getChildren() as $child)
-            $child->dump(' > ' . $ind);
-
-        return;
     }
 
     /**

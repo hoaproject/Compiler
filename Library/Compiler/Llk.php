@@ -54,6 +54,11 @@ from('Hoa')
 -> import('Compiler.Exception.IllegalToken')
 
 /**
+ * \Hoa\Compiler\Exception\UnrecognizedToken
+ */
+-> import('Compiler.Exception.UnrecognizedToken')
+
+/**
  * \Hoa\Compiler\Exception\Rule
  */
 -> import('Compiler.Exception.Rule');
@@ -348,8 +353,8 @@ class Llk {
             $nextToken = $this->nextToken($text, $skip, $tokens);
 
             if(null === $nextToken)
-                throw new Exception\IllegalToken(
-                    'Illegal token "%s" at line 1 and column %d:' .
+                throw new Exception\UnrecognizedToken(
+                    'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
                     2, array($this->getCurrentToken('value'), $offset + 1, $_text),
                     1, $offset

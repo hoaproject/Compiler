@@ -252,7 +252,7 @@ class Llk {
                     '#^%skip\s+([^\s]+)\s+(.*)$#',
                     $line,
                     $matches))
-                    $skip[$matches[1]] = $matches[2];
+                    $skips[$matches[1]] = $matches[2];
 
                 elseif(0 !== preg_match(
                     '#^%token\s+([^\s]+)\s+(.*)$#',
@@ -283,7 +283,7 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
-        return new self($skip, $tokens, $rules, $debug);
+        return new self($skips, $tokens, $rules, $debug);
     }
 
     /**

@@ -112,9 +112,9 @@ class Llk {
      *                     |  SKIPPED_TOKEN          will not appear in the tree
      *                     |  KEPT_TOKEN             will be kept in the tree
      *                     |  RULE_NAME
-     *    SKIPPED_TOKEN  ::=  "::[a-zA-Z][a-zA-Z0-9_$]*::"
-     *       KEPT_TOKEN  ::=  "<[a-zA-Z][a-zA-Z0-9_$]*>"
-     *        RULE_NAME  ::=  "[a-zA-Z][a-zA-Z0-9_$]*()"
+     *    SKIPPED_TOKEN  ::=  "::[a-zA-Z_][a-zA-Z0-9_$]*::"
+     *       KEPT_TOKEN  ::=  "<[a-zA-Z_][a-zA-Z0-9_$]*>"
+     *        RULE_NAME  ::=  "[a-zA-Z_][a-zA-Z0-9_$]*()"
      *          INTEGER  ::=  "[0-9]+"
      *          NODE_ID  ::=  "#[a-zA-Z][a-zA-Z0-9]+"
      *
@@ -474,9 +474,9 @@ class Llk {
             'open_par'      => '\(',
             'close_par'     => '\)',
             'choice_op'     => '\|',
-            'skipped_token' => '::[a-zA-Z][a-zA-Z0-9_$]*::',
-            'kept_token'    => '<[a-zA-Z][a-zA-Z0-9_$]*>',
-            'rule'          => '[a-zA-Z][a-zA-Z0-9_$]*\(\)',
+            'skipped_token' => '::[a-zA-Z_][a-zA-Z0-9_$]*::',
+            'kept_token'    => '<[a-zA-Z_][a-zA-Z0-9_$]*>',
+            'rule'          => '[a-zA-Z_][a-zA-Z0-9_$]*\(\)',
             'number'        => '[0-9]+',
             'node'          => '#[a-zA-Z][a-zA-Z0-9]+'
         );

@@ -1075,33 +1075,6 @@ class Llk {
 
         return ++$this->_currentState;
     }
-
-    /**
-     *  Method displayTokens. Displays the token on a line.
-     *  @param  int     $i  starting index (optional)
-     */
-    /**
-     * Displat the token on a line.
-     *
-     * @access  protected
-     * @param   int  $i    Starting index.
-     * @return  void
-     */
-    protected function displayTokens ( $i = 0 ) {
-
-        echo "\n";
-
-        for($m = count($this->_tokenSequence); $i < $m; ++$i) {
-
-            $token = $this->_tokenSequence[$i];
-
-            echo $token['token'], '("', $token['value'], '") ';
-        }
-
-        echo "\n";
-
-        return;
-    }
 }
 
 }

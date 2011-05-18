@@ -48,9 +48,9 @@ from('Hoa')
 namespace Hoa\Compiler\Visitor {
 
 /**
- * Class \Hoa\Compiler\Visitor\Dump
+ * Class \Hoa\Compiler\Visitor\Dump.
  *
- * .
+ * Dump AST produced by LL(k) compiler.
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2011 Ivan Enderlin.

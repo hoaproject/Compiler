@@ -291,7 +291,7 @@ class Llk {
      *                           validated.
      * @return  mixed
      */
-    public function parse ( $text, $rule = null, $tree = false ) {
+    public function parse ( $text, $rule = null, $tree = true ) {
 
         // Lexing.
         $this->_tokenSequence = $this->lexMe($text, $this->_skip, $this->_tokens);
@@ -301,9 +301,12 @@ class Llk {
         // first rule of the rules array.
         if(false === array_key_exists($rule, $this->_rules)) {
 
-            $keys = array_keys($this->_rules);
-            $rule = $keys[0];
+            reset($this->_rules);
+            $rule = key($this->_rules);
         }
+
+        if('#' == $rule[0])
+            $rule = substr($rule, 1);
 
         // Invocation of the corresponding function.
         $f = $this->getFunctionForRule($rule);

@@ -131,10 +131,11 @@ class Llk {
 
     /**
      * Current state of the analyzer.
+     * Do not use this from a public context :-).
      *
      * @var \Hoa\Compiler\Llk int
      */
-    protected $_currentState     = 0;
+    public $_currentState        = 0;
 
     /** current token sequence being analyzed */
     /**
@@ -517,7 +518,8 @@ class Llk {
             // rule application.
             $args  = '$p, $ind=\'\', $tree = false';
             $fname = substr($r, 1);
-            $code  = 'if(true === $p->debug)' . "\n" .
+            $code  = '$sav = $p->_currentState;' . "\n\n" .
+                     'if(true === $p->debug)' . "\n" .
                      '    echo $ind, \'enter: ' . $key . '\', "\n";' . "\n\n" .
                      '$node = true == $tree' . "\n" .
                      '            ? new \Hoa\Compiler\TreeNode(\'' . $nodeName . '\')' . "\n" .
@@ -527,6 +529,7 @@ class Llk {
                      'if(null === $r) {' . "\n\n" .
                      '    if(true === $p->debug)' . "\n" .
                      '        echo $ind, \'failed: ' . $key . '\', "\n";' . "\n\n" .
+                     '    $p->_currentState = $sav;' . "\n\n" .
                      '    return null;' . "\n" .
                      '}' . "\n\n" .
                      'if(true === $p->debug)' . "\n" .

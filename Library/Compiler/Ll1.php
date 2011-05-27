@@ -969,9 +969,11 @@ abstract class Ll1 {
      */
     public function __toString ( ) {
 
-        $out  = 'digraph ' . get_class($this) . ' {' . "\n" .
+        $out  = 'digraph ' . str_replace('\\', '', get_class($this)) . ' {' .
+                "\n" .
                 '    rankdir=LR;' . "\n" .
-                '    label="Automata of ' . get_class($this) . '";';
+                '    label="Automata of ' .
+                str_replace('\\', '\\\\', get_class($this)) . '";';
 
         $transitions = array_reverse($this->_transitions, true);
 

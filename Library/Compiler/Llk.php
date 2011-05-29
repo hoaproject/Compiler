@@ -81,13 +81,6 @@ namespace Hoa\Compiler {
 class Llk {
 
     /**
-     * List of skipped tokens: name => regex.
-     *
-     * @var \Hoa\Compiler\Llk array
-     */
-    protected $_skip             = null;
-
-    /**
      * List of tokens: name => regex.
      * Attention, it must be defined in precedence order.
      *
@@ -112,8 +105,8 @@ class Llk {
      *                     |  SKIPPED_TOKEN          will not appear in the tree
      *                     |  KEPT_TOKEN             will be kept in the tree
      *                     |  RULE_NAME
-     *    SKIPPED_TOKEN  ::=  "::[a-zA-Z_][a-zA-Z0-9_$]*::"
-     *       KEPT_TOKEN  ::=  "<[a-zA-Z_][a-zA-Z0-9_$]*>"
+     *    SKIPPED_TOKEN  ::=  "::[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?::"
+     *       KEPT_TOKEN  ::=  "<[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?>"
      *        RULE_NAME  ::=  "[a-zA-Z_][a-zA-Z0-9_$]*()"
      *          INTEGER  ::=  "[0-9]+"
      *          NODE_ID  ::=  "#[a-zA-Z][a-zA-Z0-9]+"
@@ -137,13 +130,47 @@ class Llk {
      */
     public $_currentState        = 0;
 
-    /** current token sequence being analyzed */
+    /**
+     * Error state.
+     *
+     * @var \Hoa\Compiler\Llk int
+     */
+    protected $_errorState       = 0;
+
+    /**
+     * Lexer state.
+     *
+     * @var \Hoa\Compiler\Llk string
+     */
+    protected $_lexerState       = null;
+
     /**
      * Current sequence beeing analyzed.
      *
      * @var \Hoa\Compiler\Llk array
      */
     protected $_tokenSequence    = null;
+
+    /**
+     * Management of token values using an associative:
+     *     array(int(1) => array(token, array(int(2), value)))
+     * where
+     *     • int(1) represents unique rule ID (incremented each time a rule is
+     *              applied);
+     *     • token  is the token used;
+     *     • int(2) represents the token # for the rule;
+     *     • value  is the value of the token.
+     *
+     * @var \Hoa\Compiler\Llk array
+     */
+    protected $_rulesToken       = array();
+
+    /**
+     * See previous attribute.
+     *
+     * @var \Hoa\Compiler\Llk int
+     */
+    protected $_rulesID          = 0;
 
     /**
      * Set of dynamically created functions.
@@ -165,16 +192,13 @@ class Llk {
      * Construct the parser.
      *
      * @access  public
-     * @param   array  $skip      Skip tokens.
      * @param   array  $tokens    Tokens.
      * @param   array  $rules     Rules.
      * @param   bool   $debug     Debug mode.
      * @return  void
      */
-    public function __construct( Array $skip, Array $tokens, Array $rules,
-                                 $debug = false ) {
+    public function __construct( Array $tokens, Array $rules, $debug = false ) {
 
-        $this->_skip   = $skip;
         $this->_tokens = $tokens;
         $this->_rules  = $rules;
         $this->debug   = $debug;
@@ -296,7 +320,13 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
-        return new self($skips, $tokens, $rules, $debug);
+        $skip = '';
+        foreach($skips as $s)
+            $skip = '(' . $s . ')|' . $skip;
+
+        $tokens['skip'] = $skip;
+
+        return new self(array('default' => $tokens), $rules, $debug);
     }
 
     /**
@@ -312,8 +342,11 @@ class Llk {
     public function parse ( $text, $rule = null, $tree = true ) {
 
         // Lexing.
-        $this->_tokenSequence = $this->lexMe($text, $this->_skip, $this->_tokens);
+        $this->_tokenSequence = $this->lexMe($text, $this->_tokens);
         $this->_currentState  = 0;
+
+        // Reset of the token analyses map
+        $this->resetRules();
 
         // If no rule is defined or if an incorrect rules is specified, select
         // first rule of the rules array.
@@ -332,14 +365,16 @@ class Llk {
 
         if(null === $r || 'EOF' !== $this->getCurrentToken()) {
 
-            $offset = $this->getCurrentToken('offset');
+            $offset = $this->_tokenSequence[$this->_errorState]['offset'];
 
             throw new Exception\IllegalToken(
                 'Illegal token "%s" at line 1 and column %d:' .
                 "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
-                0, array($this->getCurrentToken('value'), $offset + 1, $text),
-                1, $offset
-            );
+                0, array(
+                    $this->_tokenSequence[$this->_errorState]['value'],
+                    $offset + 1,
+                    $text
+                ), 1, $offset);
         }
 
         return $r;
@@ -351,19 +386,19 @@ class Llk {
      *
      * @access  protected
      * @param   string  $text      Text to tokenize.
-     * @param   array   $skip      Tokens to be skipped.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
      */
-     protected function lexMe ( $text, Array $skip, Array $tokens ) {
+     protected function lexMe ( $text, Array $tokens ) {
 
-        $_text     = $text;
-        $offset    = 0;
-        $tokenized = array();
+        $_text             = $text;
+        $offset            = 0;
+        $tokenized         = array();
+        $this->_lexerState = 'default';
 
         while(0 < strlen($text)) {
 
-            $nextToken = $this->nextToken($text, $skip, $tokens);
+            $nextToken = $this->nextToken($text, $tokens);
 
             if(null === $nextToken)
                 throw new Exception\UnrecognizedToken(
@@ -399,28 +434,46 @@ class Llk {
      *
      * @access  protected
      * @param   string  $text      Text to tokenize.
-     * @param   array   $skip      Tokens to be skipped.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
      * @throw   UnrecognizedToken
      */
-    protected function nextToken ( $text, Array $skip, Array $tokens ) {
+    protected function nextToken ( $text, Array $tokens ) {
 
-        foreach($tokens as $lexeme => $regexp)
-            if(null !== $out = $this->matchesLexem($text, $lexeme, $regexp)) {
+        $tokenArray = $tokens[$this->_lexerState];
 
-                $out['keep'] = true;
+        foreach($tokenArray as $fullLexeme => $regexp) {
+
+            if(false !== strpos($fullLexeme,':')) {
+
+                $tab       = explode(':', $fullLexeme);
+                $lexeme    = $tab[0];
+                $nextState = $tab[1];
+            }
+            else {
+
+                $lexeme    = $fullLexeme;
+                $nextState = $this->_lexerState;
+            }
+
+            if(   $lexeme !== 'skip'
+               && null    !== $out = $this->matchesLexem($text, $lexeme, $regexp)) {
+
+                $out['keep']       = true;
+                $this->_lexerState = $nextState;
 
                 return $out;
             }
+        }
 
-        foreach($skip as $lexeme => $regexp)
-            if(null !== $out = $this->matchesLexem($text, $lexeme, $regexp)) {
+        $out = $this->matchesLexem($text, $lexeme, $tokenArray['skip']);
 
-                $out['keep'] = false;
+        if(null !== $out) {
 
-                return $out;
-            }
+            $out['keep'] = false;
+
+            return $out;
+        }
 
         return null;
     }
@@ -464,8 +517,8 @@ class Llk {
             throw new Exception\Rule('No rules specified!', 2);
 
         // Definition of grammar tokens.
-        $skip   = array('space' => '\s');
-        $tokens = array(// repetition tokens
+        $tokens = array('default' => array(
+            'skip'          => '\s',
             'plus'          => '\+',
             'star'          => '\*',
             'question'      => '\?',
@@ -475,22 +528,24 @@ class Llk {
             'open_par'      => '\(',
             'close_par'     => '\)',
             'choice_op'     => '\|',
-            'skipped_token' => '::[a-zA-Z_][a-zA-Z0-9_$]*::',
-            'kept_token'    => '<[a-zA-Z_][a-zA-Z0-9_$]*>',
+            'skipped_token' => '::[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?::',
+            'kept_token'    => '<[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?\>',
             'rule'          => '[a-zA-Z_][a-zA-Z0-9_$]*\(\)',
             'number'        => '[0-9]+',
             'node'          => '#[a-zA-Z][a-zA-Z0-9]+'
-        );
+        ));
 
         // Re-initialization of on-the-fly declared functions.
         $this->_createdFunctions = array();
         $this->_functionsCode    = array();
+        $debug                   = $this->debug;
+        $this->debug             = false;
 
         // Treatment of the rules.
         foreach($rules as $key => $value) {
 
             // Lexing.
-            $this->_tokenSequence = $this->lexMe($value, $skip, $tokens);
+            $this->_tokenSequence = $this->lexMe($value, $tokens);
             $this->_currentState  = 0;
 
             // If key starts with #, builds a node.
@@ -518,7 +573,8 @@ class Llk {
             // rule application.
             $args  = '$p, $ind=\'\', $tree = false';
             $fname = substr($r, 1);
-            $code  = '$sav = $p->_currentState;' . "\n\n" .
+            $code  = '$sav = $p->_currentState;' . "\n" .
+                     '$p->_incrementRule(); ' . "\n\n" .
                      'if(true === $p->debug)' . "\n" .
                      '    echo $ind, \'enter: ' . $key . '\', "\n";' . "\n\n" .
                      '$node = true == $tree' . "\n" .
@@ -530,8 +586,10 @@ class Llk {
                      '    if(true === $p->debug)' . "\n" .
                      '        echo $ind, \'failed: ' . $key . '\', "\n";' . "\n\n" .
                      '    $p->_currentState = $sav;' . "\n\n" .
+                     '    $p->_decrementRule(); ' . "\n" .
                      '    return null;' . "\n" .
                      '}' . "\n\n" .
+                     '$p->_decrementRule(); ' . "\n" .
                      'if(true === $p->debug)' . "\n" .
                      '    echo $ind, \'exit: ' . $key . '\', "\n";' . "\n\n" .
                      'if(true == $tree && \'#\' == $node->getId())' . "\n" .
@@ -544,6 +602,8 @@ class Llk {
             $this->registerFunction($funct, $code);
             $this->_rules[$key] = $funct;
         }
+
+        $this->debug = $debug;
 
         if(true === $this->debug) {
 
@@ -723,7 +783,7 @@ class Llk {
 
     /**
      * Implementation of:
-     *     repetition  ::=  simple ( repeatOP) ?
+     *     repetition  ::=  simple ( repeatOP ) ?
      *
      * @access  protected
      * @param   string  $ind    Indentation for debug.
@@ -790,7 +850,7 @@ class Llk {
                 else
                     $min = 0;
 
-                // Comma
+                // Comma.
                 if('comma' != $this->getCurrentToken())
                     return null;
 
@@ -908,17 +968,44 @@ class Llk {
 
             $tokValue = substr($this->getCurrentToken('value'), 2, -2);
 
-            if(false === array_key_exists($tokValue, $this->_tokens))
+            if(']' == substr($tokValue, -1)) {
+
+                $id       = substr(
+                    $tokValue,
+                    strpos($tokValue, '[') + 1,
+                    strlen($tokValue) - strpos($tokValue, ']')
+                );
+                $tokValue = substr($tokValue, 0, strpos($tokValue, '['));
+            }
+            else
+                $id = -1;
+
+            if(false === $this->checkTokenExistence($tokValue, $this->_tokens))
                 throw new Exception\Rule(
                     'Specified token %s not declared in tokens.',
                     5, $tokValue);
 
             // Building of the function to check the token.
             $args = '$p, $ind = \'\', $node = null';
-            $code  = 'if(\'' . $tokValue . '\' != $p->getCurrentToken())' . "\n" .
-                     '    return null;' . "\n\n" .
-                     '$p->consumeToken(\' > \' . $ind);' . "\n\n" .
+            $code = 'if(\'' . $tokValue . '\' != $p->getCurrentToken()) {' . "\n\n" .
+                    '    if(true === $p->debug)' . "\n" .
+                    '        echo \' > \', $ind, \'Unexpected \', ' .
+                    '$p->getCurrentToken(), \', expected ' . $tokValue . '\', "\n";' . "\n\n" .
+                    '    return null;' . "\n" .
+                    '}' . "\n\n";
+
+            if(0 <= $id)
+                $code .= 'if(true !== $p->_verifyCurrentToken(' . $id . ')) {' . "\n\n" .
+                         '    if(true === $p->debug)' . "\n" .
+                         '        echo \' > \', $ind, \'Unexpected value \', ' .
+                         '$p->getCurrentToken(\'value\'), \', expected value \', ' .
+                         '$p->getExpectedCurrentTokenValue(' . $id . '), ' . '"\n";' . "\n\n" .
+                         '    return null; ' . "\n" .
+                         '}' . "\n\n";
+
+            $code .= '$p->consumeToken(\' > \' . $ind);' . "\n\n" .
                      'return true;';
+
             $funct = create_function($args, $code);
             $this->registerFunction($funct, $code);
 
@@ -936,16 +1023,42 @@ class Llk {
 
             $tokValue = substr($this->getCurrentToken('value'), 1, -1);
 
-            if(false === array_key_exists($tokValue, $this->_tokens))
+            if(']' == substr($tokValue, -1)) {
+
+                $id       = substr(
+                    $tokValue,
+                    strpos($tokValue, '[') + 1,
+                    strlen($tokValue) - strpos($tokValue, ']')
+                );
+                $tokValue = substr($tokValue, 0, strpos($tokValue, '['));
+            }
+            else
+                $id = -1;
+
+            if(false === $this->checkTokenExistence($tokValue, $this->_tokens))
                 throw new Exception\Rule(
                     'Specified token %s not declared in tokens.',
                     6, $tokValue);
 
             // Building of the function to check the token.
             $args  = '$p, $ind = \'\', $node = null';
-            $code  = 'if(\'' . $tokValue . '\' != $p->getCurrentToken())' . "\n" .
-                     '    return null;' . "\n\n" .
-                     'if(null !== $node) {' . "\n\n" .
+            $code  = 'if(\'' . $tokValue . '\' != $p->getCurrentToken()) {' . "\n\n" .
+                     '    if(true === $p->debug)' . "\n" .
+                     '        echo \' > \', $ind, \'Unexpected \', ' .
+                     '$p->getCurrentToken(), \', expected ' . $tokValue . '\', "\n";' . "\n\n" .
+                     '   return null;' . "\n" .
+                     '}' . "\n\n";
+
+            if(0 <= $id)
+                $code .= 'if(true !== $p->_verifyCurrentToken(' . $id . ')) {' . "\n\n" .
+                         '    if(true === $p->debug)' . "\n" .
+                         '        echo \' > \', $ind, \'Unexpected value \', ' .
+                         '$p->getCurrentToken(\'value\'), \', expected value \', ' .
+                         '$p->getExpectedCurrentTokenValue(' . $id . '), "\n";' . "\n\n" .
+                         '    return null;' . "\n" .
+                         '}' . "\n\n";
+
+            $code .= 'if(null !== $node) {' . "\n\n" .
                      '    $t = array(' . "\n" .
                      '        \'token\' => $p->getCurrentToken(\'token\'),' . "\n" .
                      '        \'value\' => $p->getCurrentToken(\'value\')' . "\n" .
@@ -1058,6 +1171,7 @@ class Llk {
         return $this->_tokenSequence[$this->_currentState][$kind];
     }
 
+
     /**
      * Consume the current token and move to the next one.
      *
@@ -1076,7 +1190,132 @@ class Llk {
                  '")',
                  "\n";
 
-        return ++$this->_currentState;
+        return $this->_errorState = ++$this->_currentState;
+    }
+
+    /**
+     * Increments the rule ID.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function _incrementRule ( ) {
+
+        ++$this->_rulesID;
+
+        return;
+    }
+
+    /**
+     * Decrements the rule ID.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function _decrementRule ( ) {
+
+        unset($this->_rulesTokens[$this->_rulesID--]);
+
+        return;
+    }
+
+    /**
+     * Resets the rule ID and mapping.
+     *
+     * @access  protected
+     * @return  void
+     */
+    protected function resetRules ( ) {
+
+        unset($this->_rulesToken);
+        $this->_rulesToken = array();
+        $this->_rulesID    = 0;
+
+        return;
+    }
+
+    /**
+     * Verify if the current token is correct.
+     * Two options: if it does not exist in the map, the entry is created,
+     * otherwise it is checked.
+     *
+     * @access  public
+     * @param   int  $id    The ID for the current token value.
+     * @return  bool
+     */
+    public function _verifyCurrentToken ( $id ) {
+
+        $value = $this->getExpectedCurrentTokenValue($id);
+
+        if(null === $value) {
+
+            if(!isset($this->_rulesTokens[$this->_rulesID]))
+                $this->_rulesTokens[$this->_rulesID] = array();
+
+            $current = $this->getCurrentToken();
+
+            if(!isset($this->_rulesTokens[$this->_rulesID][$current]))
+                $this->_rulesTokens[$this->_rulesID][$current] = array();
+
+            $this->_rulesTokens[$this->_rulesID][$current][$id] =
+                $this->getCurrentToken('value');
+
+            return true;
+        }
+
+        return $value == $this->getCurrentToken('value') ? true : null;
+    }
+
+    /**
+     * Retrieve the value of an expected token, w.r.t. a recorded snapshot.
+     *
+     * @access  public
+     * @param   int  $id    The ID for the current token value.
+     * @return  string
+     */
+    public function getExpectedCurrentTokenValue ( $id ) {
+
+        if(isset($this->_rulesTokens[$this->_rulesID])) {
+
+            $tab     = $this->_rulesTokens[$this->_rulesID];
+            $current = $this->getCurrentToken();
+
+            if(isset($tab[$current])) {
+
+                $tab2 = $tab[$current];
+
+                if(isset($tab2[$id]))
+                    return $tab2[$id];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check the existence of a token inside a token declaration.
+     *
+     * @access  public
+     * @param   string  $token         The token name.
+     * @param   array   $tokenArray    Token declaration: array(context =>
+     *                                 array(token name => regexp)).
+     * @return  bool
+     */
+    public function checkTokenExistence ( $token, $tokenArray ) {
+
+        foreach($tokenArray as $tokens)
+            foreach($tokens as $tokName => $tokValue)
+                if(false !== strpos($tokName, ':')) {
+
+                    $tab = explode(':',$tokName);
+
+                    if($token == $tab[0])
+                        return true;
+                }
+                elseif($tokName == $token)
+                    return true;
+
+        return false;
     }
 }
 

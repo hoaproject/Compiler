@@ -1214,7 +1214,7 @@ class Llk {
      */
     public function _decrementRule ( ) {
 
-        unset($this->_rulesTokens[$this->_rulesID--]);
+        unset($this->_rulesToken[$this->_rulesID--]);
 
         return;
     }
@@ -1249,15 +1249,15 @@ class Llk {
 
         if(null === $value) {
 
-            if(!isset($this->_rulesTokens[$this->_rulesID]))
-                $this->_rulesTokens[$this->_rulesID] = array();
+            if(!isset($this->_rulesToken[$this->_rulesID]))
+                $this->_rulesToken[$this->_rulesID] = array();
 
             $current = $this->getCurrentToken();
 
-            if(!isset($this->_rulesTokens[$this->_rulesID][$current]))
-                $this->_rulesTokens[$this->_rulesID][$current] = array();
+            if(!isset($this->_rulesToken[$this->_rulesID][$current]))
+                $this->_rulesToken[$this->_rulesID][$current] = array();
 
-            $this->_rulesTokens[$this->_rulesID][$current][$id] =
+            $this->_rulesToken[$this->_rulesID][$current][$id] =
                 $this->getCurrentToken('value');
 
             return true;
@@ -1275,9 +1275,9 @@ class Llk {
      */
     public function getExpectedCurrentTokenValue ( $id ) {
 
-        if(isset($this->_rulesTokens[$this->_rulesID])) {
+        if(isset($this->_rulesToken[$this->_rulesID])) {
 
-            $tab     = $this->_rulesTokens[$this->_rulesID];
+            $tab     = $this->_rulesToken[$this->_rulesID];
             $current = $this->getCurrentToken();
 
             if(isset($tab[$current])) {

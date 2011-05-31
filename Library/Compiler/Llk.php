@@ -642,8 +642,6 @@ class Llk {
             $this->_rules[$key] = $funct;
         }
 
-        $this->debug = $debug;
-
         if(true === $this->debug) {
 
             foreach($this->_functionsCode as $f => $c)
@@ -652,6 +650,8 @@ class Llk {
             foreach($this->_rules as $name => $f)
                 echo $name, " => ", $f, "\n";
         }
+
+        $this->debug = $debug;
 
         return;
     }

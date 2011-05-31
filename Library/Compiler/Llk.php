@@ -199,6 +199,10 @@ class Llk {
      */
     public function __construct( Array $tokens, Array $rules, $debug = false ) {
 
+        foreach($tokens as $context => &$token)
+            if(!isset($token['skip']))
+                $token['skip'] = null;
+
         $this->_tokens = $tokens;
         $this->_rules  = $rules;
         $this->debug   = $debug;
@@ -465,6 +469,9 @@ class Llk {
                 return $out;
             }
         }
+
+        if(empty($tokenArray['skip']))
+            return;
 
         $out = $this->matchesLexem($text, $lexeme, $tokenArray['skip']);
 

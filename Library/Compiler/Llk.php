@@ -252,6 +252,21 @@ class Llk {
      * Instructions follow the form: %<instruction>. Only %skip and %token are
      * supported.
      * Rules follow the form: <rule name>:<new line>[<space><rule><new line>]*.
+     * Contexts are useful to set specific skips and tokens. We give a full
+     * example with context + unification (for fun) to parse <a>b</a>:
+     *     %skip   space         \s
+     *     %token  lt             <        ->  in_tag
+     *     %token  inner          [^<]*
+     *
+     *     %skip   in_tag:space   \s
+     *     %token  in_tag:slash   /
+     *     %token  in_tag:tagname [^>]+
+     *     %token  in_tag:gt      >        ->  default
+     *
+     *     #foo:
+     *         ::lt:: <tagname[0]> ::gt::
+     *         <inner>
+     *         ::lt:: ::slash:: ::tagname[0]:: ::gt::
      *
      * @access  public
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
@@ -264,8 +279,7 @@ class Llk {
 
         $pp     = $stream->readAll();
         $lines  = explode("\n", $pp);
-        $skips  = array();
-        $tokens = array();
+        $tokens = array('default' => array());
         $rules  = array();
 
         for($i = 0, $m = count($lines); $i < $m; ++$i) {
@@ -278,16 +292,40 @@ class Llk {
             if('%' == $line[0]) {
 
                 if(0 !== preg_match(
-                    '#^%skip\s+([^\s]+)\s+(.*)$#',
+                    '#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#',
                     $line,
-                    $matches))
-                    $skips[$matches[1]] = $matches[2];
+                    $matches)) {
+
+                    if(empty($matches[1]))
+                        $matches[1] = 'default';
+
+                    if(!isset($tokens[$matches[1]]))
+                        $tokens[$matches[1]] = array();
+
+                    if(!isset($tokens[$matches[1]]['skip']))
+                        $tokens[$matches[1]]['skip'] = $matches[3];
+                    else
+                        $tokens[$matches[1]]['skip'] =
+                            '(?:' . $matches[3] . ')|' .
+                            $tokens[$matches[1]]['skip'];
+                }
 
                 elseif(0 !== preg_match(
-                    '#^%token\s+([^\s]+)\s+(.*)$#',
+                    '#^%token\s+(?:([^:]+):)?([^\s]+)\s+(.*?)(?:\s+->\s+(.*))?$#',
                     $line,
-                    $matches))
-                    $tokens[$matches[1]] = $matches[2];
+                    $matches)) {
+
+                    if(empty($matches[1]))
+                        $matches[1] = 'default';
+
+                    if(isset($matches[4]) && !empty($matches[4]))
+                        $matches[2] = $matches[2] . ':' . $matches[4];
+
+                    if(!isset($tokens[$matches[1]]))
+                        $tokens[$matches[1]] = array();
+
+                    $tokens[$matches[1]][$matches[2]] = $matches[3];
+                }
 
                 else
                     throw new Exception(
@@ -324,13 +362,7 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
-        $skip = '';
-        foreach($skips as $s)
-            $skip = '(' . $s . ')|' . $skip;
-
-        $tokens['skip'] = $skip;
-
-        return new self(array('default' => $tokens), $rules, $debug);
+        return new self($tokens, $rules, $debug);
     }
 
     /**

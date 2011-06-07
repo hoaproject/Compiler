@@ -39,6 +39,11 @@ namespace {
 from('Hoa')
 
 /**
+ * \Hoa\Compiler\Visitor\Exception
+ */
+-> import('Compiler.Visitor.Exception')
+
+/**
  * \Hoa\Visitor\Visit
  */
 -> import('Visitor.Visit')
@@ -316,8 +321,8 @@ class Meta implements \Hoa\Visitor\Visit {
               break;
 
             default:
-                throw new \Hoa\Core\Exception(
-                    'I donnot understand %s.', 1, $element->getId());
+                throw new Exception(
+                    'I donnot understand %s.', 0, $element->getId());
         }
 
         return $out;

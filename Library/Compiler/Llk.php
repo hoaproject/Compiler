@@ -1383,6 +1383,19 @@ class Llk {
 
         return $this->_tokens;
     }
+
+    /**
+     * Get root rule.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getRootRule ( ) {
+
+        reset($this->_originalRules);
+
+        return current($this->_originalRules);
+    }
 }
 
 }

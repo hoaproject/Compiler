@@ -90,30 +90,18 @@ class Llk {
 
     /**
      * Rules: name => rule expression.
-     * Rules adopt the following grammar.
-     *             rule  ::=  choice <EOF>
-     *           choice  ::=  concat ( "|" choice ) *
-     *           concat  ::=  repetition ( concat ) *
-     *       repetition  ::=  simple ( repeatOP ) ?  ( NODE_ID ) ?
-     *         repeatOP  ::=  "{" INTEGER "," INTEGER "}"
-     *                     |  "{" "," INTEGER "}"
-     *                     |  "{" INTEGER "," "}"
-     *                     |  "?"                    equiv. "{0,1}"
-     *                     |  "+"                    equiv. "{1,}"
-     *                     |  "*"                    equiv. "{0,}"
-     *           simple  ::=  "(" rule ")"
-     *                     |  SKIPPED_TOKEN          will not appear in the tree
-     *                     |  KEPT_TOKEN             will be kept in the tree
-     *                     |  RULE_NAME
-     *    SKIPPED_TOKEN  ::=  "::[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?::"
-     *       KEPT_TOKEN  ::=  "<[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?>"
-     *        RULE_NAME  ::=  "[a-zA-Z_][a-zA-Z0-9_$]*()"
-     *          INTEGER  ::=  "[0-9]+"
-     *          NODE_ID  ::=  "#[a-zA-Z][a-zA-Z0-9]+"
+     * Rules adopt the grammar described in hoa://Library/Compiler/Llk.pp.
      *
      * @var \Hoa\Compiler\Llk array
      */
     protected $_rules            = null;
+
+    /**
+     * Original rules (as given).
+     *
+     * @var \Hoa\Compiler\Llk array
+     */
+    protected $_originalRules    = null;
 
     /**
      * Whether we will print debug outputs.
@@ -186,6 +174,13 @@ class Llk {
      */
     protected $_functionsCode    = array();
 
+    /**
+     * Current stream.
+     *
+     * @var \Hoa\Stream\IStream\In object
+     */
+    protected static $_stream    = null;
+
 
 
     /**
@@ -203,9 +198,10 @@ class Llk {
             if(!isset($token['skip']))
                 $token['skip'] = null;
 
-        $this->_tokens = $tokens;
-        $this->_rules  = $rules;
-        $this->debug   = $debug;
+        $this->_tokens        = $tokens;
+        $this->_rules         = $rules;
+        $this->_originalRules = $rules;
+        $this->debug          = $debug;
         $this->analyzeRules($rules);
 
         return;
@@ -277,10 +273,11 @@ class Llk {
     public static function load ( \Hoa\Stream\IStream\In $stream,
                                   $debug = false ) {
 
-        $pp     = $stream->readAll();
-        $lines  = explode("\n", $pp);
-        $tokens = array('default' => array());
-        $rules  = array();
+        self::$_stream = $stream;
+        $pp            = $stream->readAll();
+        $lines         = explode("\n", $pp);
+        $tokens        = array('default' => array());
+        $rules         = array();
 
         for($i = 0, $m = count($lines); $i < $m; ++$i) {
 
@@ -401,15 +398,23 @@ class Llk {
 
         if(null === $r || 'EOF' !== $this->getCurrentToken()) {
 
-            $offset = $this->_tokenSequence[$this->_errorState]['offset'];
+            if(isset($this->_tokenSequence[$this->_errorState]))
+                $offset = $this->_tokenSequence[$this->_errorState]['offset'];
+            else {
+
+                $this->_errorState = 0;
+                $offset            = 0;
+            }
 
             throw new Exception\IllegalToken(
                 'Illegal token "%s" at line 1 and column %d:' .
-                "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
+                "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑' . "\n" .
+                'in grammar %s.',
                 0, array(
                     $this->_tokenSequence[$this->_errorState]['value'],
                     $offset + 1,
-                    $text
+                    $text,
+                    self::$_stream->getStreamName()
                 ), 1, $offset);
         }
 
@@ -1355,6 +1360,28 @@ class Llk {
                     return true;
 
         return false;
+    }
+
+    /**
+     * Get all rules.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getRules ( ) {
+
+        return $this->_originalRules;
+    }
+
+    /**
+     * Get all tokens.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getTokens ( ) {
+
+        return $this->_tokens;
     }
 }
 

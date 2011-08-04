@@ -74,15 +74,17 @@ concatenation:
     quantification() ( quantification() #concatenation )*
 
 quantification:
-    simple() ( quantifier() #quantification )? ::node::?
+    simple() ( quantifier() #quantification )? <node>?
 
 simple:
-    ::capturing_:: alternation() ::_capturing:: #capturing
-  | ::skipped:: <token> ( ::unification_:: <unification> ::_unification:: )?
-    ::skipped:: #skipped
-  | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?
-    ::_kept:: #kept
-  | <token> ::named:: #named
+    (
+        ::capturing_:: alternation() ::_capturing:: #capturing
+      | ::skipped:: <token> ( ::unification_:: <unification> ::_unification:: )?
+        ::skipped:: #skipped
+      | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?
+        ::_kept:: #kept
+      | <token> ::named:: #named
+    ) <node>?
 
 quantifier:
     <zero_or_one>

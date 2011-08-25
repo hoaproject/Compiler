@@ -376,6 +376,8 @@ abstract class Ll1 {
      * @access  public
      * @param   string  $in    Source code.
      * @return  void
+     * @throws  \Hoa\Compiler\Exception\FinalStateHasNotBeenReached
+     * @throws  \Hoa\Compiler\Exception\IllegalToken
      */
     public function compile ( $in ) {
 

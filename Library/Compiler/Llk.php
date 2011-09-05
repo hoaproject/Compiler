@@ -158,7 +158,7 @@ class Llk {
      *
      * @var \Hoa\Compiler\Llk int
      */
-    protected $_rulesID          = 0;
+    protected $_rulesId          = 0;
 
     /**
      * Set of dynamically created functions.
@@ -363,7 +363,8 @@ class Llk {
     }
 
     /**
-     * Text processor: analyses the text in parameter and possibly builds a tree.
+     * Text processor: analyses the text in parameter and possibly builds a
+     * tree.
      *
      * @access  public
      * @param   string  $text    Text to analyse.
@@ -445,8 +446,10 @@ class Llk {
                 throw new Exception\UnrecognizedToken(
                     'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
-                    2, array($this->getCurrentToken('value'), $offset + 1, $_text),
-                    1, $offset
+                    2,
+                    array($this->getCurrentToken('value'), $offset + 1, $_text),
+                    1,
+                    $offset
                 );
 
             if($nextToken['keep']) {
@@ -1245,7 +1248,7 @@ class Llk {
      */
     public function _incrementRule ( ) {
 
-        ++$this->_rulesID;
+        ++$this->_rulesId;
 
         return;
     }
@@ -1258,7 +1261,7 @@ class Llk {
      */
     public function _decrementRule ( ) {
 
-        unset($this->_rulesToken[$this->_rulesID--]);
+        unset($this->_rulesToken[$this->_rulesId--]);
 
         return;
     }
@@ -1273,7 +1276,7 @@ class Llk {
 
         unset($this->_rulesToken);
         $this->_rulesToken = array();
-        $this->_rulesID    = 0;
+        $this->_rulesId    = 0;
 
         return;
     }
@@ -1293,15 +1296,15 @@ class Llk {
 
         if(null === $value) {
 
-            if(!isset($this->_rulesToken[$this->_rulesID]))
-                $this->_rulesToken[$this->_rulesID] = array();
+            if(!isset($this->_rulesToken[$this->_rulesId]))
+                $this->_rulesToken[$this->_rulesId] = array();
 
             $current = $this->getCurrentToken();
 
-            if(!isset($this->_rulesToken[$this->_rulesID][$current]))
-                $this->_rulesToken[$this->_rulesID][$current] = array();
+            if(!isset($this->_rulesToken[$this->_rulesId][$current]))
+                $this->_rulesToken[$this->_rulesId][$current] = array();
 
-            $this->_rulesToken[$this->_rulesID][$current][$id] =
+            $this->_rulesToken[$this->_rulesId][$current][$id] =
                 $this->getCurrentToken('value');
 
             return true;
@@ -1319,9 +1322,9 @@ class Llk {
      */
     public function getExpectedCurrentTokenValue ( $id ) {
 
-        if(isset($this->_rulesToken[$this->_rulesID])) {
+        if(isset($this->_rulesToken[$this->_rulesId])) {
 
-            $tab     = $this->_rulesToken[$this->_rulesID];
+            $tab     = $this->_rulesToken[$this->_rulesId];
             $current = $this->getCurrentToken();
 
             if(isset($tab[$current])) {

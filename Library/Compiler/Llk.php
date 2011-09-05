@@ -1138,7 +1138,7 @@ class Llk {
                     7, $ruleValue);
 
             // Building of the function to call to check the rule.
-            $args = '$p,$ind=\'\',$node=NULL';
+            $args = '$p,$ind=\'\',$node=null';
             $code = '$f = $p->getFunctionForRule(\'' . $ruleValue . '\');' . "\n" .
                     '$r = $f($p, \' > \' . $ind, null !== $node);' . "\n\n" .
                     'if(null === $r)' . "\n" .

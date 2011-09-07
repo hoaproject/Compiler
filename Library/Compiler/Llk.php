@@ -161,6 +161,18 @@ class Llk {
     protected $_rulesId          = 0;
 
     /**
+     * Unification of rules.
+     * It's a collection of first/reference records and other records (to
+     * compare with the reference ones). A record is a pair of integers that
+     * represents the start and stop token index in the token sequence. These
+     * records is stored according to the current rule ID and the rule name
+     * (value).
+     *
+     * @var \Hoa\Compiler\LLk array
+     */
+    protected $_rulesRecord      = array();
+
+    /**
      * Set of dynamically created functions.
      *
      * @var \Hoa\Compiler\Llk array
@@ -577,7 +589,7 @@ class Llk {
             'choice_op'     => '\|',
             'skipped_token' => '::[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?::',
             'kept_token'    => '<[a-zA-Z_][a-zA-Z0-9_$]*(\[[0-9]+\])?\>',
-            'rule'          => '[a-zA-Z_][a-zA-Z0-9_$]*\(\)',
+            'rule'          => '[a-zA-Z_][a-zA-Z0-9_$]*\(\)(\[[0-9]+\])?',
             'number'        => '[0-9]+',
             'node'          => '#[a-zA-Z][a-zA-Z0-9]+'
         ));
@@ -1036,7 +1048,7 @@ class Llk {
             $args = '$p, $ind = \'\', $node = null';
             $code = 'if(\'' . $tokValue . '\' != $p->getCurrentToken()) {' . "\n\n" .
                     '    if(true === $p->debug)' . "\n" .
-                    '        echo \' > \', $ind, \'Unexpected \', ' .
+                    '        echo \' > \', $ind, \'unexpected \', ' .
                     '$p->getCurrentToken(), \', expected ' . $tokValue . '\', "\n";' . "\n\n" .
                     '    return null;' . "\n" .
                     '}' . "\n\n";
@@ -1044,10 +1056,10 @@ class Llk {
             if(0 <= $id)
                 $code .= 'if(true !== $p->_verifyCurrentToken(' . $id . ')) {' . "\n\n" .
                          '    if(true === $p->debug)' . "\n" .
-                         '        echo \' > \', $ind, \'Unexpected value \', ' .
+                         '        echo \' > \', $ind, \'unexpected value \', ' .
                          '$p->getCurrentToken(\'value\'), \', expected value \', ' .
                          '$p->getExpectedCurrentTokenValue(' . $id . '), ' . '"\n";' . "\n\n" .
-                         '    return null; ' . "\n" .
+                         '    return null;' . "\n" .
                          '}' . "\n\n";
 
             $code .= '$p->consumeToken(\' > \' . $ind);' . "\n\n" .
@@ -1091,7 +1103,7 @@ class Llk {
             $args  = '$p, $ind = \'\', $node = null';
             $code  = 'if(\'' . $tokValue . '\' != $p->getCurrentToken()) {' . "\n\n" .
                      '    if(true === $p->debug)' . "\n" .
-                     '        echo \' > \', $ind, \'Unexpected \', ' .
+                     '        echo \' > \', $ind, \'unexpected \', ' .
                      '$p->getCurrentToken(), \', expected ' . $tokValue . '\', "\n";' . "\n\n" .
                      '   return null;' . "\n" .
                      '}' . "\n\n";
@@ -1099,7 +1111,7 @@ class Llk {
             if(0 <= $id)
                 $code .= 'if(true !== $p->_verifyCurrentToken(' . $id . ')) {' . "\n\n" .
                          '    if(true === $p->debug)' . "\n" .
-                         '        echo \' > \', $ind, \'Unexpected value \', ' .
+                         '        echo \' > \', $ind, \'unexpected value \', ' .
                          '$p->getCurrentToken(\'value\'), \', expected value \', ' .
                          '$p->getExpectedCurrentTokenValue(' . $id . '), "\n";' . "\n\n" .
                          '    return null;' . "\n" .
@@ -1129,7 +1141,22 @@ class Llk {
         // case RULE
         if('rule' == $this->getCurrentToken()) {
 
-            $ruleValue = substr($this->getCurrentToken('value'), 0, -2);
+            $ruleValue = $this->getCurrentToken('value');
+
+            if(']' == substr($ruleValue, -1)) {
+
+                $id        = substr(
+                    $ruleValue,
+                    strpos($ruleValue, '[') + 1,
+                    strlen($ruleValue) - strpos($ruleValue, ']')
+                );
+                $ruleValue = substr($ruleValue, 0, strpos($ruleValue, '[') - 2);
+            }
+            else {
+
+                $id        = -1;
+                $ruleValue = substr($ruleValue, 0, -2);
+            }
 
             if(   false === array_key_exists(      $ruleValue, $this->_rules)
                && false === array_key_exists('#' . $ruleValue, $this->_rules))
@@ -1139,13 +1166,34 @@ class Llk {
 
             // Building of the function to call to check the rule.
             $args = '$p,$ind=\'\',$node=null';
-            $code = '$f = $p->getFunctionForRule(\'' . $ruleValue . '\');' . "\n" .
-                    '$r = $f($p, \' > \' . $ind, null !== $node);' . "\n\n" .
-                    'if(null === $r)' . "\n" .
-                    '    return null;' . "\n\n" .
-                    'if(null !== $node && true !== $node)' . "\n" .
-                    '    $node->addChild($r);' . "\n\n" .
-                    'return true;';
+
+            if(0 <= $id)
+                $code = '$p->_startRuleRecord(\'' . $ruleValue . '\', ' . $id . ');' . "\n" .
+                        '$f = $p->getFunctionForRule(\'' . $ruleValue . '\');' . "\n" .
+                        '$r = $f($p, \' > \' . $ind, null !== $node);' . "\n\n" .
+                        'if(null === $r)' . "\n" .
+                        '    return null;' . "\n\n" .
+                        '$p->_stopRuleRecord(\'' . $ruleValue . '\', ' . $id . ');' . "\n" .
+                        'if(true !== $p->_verifyCurrentRule(\'' . $ruleValue . '\', ' . $id . ')) {' . "\n\n" .
+                        '    if(true === $p->debug)' . "\n" .
+                        '        echo \' > \', $ind, \'last token sequence ' .
+                        'cannot be unified to ' . $ruleValue . '()[' . $id .
+                        ']; unexpected value \', ' .
+                        '$p->getCurrentToken(\'value\'), \'.\', "\n";' . "\n\n" .
+                        '    return null;' . "\n" .
+                        '}' . "\n\n" .
+                        'if(null !== $node && true !== $node)' . "\n" .
+                        '    $node->addChild($r);' . "\n\n" .
+                        'return true;';
+            else
+                $code = '$f = $p->getFunctionForRule(\'' . $ruleValue . '\');' . "\n" .
+                        '$r = $f($p, \' > \' . $ind, null !== $node);' . "\n\n" .
+                        'if(null === $r)' . "\n" .
+                        '    return null;' . "\n\n" .
+                        'if(null !== $node && true !== $node)' . "\n" .
+                        '    $node->addChild($r);' . "\n\n" .
+                        'return true;';
+
             $funct = create_function($args, $code);
             $this->registerFunction($funct, $code);
 
@@ -1261,13 +1309,20 @@ class Llk {
      */
     public function _decrementRule ( ) {
 
-        unset($this->_rulesToken[$this->_rulesId--]);
+        unset($this->_rulesToken[$this->_rulesId]);
+
+        foreach($this->_rulesRecord as $id => $record)
+            if($id >= $this->_rulesId)
+                unset($this->_rulesRecord[$id]);
+
+        --$this->_rulesId;
+
 
         return;
     }
 
     /**
-     * Resets the rule ID and mapping.
+     * Resets the rule ID and mappings.
      *
      * @access  protected
      * @return  void
@@ -1275,8 +1330,11 @@ class Llk {
     protected function resetRules ( ) {
 
         unset($this->_rulesToken);
-        $this->_rulesToken = array();
-        $this->_rulesId    = 0;
+        unset($this->_rulesRecord);
+
+        $this->_rulesToken  = array();
+        $this->_rulesId     = 0;
+        $this->_rulesRecord = array();
 
         return;
     }
@@ -1337,6 +1395,111 @@ class Llk {
         }
 
         return null;
+    }
+
+    /**
+     * Start a token sequence record (see rule unification).
+     *
+     * @access  public
+     * @param   string  $ruleValue    Rule name.
+     * @param   int     $id           Unification ID.
+     * @return  void
+     */
+    public function _startRuleRecord ( $ruleValue, $id ) {
+
+        // Reference record.
+        if(!isset($this->_rulesRecord[$this->_rulesId])) {
+
+            $this->_rulesRecord[$this->_rulesId] = array(
+                $ruleValue => array(
+                    0 => array(0 => $this->_currentState)
+                )
+            );
+
+            return;
+        }
+
+        $handle = &$this->_rulesRecord[$this->_rulesId][$ruleValue];
+
+        // Reference record is broken due to a back-track.
+        if(!isset($handle[0][1])) {
+
+            $handle[0][0] = $this->_currentState;
+
+            return;
+        }
+
+        // Other records.
+        $handle[1] = array(0 => $this->_currentState);
+
+        return;
+    }
+
+    /**
+     * Stop a token sequence record (see rule unification).
+     *
+     * @access  public
+     * @param   string  $ruleValue    Rule name.
+     * @param   int     $id           Unification ID.
+     * @return  void
+     */
+    public function _stopRuleRecord ( $ruleValue, $id ) {
+
+        $handle = &$this->_rulesRecord[$this->_rulesId][$ruleValue];
+
+        if(!isset($handle[0][1])) {
+
+            $handle[0][1] = $this->_currentState - 1;
+
+            return;
+        }
+
+        $handle[1][1] = $this->_currentState - 1;
+
+        return;
+    }
+
+    /**
+     * Verify current rule unification (according to rule record).
+     *
+     * @access  public
+     * @param   string  $ruleValue    Rule name.
+     * @param   int     $id           Unification ID.
+     * @return  void
+     */
+    public function _verifyCurrentRule ( $ruleValue, $id ) {
+
+        $handle = &$this->_rulesRecord[$this->_rulesId][$ruleValue];
+
+        if(!isset($handle[1]))
+            return true;
+
+        list(list($ra, $rb), list($ca, $cb)) = $handle;
+
+        if($rb - $ra != $cb - $ca)
+            return false;
+
+        $out = true;
+        $i   = 0;
+        $j   = $ra;
+
+        while(   $j <= $rb
+              && $out &=     $this->_tokenSequence[      $j]['value']
+                          == $this->_tokenSequence[$ca + $i]['value']
+              && ++$i
+              && ++$j);
+
+        unset($handle[1]);
+        !$out and $out &= $j == $rb;
+
+        if(false == $out) {
+
+            $this->_currentState = $this->_errorState = $ca + $j;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**

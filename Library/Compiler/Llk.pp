@@ -83,7 +83,8 @@ simple:
         ::skipped:: #skipped
       | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?
         ::_kept:: #kept
-      | <token> ::named:: #named
+      | <token> ::named::
+        ( ::unification_:: <unification> ::_unification:: )? #named
     ) <node>?
 
 quantifier:

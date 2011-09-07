@@ -71,6 +71,11 @@ namespace Hoa\Compiler {
  * Class \Hoa\Compiler\Llk.
  *
  * Provide a generic LL(k) parser.
+ * Support: skip (%skip), token (%token), token namespace (ns1:token name value
+ * -> ns2), rule (rule:), disjunction (|), capturing (operators ( and )),
+ * quantifiers (?, +, * and {n,m}), node (#node), skipped token (::token::),
+ * kept token (<token>), token unification (token[i]) and rule unification
+ * (rule()[j]).
  *
  * @author     Frédéric Dadeau <frederic.dadeau@lifc.univ-fcomte.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
@@ -442,6 +447,7 @@ class Llk {
      * @param   string  $text      Text to tokenize.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
+     * @throw   \Hoa\Compiler\Exception\UnrecognizedToken
      */
      protected function lexMe ( $text, Array $tokens ) {
 
@@ -492,7 +498,6 @@ class Llk {
      * @param   string  $text      Text to tokenize.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
-     * @throw   UnrecognizedToken
      */
     protected function nextToken ( $text, Array $tokens ) {
 

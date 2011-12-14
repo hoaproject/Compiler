@@ -86,6 +86,13 @@ class TreeNode implements \Hoa\Visitor\Element {
      */
     protected $_children = null;
 
+    /**
+     * Attached data.
+     *
+     * @var \Hoa\Compiler\TreeNode array
+     */
+    protected $_data     = array();
+
 
 
     /**
@@ -240,6 +247,17 @@ class TreeNode implements \Hoa\Visitor\Element {
     public function getChildrenNumber ( ) {
 
         return count($this->_children);
+    }
+
+    /**
+     * Get data.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function &getData ( ) {
+
+        return $this->_data;
     }
 
     /**

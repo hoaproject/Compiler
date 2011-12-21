@@ -88,12 +88,37 @@ class Dump implements \Hoa\Visitor\Visit {
             $out .= '(' . $value['token'] . ', ' .
                     $value['value'] . ')';
 
+        $data = $element->getData();
+
+        if(!empty($data))
+            $out .= ' ' . $this->dumpData($data);
+
         $out .= "\n";
 
         foreach($element->getChildren() as $child)
             $out .= $child->accept($this, $handle, $eldnah);
 
         --self::$_i;
+
+        return $out;
+    }
+
+    /**
+     * Dump data.
+     *
+     * @access  protected
+     * @param   mixed  $data    Data.
+     * @return  string
+     */
+    protected function dumpData ( $data ) {
+
+        $out = null;
+
+        if(!is_array($data))
+            return $data;
+
+        foreach($data as $key => $value)
+            $out .= '[' . $key . ' => ' . $this->dumpData($value) . ']';
 
         return $out;
     }

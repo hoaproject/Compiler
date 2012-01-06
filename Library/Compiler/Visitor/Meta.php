@@ -54,6 +54,26 @@ from('Hoa')
 -> import('Compiler.Llk')
 
 /**
+ * \Hoa\Compiler\Visitor\Uniform
+ */
+-> import('Compiler.Visitor.Uniform')
+
+/**
+ * \Hoa\Compiler\Visitor\UniformPreCompute
+ */
+-> import('Compiler.Visitor.UniformPreCompute')
+
+/**
+ * \Hoa\Regex\Visitor\Uniform
+ */
+-> import('Regex.Visitor.Uniform')
+
+/**
+ * \Hoa\Regex\Visitor\UniformPreCompute
+ */
+-> import('Regex.Visitor.UniformPreCompute')
+
+/**
  * \Hoa\File\Read
  */
 -> import('File.Read');
@@ -75,124 +95,102 @@ namespace Hoa\Compiler\Visitor {
 class Meta implements \Hoa\Visitor\Visit {
 
     /**
-     * AST producer.
-     * $meta = \Hoa\Compiler\Llk::load(…);
-     * $ast->accept(new \Hoa\Compiler\Visitor\Meta($meta, …), …);
-     *
-     * @var \Hoa\Compiler\Llk object
-     */
-    protected $_self                = null;
-
-    /**
-     * Tokens.
+     * Grammar tokens.
      *
      * @var \Hoa\Compiler\Visitor\Meta array
      */
-    protected $_tokens              = array();
+    protected $_tokens          = array();
 
     /**
-     * Parsed tokens (AST cache).
+     * Grammar rules.
      *
      * @var \Hoa\Compiler\Visitor\Meta array
      */
-    protected $_parsedTokens        = array();
+    protected $_rules           = array();
 
     /**
-     * Rules.
+     * Visitor of tokens (uniform).
      *
-     * @var \Hoa\Compiler\Visitor\Meta array
+     * @var \Hoa\Regex\Visitor\Uniform object
      */
-    protected $_rules               = array();
+    protected $_tokenSampler    = null;
 
     /**
-     * Compiler current context.
+     * Visitor of tokens (uniform pre-compute).
      *
-     * @var \Hoa\Compiler\Visitor\Meta string
+     * @var \Hoa\Regex\Visitor\UniformPreCompute object
      */
-    protected $_context             = 'default';
+    protected $_tokenPreCompute = null;
 
     /**
-     * Compiler compiler of hoa://Library/Regex/Grammar.pp.
+     * Visitor of rules (uniform).
      *
-     * @var \Hoa\Compiler\Llk object
+     * @var \Hoa\Compiler\Visitor\Uniform object
      */
-    protected static $_regex        = null;
-
-    /**
-     * Regex visitor.
-     *
-     * @var \Hoa\Regex\Visitor\Realdom object
-     */
-    protected static $_regexVisitor = null;
-
-    /**
-     * Unification.
-     *
-     * @var \Hoa\Compiler\Visitor\Meta array
-     */
-    protected $_unification         = array();
-
-    /**
-     * Current unification level.
-     *
-     * @var \Hoa\Compiler\Visitor\Meta int
-     */
-    protected $_u                   = 0;
+    protected $_ruleSampler     = null;
 
 
 
     /**
-     * Build a visitor that exposes the LL(k) compiler compiler as a meta
-     * compiler compiler.
-     *
      * @access  public
-     * @param   \Hoa\Compiler\Llk           $self            AST producer.
-     * @param   \Hoa\Compiler\Llk           $pp              Compiler compiler
-     *                                                       to meta-ize (useful
-     *                                                       to get tokens and
-     *                                                       rules).
-     * @param   \Hoa\Regex\Visitor\Realdom  $regexVisitor    Regex visitor (to
-     *                                                       interprete tokens).
+     * @param   \Hoa\Compiler\Llk  $grammar    Grammar.
+     * @param   \Hoa\Test\Sampler  $sampler    Numeric-sampler.
+     * @param   int                $n          Size of data to generate.
+     *                                         This is the number of tokens.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk          $self,
-                                  \Hoa\Compiler\Llk          $pp,
-                                  \Hoa\Regex\Visitor\Realdom $regexVisitor ) {
+    public function __construct ( \Hoa\Compiler\Llk $grammar,
+                                  \Hoa\Test\Sampler $sampler,
+                                  $n ) {
 
-        $this->_self = $self;
+        // Initialize.
+        $llk   = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
+            'hoa://Library/Compiler/Llk.pp'
+        ));
+        $regex = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
+            'hoa://Library/Regex/Grammar.pp'
+        ));
 
-        foreach($pp->getTokens() as $_context => $element) {
+        $this->_tokenSampler    = new \Hoa\Regex\Visitor\Uniform($sampler, $n);
+        $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
+        $this->_tokenPreCompute = new \Hoa\Regex\Visitor\UniformPreCompute($n);
+        $rulePreCompute         = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
 
-            $out = array();
+        $this->_ruleSampler->setMeta($this);
+        $rulePreCompute->setMeta($this);
 
-            foreach($element as $name => $_) {
+        // Collect.
+        foreach($grammar->getTokens() as $namespace => $tokens) {
 
-                @list($realname, $context) = explode(':', $name);
+            foreach($tokens as $name => $value) {
 
-                if(null === $context)
-                    $context = $_context;
+                if(false !== $pos = strpos($name, ':'))
+                    $name = substr($name, 0, $pos);
 
-                $out[$realname] = array($_, $context);
+                $this->_tokens[$name] = array(
+                    'value' => $value,
+                    'ast'   => $regex->parse($value)
+                );
             }
-
-            $this->_tokens[$_context] = $out;
         }
 
-        foreach($pp->getRules() as $name => $rule) {
+        foreach($grammar->getRules() as $name => $rule) {
 
             if('#' == $name[0])
                 $name = substr($name, 1);
 
-            $this->_rules[$name] = $rule;
+            $this->_rules[$name] = array(
+                'value' => $rule,
+                'ast'   => $llk->parse($rule)
+            );
         }
 
-        if(null === self::$_regexVisitor)
-            self::$_regexVisitor = $regexVisitor;
+        // Visit.
+        foreach($this->_tokens as $token)
+            $this->_tokenPreCompute->visit($token['ast']);
 
-        if(null === self::$_regex)
-            self::$_regex        = \Hoa\Compiler\Llk::load(
-                new \Hoa\File\Read('hoa://Library/Regex/Grammar.pp')
-            );
+        foreach($this->_rules as $rule)
+            $rulePreCompute->visit($rule['ast']);
 
         return;
     }
@@ -209,140 +207,97 @@ class Meta implements \Hoa\Visitor\Visit {
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
 
-        $out = null;
-
-        switch($element->getId()) {
-
-            case '#rule':
-                foreach($element->getChildren() as $child)
-                    $out .= $child->accept($this, $handle, $eldnah);
-              break;
-
-            case '#alternation':
-                $out .= $element->getChild(
-                    self::$_regexVisitor->getSampler()->getInteger(
-                        0,
-                        $element->getChildrenNumber() - 1
-                    )
-                )->accept($this, $handle, $eldnah);
-              break;
-
-            case '#concatenation':
-            case '#capturing':
-                foreach($element->getChildren() as $child)
-                    $out .= $child->accept($this, $handle, $eldnah);
-              break;
-
-            case '#quantification':
-                $lower = null;
-                $upper = null;
-                $value = $element->getChild(1)->getValueValue();
-
-                switch($element->getChild(1)->getValueToken()) {
-
-                    case 'zero_or_one':
-                        $lower = 0;
-                        $upper = 1;
-                      break;
-
-                    case 'zero_or_more':
-                        $lower = 0;
-                      break;
-
-                    case 'one_or_more':
-                        $lower = 1;
-                      break;
-
-                    case 'n_to_m':
-                        $value = explode(',', substr($value, 1, -1));
-                        $lower = (int) trim($value[0]);
-                        $upper = (int) trim($value[1]);
-                      break;
-
-                    case 'n_or_more':
-                        $value = explode(',', substr($value, 1, -1));
-                        $lower = (int) trim($value[0]);
-                      break;
-                }
-
-                if(null === $upper)
-                    $upper = 7;
-
-                $sampler = self::$_regexVisitor->getSampler();
-
-                for($i = 0, $m = $sampler->getInteger($lower, $upper);
-                    $i < $m;
-                    ++$i)
-                    $out .= $element->getChild(0)->accept(
-                        $this,
-                        $handle,
-                        $eldnah
-                    );
-              break;
-
-            case '#skipped':
-            case '#kept':
-                $value          = $element->getChild(0)->getValueValue();
-                $context        = $this->_context;
-                $this->_context = $this->_tokens[$context][$value][1];
-
-                if(1 < $element->getChildrenNumber()) {
-
-                    $i = (int) $element->getChild(1)->getValueValue();
-
-                    if(!isset($this->_unification[$this->_u][$value]))
-                        $this->_unification[$this->_u][$value] = array();
-
-                    if(!isset($this->_unification[$this->_u][$value][$i]))
-                        $this->_unification[$this->_u][$value][$i] =
-                            $newValue = $this->token(
-                                $this->_tokens[$context][$value][0]
-                            );
-                    else
-                        $newValue = $this->_unification[$this->_u][$value][$i];
-                }
-                else
-                    $newValue       = $this->token(
-                        $this->_tokens[$context][$value][0]
-                    );
-
-                $out .= $newValue;
-              break;
-
-            case '#named':
-                $this->_unification[]  = array();
-                ++$this->_u;
-                $out                  .= $this->_self->parse($this->_rules[
-                    $element->getChild(0)->getValueValue()
-                ])->accept($this, $handle, $eldnah);
-
-                array_pop($this->_unification);
-                --$this->_u;
-              break;
-
-            default:
-                throw new Exception(
-                    'I donnot understand %s.', 0, $element->getId());
-        }
-
-        return $out;
+        return $out = $this->getRuleSampler()->visit(
+            $element,
+            $handle,
+            $eldnah
+        );
     }
 
     /**
-     * Generate token.
+     * Get a specific token bucket.
      *
      * @access  public
-     * @param   string  $token    Token.
-     * @return  string
+     * @param   string  $token    Token name.
+     * @return  array
      */
-    protected function token ( $token ) {
+    public function &getToken ( $token ) {
 
-        if(isset($this->_parsedTokens[$token]))
-            $ast = $this->_parsedTokens[$token];
-        else
-            $ast = $this->_parsedTokens[$token] = self::$_regex->parse($token);
+        if(!isset($this->_tokens[$token])) {
 
-        return $ast->accept(self::$_regexVisitor);
+            $out = null;
+
+            return $out;
+        }
+
+        return $this->_tokens[$token];
+    }
+
+    /**
+     * Get the token visitor (uniform).
+     *
+     * @access  public
+     * @return  \Hoa\Regex\Visitor\Uniform
+     */
+    public function getTokenSampler ( ) {
+
+        return $this->_tokenSampler;
+    }
+
+    /**
+     * Get the token visitor (uniform pre-compute).
+     *
+     * @access  public
+     * @return  \Hoa\Regex\Visitor\UniformPreCompute
+     */
+    public function getTokenPreCompute ( ) {
+
+        return $this->_tokenPreCompute;
+    }
+
+    /**
+     * Get the AST of a specific rule.
+     *
+     * @access  public
+     * @param   string  $rule    Rule name (without any leading #).
+     * @return  \Hoa\Compiler\TreeNode
+     */
+    public function getRuleAst ( $rule ) {
+
+        if(!isset($this->_rules[$rule]))
+            return null;
+
+        return $this->_rules[$rule]['ast'];
+    }
+
+    /**
+     * Get a specific rule bucket.
+     *
+     * @access  public
+     * @param   string  $rule    Rule name (without any leading #).
+     * @return  array
+     */
+    public function &getRule ( $rule ) {
+
+        if(!isset($this->_rules[$rule])) {
+
+            $out = null;
+
+            return $out;
+        }
+
+        return $this->_rules[$rule];
+    }
+
+    /**
+     * Get the rule visitor (uniform).
+     *
+     * @access  public
+     * @return  \Hoa\Compiler\Visitor\Uniform
+     */
+    public function getRuleSampler ( ) {
+
+        return $this->_ruleSampler;
     }
 }
 

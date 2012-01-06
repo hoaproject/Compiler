@@ -1565,7 +1565,7 @@ class Llk {
 
         reset($this->_originalRules);
 
-        return current($this->_originalRules);
+        return key($this->_originalRules);
     }
 }
 

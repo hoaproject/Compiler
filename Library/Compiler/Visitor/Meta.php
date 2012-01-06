@@ -129,6 +129,13 @@ class Meta implements \Hoa\Visitor\Visit {
      */
     protected $_ruleSampler     = null;
 
+    /**
+     * Visitor of rules (uniform pre-compute).
+     *
+     * @var \Hoa\Compiler\Visitor\UniformPrecompute object
+     */
+    protected $_rulePreCompute  = null;
+
 
 
     /**
@@ -141,7 +148,7 @@ class Meta implements \Hoa\Visitor\Visit {
      */
     public function __construct ( \Hoa\Compiler\Llk $grammar,
                                   \Hoa\Test\Sampler $sampler,
-                                  $n ) {
+                                  $n = 1 ) {
 
         // Initialize.
         $llk   = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
@@ -154,10 +161,10 @@ class Meta implements \Hoa\Visitor\Visit {
         $this->_tokenSampler    = new \Hoa\Regex\Visitor\Uniform($sampler, $n);
         $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
         $this->_tokenPreCompute = new \Hoa\Regex\Visitor\UniformPreCompute($n);
-        $rulePreCompute         = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
+        $this->_rulePreCompute  = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
 
         $this->_ruleSampler->setMeta($this);
-        $rulePreCompute->setMeta($this);
+        $this->_rulePreCompute->setMeta($this);
 
         // Collect.
         foreach($grammar->getTokens() as $namespace => $tokens) {
@@ -185,13 +192,6 @@ class Meta implements \Hoa\Visitor\Visit {
             );
         }
 
-        // Visit.
-        foreach($this->_tokens as $token)
-            $this->_tokenPreCompute->visit($token['ast']);
-
-        foreach($this->_rules as $rule)
-            $rulePreCompute->visit($rule['ast']);
-
         return;
     }
 
@@ -206,6 +206,12 @@ class Meta implements \Hoa\Visitor\Visit {
      */
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
+
+        foreach($this->_tokens as $token)
+            $this->_tokenPreCompute->visit($token['ast']);
+
+        foreach($this->_rules as $rule)
+            $this->_rulePreCompute->visit($rule['ast']);
 
         return $out = $this->getRuleSampler()->visit(
             $element,
@@ -298,6 +304,23 @@ class Meta implements \Hoa\Visitor\Visit {
     public function getRuleSampler ( ) {
 
         return $this->_ruleSampler;
+    }
+
+    /**
+     * Set size.
+     *
+     * @access  public
+     * @param   int  $n    Size.
+     * @return  void
+     */
+    public function setSize ( $n ) {
+
+        $this->_tokenSampler->setSize($n);
+        $this->_ruleSampler->setSize($n);
+        $this->_tokenPreCompute->setSize($n);
+        $this->_rulePreCompute->setSize($n);
+
+        return;
     }
 }
 

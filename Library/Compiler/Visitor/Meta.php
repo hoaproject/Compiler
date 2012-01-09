@@ -171,6 +171,9 @@ class Meta implements \Hoa\Visitor\Visit {
 
             foreach($tokens as $name => $value) {
 
+                if(null === $value)
+                    continue;
+
                 if(false !== $pos = strpos($name, ':'))
                     $name = substr($name, 0, $pos);
 

@@ -298,7 +298,7 @@ class Llk {
 
         for($i = 0, $m = count($lines); $i < $m; ++$i) {
 
-            $line = $lines[$i];
+            $line = rtrim($lines[$i]);
 
             if(0 === strlen($line) || '//' == substr($line, 0, 2))
                 continue;

@@ -407,11 +407,8 @@ class Llk {
             $rule = key($this->_rules);
         }
 
-        if('#' == $rule[0])
-            $rule = substr($rule, 1);
-
         // Invocation of the corresponding function.
-        $f = $this->getFunctionForRule($rule);
+        $f = $this->getFunctionForRule(ltrim($rule, '#'));
         $r = $f($this, '', $tree);
 
         if(null === $r || 'EOF' !== $this->getCurrentToken()) {
@@ -1565,7 +1562,7 @@ class Llk {
 
         reset($this->_originalRules);
 
-        return key($this->_originalRules);
+        return ltrim(key($this->_originalRules), '#');
     }
 }
 

@@ -144,12 +144,11 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
               break;
 
             case '#concatenation':
-                $i = 0;
-
-                foreach($element->getChildren() as $child)
-                    $i += '#capturing' !== $child->getId();
-
-                $Γ = \Hoa\Math\Combinatorics\Combination::Γ($i, $n, true);
+                $Γ = \Hoa\Math\Combinatorics\Combination::Γ(
+                    $element->getChildrenNumber(),
+                    $n,
+                    true
+                );
 
                 if(!isset($data['precompute'][$n]['Γ']))
                     $data['precompute'][$n]['Γ'] = array();

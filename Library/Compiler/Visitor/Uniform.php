@@ -198,10 +198,6 @@ class Uniform implements \Hoa\Visitor\Visit {
                         '(Clue: the token %s does not exist).',
                         1, $element->getValueValue());
 
-                $tokenPreCompute = $this->getMeta()->getTokenPreCompute();
-                $tokenPreCompute->setSize($n);
-                $tokenPreCompute->visit($token['ast']);
-
                 return $token['ast']->accept(
                     $this->getMeta()->getTokenSampler(),
                     $handle,

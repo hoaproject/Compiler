@@ -64,14 +64,9 @@ from('Hoa')
 -> import('Compiler.Visitor.UniformPreCompute')
 
 /**
- * \Hoa\Regex\Visitor\Uniform
+ * \Hoa\Regex\Visitor\Isotropic
  */
--> import('Regex.Visitor.Uniform')
-
-/**
- * \Hoa\Regex\Visitor\UniformPreCompute
- */
--> import('Regex.Visitor.UniformPreCompute')
+-> import('Regex.Visitor.Isotropic')
 
 /**
  * \Hoa\File\Read
@@ -109,18 +104,11 @@ class Meta implements \Hoa\Visitor\Visit {
     protected $_rules           = array();
 
     /**
-     * Visitor of tokens (uniform).
+     * Visitor of tokens (isotropic).
      *
-     * @var \Hoa\Regex\Visitor\Uniform object
+     * @var \Hoa\Regex\Visitor\Isotropic object
      */
     protected $_tokenSampler    = null;
-
-    /**
-     * Visitor of tokens (uniform pre-compute).
-     *
-     * @var \Hoa\Regex\Visitor\UniformPreCompute object
-     */
-    protected $_tokenPreCompute = null;
 
     /**
      * Visitor of rules (uniform).
@@ -158,9 +146,8 @@ class Meta implements \Hoa\Visitor\Visit {
             'hoa://Library/Regex/Grammar.pp'
         ));
 
-        $this->_tokenSampler    = new \Hoa\Regex\Visitor\Uniform($sampler, $n);
+        $this->_tokenSampler    = new \Hoa\Regex\Visitor\Isotropic($sampler);
         $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
-        $this->_tokenPreCompute = new \Hoa\Regex\Visitor\UniformPreCompute($n);
         $this->_rulePreCompute  = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
 
         $this->_ruleSampler->setMeta($this);
@@ -210,9 +197,6 @@ class Meta implements \Hoa\Visitor\Visit {
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
 
-        foreach($this->_tokens as $token)
-            $this->_tokenPreCompute->visit($token['ast']);
-
         foreach($this->_rules as $rule)
             $this->_rulePreCompute->visit($rule['ast']);
 
@@ -246,22 +230,11 @@ class Meta implements \Hoa\Visitor\Visit {
      * Get the token visitor (uniform).
      *
      * @access  public
-     * @return  \Hoa\Regex\Visitor\Uniform
+     * @return  \Hoa\Regex\Visitor\Isotropic
      */
     public function getTokenSampler ( ) {
 
         return $this->_tokenSampler;
-    }
-
-    /**
-     * Get the token visitor (uniform pre-compute).
-     *
-     * @access  public
-     * @return  \Hoa\Regex\Visitor\UniformPreCompute
-     */
-    public function getTokenPreCompute ( ) {
-
-        return $this->_tokenPreCompute;
     }
 
     /**
@@ -318,9 +291,7 @@ class Meta implements \Hoa\Visitor\Visit {
      */
     public function setSize ( $n ) {
 
-        $this->_tokenSampler->setSize($n);
         $this->_ruleSampler->setSize($n);
-        $this->_tokenPreCompute->setSize($n);
         $this->_rulePreCompute->setSize($n);
 
         return;

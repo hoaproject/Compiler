@@ -142,9 +142,9 @@ class Uniform implements \Hoa\Visitor\Visit {
               break;
 
             case '#concatenation':
-                $out      = null;
-                $Γ        = $data['precompute'][$n]['Γ'];
-                $γ        = $Γ[$this->_sampler->getInteger(0, count($Γ) - 1)];
+                $out = null;
+                $Γ   = $data['precompute'][$n]['Γ'];
+                $γ   = $Γ[$this->_sampler->getInteger(0, count($Γ) - 1)];
 
                 foreach($element->getChildren() as $i => $child)
                     $out .= $child->accept($this, $handle, $γ[$i]);

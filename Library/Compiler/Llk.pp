@@ -78,7 +78,7 @@ quantification:
 
 simple:
     (
-        ::capturing_:: alternation() ::_capturing:: #capturing
+        ::capturing_:: alternation() ::_capturing::
       | ::skipped:: <token> ( ::unification_:: <unification> ::_unification:: )?
         ::skipped:: #skipped
       | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?

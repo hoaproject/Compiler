@@ -93,6 +93,9 @@ class TreeNode implements \Hoa\Visitor\Element {
      */
     protected $_data     = array();
 
+    protected static $__i = 0;
+    protected $_i = 0;
+
 
 
     /**
@@ -109,8 +112,14 @@ class TreeNode implements \Hoa\Visitor\Element {
         $this->setId($id);
         $this->setValue($value);
         $this->setChildren($children);
+        $this->_i = self::$__i++;
 
         return;
+    }
+
+    public function getHash ( ) {
+
+        return $this->_i;
     }
 
     /**

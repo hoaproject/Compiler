@@ -90,6 +90,8 @@ class Dump implements \Hoa\Visitor\Visit {
 
         $data = $element->getData();
 
+        $out .= ' ' . $element->getHash();
+
         if(!empty($data))
             $out .= ' ' . $this->dumpData($data);
 

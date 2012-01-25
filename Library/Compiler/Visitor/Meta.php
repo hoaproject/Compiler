@@ -53,6 +53,9 @@ from('Hoa')
  */
 -> import('Compiler.Llk')
 
+-> import('Compiler.Visitor.BoundedExaustive')
+-> import('Compiler.Visitor.Coverage')
+
 /**
  * \Hoa\Compiler\Visitor\Uniform
  */
@@ -147,11 +150,12 @@ class Meta implements \Hoa\Visitor\Visit {
         ));
 
         $this->_tokenSampler    = new \Hoa\Regex\Visitor\Isotropic($sampler);
-        $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
-        $this->_rulePreCompute  = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
+        //$this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
+        $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Coverage($sampler, $n);
+        //$this->_rulePreCompute  = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
 
         $this->_ruleSampler->setMeta($this);
-        $this->_rulePreCompute->setMeta($this);
+        //$this->_rulePreCompute->setMeta($this);
 
         // Collect.
         foreach($grammar->getTokens() as $namespace => $tokens) {
@@ -250,6 +254,11 @@ class Meta implements \Hoa\Visitor\Visit {
             return null;
 
         return $this->_rules[$rule]['ast'];
+    }
+
+    public function getRules ( ) {
+
+        return $this->_rules;
     }
 
     /**

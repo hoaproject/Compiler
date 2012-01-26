@@ -117,7 +117,6 @@ class Uniform implements \Hoa\Visitor\Visit {
         switch($element->getId()) {
 
             case '#rule':
-            case '#capturing':
             case '#skipped':
             case '#kept':
                 return $element->getChild(0)->accept($this, $handle, $n);

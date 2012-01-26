@@ -201,8 +201,10 @@ class Meta implements \Hoa\Visitor\Visit {
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
 
+        /*
         foreach($this->_rules as $rule)
             $this->_rulePreCompute->visit($rule['ast']);
+        */
 
         return $out = $this->getRuleSampler()->visit(
             $element,

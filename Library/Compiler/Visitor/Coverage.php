@@ -134,11 +134,7 @@ class Coverage implements \Hoa\Visitor\Visit {
     public function initializeRuleCoverage ( \Hoa\Visitor\Element $element,
                                              $eldnah ) {
 
-        $this->_coveredRules = $element->accept(
-            $this,
-            $handle,
-            $eldnah
-        );
+        $element->accept($this, $handle, $eldnah);
 
         return;
     }
@@ -155,6 +151,7 @@ class Coverage implements \Hoa\Visitor\Visit {
 
         while(0 < count($this->_todo)) {
 
+            //var_dump($this->_todo);
             $rule = array_pop($this->_todo);
 
             if($rule instanceof Trace\RuleExit) {
@@ -278,7 +275,7 @@ class Coverage implements \Hoa\Visitor\Visit {
 
         foreach($rules as $rule) {
 
-            $rule     = $this->flatNode();
+            $rule     = $this->flatNode($rule);
             $out      = array();
             $nbClosed = 0;
 
@@ -343,12 +340,6 @@ class Coverage implements \Hoa\Visitor\Visit {
 
         switch($element->getId()) {
 
-            case '#rule':
-            case '#skipped':
-            case '#kept':
-                return $element->getChild(0)->accept($this, $handle, $eldnah);
-              break;
-
             case '#alternation':
                 $uncovered  = array();
                 $inProgress = array();
@@ -407,10 +398,10 @@ class Coverage implements \Hoa\Visitor\Visit {
 
             case '#concatenation':
                 $covered[$uid][0] = -1;
-                $trace[] = new Trace\RuleEntry($element, 0, null);
-                $todo[]  = new Trace\RuleExit($element, 0, null);
+                $trace[]          = new Trace\RuleEntry($element, 0, null);
+                $todo[]           = new Trace\RuleExit($element,  0, null);
 
-                for($i = $element->getChildrenNumber()- 1; $i >= 0; --$i)
+                for($i = $element->getChildrenNumber() - 1; $i >= 0; --$i)
                     $todo[] = new Trace\RuleEntry(
                         $this->flatNode($element->getChild($i)),
                         0,
@@ -431,11 +422,11 @@ class Coverage implements \Hoa\Visitor\Visit {
 
                 foreach($covered[$uid] as $c => $k)
                     if(0 === $k)
-                        $uncovered[]  = $child;
+                        $uncovered[]  = $c;
                     elseif(-1 === $k)
-                        $inProgress[] = $child;
+                        $inProgress[] = $c;
                     else
-                        $already[]    = $child;
+                        $already[]    = $c;
 
                 if(empty($uncovered)) {
 
@@ -457,7 +448,7 @@ class Coverage implements \Hoa\Visitor\Visit {
                         $trace
                     );
 
-                    if(null == $sequence)
+                    if(empty($sequence))
                         return null;
 
                     for($i = 0; $i < $rand; ++$i)
@@ -475,13 +466,10 @@ class Coverage implements \Hoa\Visitor\Visit {
                     $covered[$uid][$rand] = -1;
                     $trace[] = new Trace\RuleEntry($element, $covered, $todo);
                     $todo[]  = new Trace\RuleExit($element, $rand, null);
+                    $child   = $this->flatNode($element->getChild(0));
 
                     for($i = 0; $i < $rand; ++$i)
-                        $todo[] = new Trace\RuleEntry(
-                            $this->flatNode($element->getChild(0)),
-                            $covered,
-                            $todo
-                        );
+                        $todo[] = new Trace\RuleEntry($child, $covered, $todo);
                 }
 
                 return array(
@@ -489,20 +477,6 @@ class Coverage implements \Hoa\Visitor\Visit {
                     'todo'    => $todo,
                     'covered' => $covered
                 );
-              break;
-
-            case '#named':
-                $rule = $this->getMeta()->getRule(
-                    $element->getChild(0)->getValueValue()
-                );
-
-                if(null === $rule)
-                    throw new Exception(
-                        'Something has failed somewhere. Good luck. ' .
-                        '(Clue: the rule %s does not exist).',
-                        1, $element->getChild(0)->getValueValue());
-
-                return $rule['ast']->accept($this, $handle, $eldnah);
               break;
 
             case 'token':
@@ -518,23 +492,20 @@ class Coverage implements \Hoa\Visitor\Visit {
               break;
         }
 
-        return '???';
+        throw new Exception('Damned…', 42);
     }
 
     public function _visitInit ( \Hoa\Visitor\Element $element,
                                  &$handle = null, $eldnah = null ) {
 
         $data              = &$element->getData();
-        $data['cov']['id'] = $id  = $eldnah . '_' . $element->getHash();
-        $coveredRules      = array();
+
+        if(isset($data['cov']['id']))
+            return;
+
+        $data['cov']['id'] = $id  = $element->getHash();
 
         switch($element->getId()) {
-
-            case '#rule':
-            case '#skipped':
-            case '#kept':
-                return $element->getChild(0)->accept($this, $handle, $eldnah);
-              break;
 
             case '#quantification':
                 $xy = $element->getChild(1)->getValueValue();
@@ -577,70 +548,44 @@ class Coverage implements \Hoa\Visitor\Visit {
                 $y1 = $y - 1;
 
                 if($x == $y)
-                    $coveredRules[$id][$x]  = 0;
+                    $this->_coveredRules[$id][$x]  = 0;
                 else {
 
-                    $coveredRules[$id][$x ] = 0;
-                    $coveredRules[$id][$x1] = 0;
-                    $coveredRules[$id][$y1] = 0;
-                    $coveredRules[$id][$y ] = 0;
+                    $this->_coveredRules[$id][$x ] = 0;
+                    $this->_coveredRules[$id][$x1] = 0;
+                    $this->_coveredRules[$id][$y1] = 0;
+                    $this->_coveredRules[$id][$y ] = 0;
                 }
 
-                return $coveredRules;
+                $this->flatNode($element->getChild(0))->accept(
+                    $this,
+                    $handle,
+                    $eldnah
+                );
               break;
 
             case '#alternation':
                 foreach($element->getChildren() as $i => $child) {
 
-                    $coveredRules[$id][$i] = 0;
-                    $coveredRules += $this->flatNode($child)->accept(
-                        $this,
-                        $handle,
-                        $eldnah
-                    );
+                    $this->_coveredRules[$id][$i] = 0;
+                    $this->flatNode($child)->accept($this, $handle, $eldnah);
                 }
 
-                $coveredRules[$id][0] = 0;
-
-                return $coveredRules;
+                $this->_coveredRules[$id][0] = 0;
               break;
 
             case '#concatenation':
-                $coveredRules[$id][0] = 0;
+                $this->_coveredRules[$id][0] = 0;
 
                 foreach($element->getChildren() as $child)
-                    $coveredRules += $this->flatNode($child)->accept(
-                        $this,
-                        $handle,
-                        $eldnah
-                    );
-
-                return $coveredRules;
-              break;
-
-            case '#named':
-                $coveredRules[$id][0] = 0;
-
-                $rule = $this->getMeta()->getRule(
-                    $name = $element->getChild(0)->getValueValue()
-                );
-
-                if(null === $rule)
-                    throw new Exception(
-                        'Something has failed somewhere. Good luck. ' .
-                        '(Clue: the rule %s does not exist).',
-                        3, $element->getChild(0)->getValueValue());
-
-                $coveredRules += $rule['ast']->accept($this, $handle, $name);
-
-                return $coveredRules;
+                    $this->flatNode($child)->accept($this, $handle, $eldnah);
               break;
 
             default:
-                $coveredRules[$id][0] = 0;
-
-                return $coveredRules;
+                $this->_coveredRules[$id][0] = 0;
         }
+
+        return;
     }
 
     public function updateCoverage ( Trace\RuleExit $rule ) {
@@ -671,7 +616,7 @@ class Coverage implements \Hoa\Visitor\Visit {
               break;
 
             case '#quantification':
-                $childData = $element->getChild(0)->getData();
+                $childData = $this->flatNode($element->getChild(0))->getData();
 
                 if(   0 === $child
                    || !in_array(0, $this->_coveredRules[$childData['cov']['id']]))
@@ -761,6 +706,9 @@ class Coverage implements \Hoa\Visitor\Visit {
         switch($element->getId()) {
 
             case '#rule':
+                return $this->flatNode($element->getChild(0));
+              break;
+
             case '#skipped':
             case '#kept':
                 return $element->getChild(0);

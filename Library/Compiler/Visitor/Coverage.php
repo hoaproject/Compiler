@@ -65,7 +65,7 @@ namespace Hoa\Compiler\Visitor {
  * @license    New BSD License
  */
 
-class Coverage implements \Hoa\Visitor\Visit {
+class Coverage implements \Hoa\Visitor\Visit, \Iterator {
 
     /**
      * Numeric-sampler.
@@ -85,6 +85,14 @@ class Coverage implements \Hoa\Visitor\Visit {
     protected $_trace        = null;
     protected $_tests        = null;
     protected $_coveredRules = null;
+    protected $_first = true;
+    protected $_key = -1;
+    protected $_current = null;
+    protected $_eod = false;
+    protected $_id = null;
+
+    protected $_foo = null;
+    protected $_bar = null;
 
 
 
@@ -104,31 +112,74 @@ class Coverage implements \Hoa\Visitor\Visit {
         return;
     }
 
-    public function generate ( \Hoa\Visitor\Element $element,
-                               &$handle = null, $eldnah = null ) {
+    public function foo ( \Hoa\Visitor\Element $element, $bar ) {
 
-        $element      = $this->flatNode($element);
-        $this->_tests = array();
-        $this->initializeRuleCoverage($element, $eldnah);
-        $data = $element->getData();
-        $id   = $data['cov']['id'];
+        $this->_foo = $this->flatNode($element);
+        $this->_bar = $bar;
+    }
 
-        do {
+    public function current ( ) {
 
-            $this->_trace = array();
-            $this->_todo  = array(
-                new Trace\RuleEntry($element, $this->_coveredRules, 0)
-            );
-            $out          = $this->unfold();
+        return $this->_current;
+    }
 
-            if(null !== $out) {
+    public function key ( ) {
 
-                $this->printTrace();
-                $this->_tests[] = $this->_trace;
-                $this->resetRuleCoverage();
-            }
-        } while(   null !== $out
-                && in_array(0, $this->_coveredRules[$id]));
+        return $this->_key;
+    }
+
+    public function next ( ) {
+
+        return;
+    }
+
+    public function rewind ( ) {
+
+        if(!empty($this->_coveredRules)) {
+
+            foreach($this->_coveredRules as $i => $node)
+                foreach($node as $j => $sub)
+                    $this->_coveredRules[$i][$j] = 0;
+
+            $this->_current = null;
+            $this->_key     = -1;
+
+            return;
+        }
+
+        $element             = $this->_foo;
+        $this->_tests        = array();
+        $this->_coveredRules = array();
+        $this->initializeRuleCoverage($element, $this->_bar);
+        $data                = $element->getData();
+        $this->_id           = $data['cov']['id'];
+
+        return;
+    }
+
+    public function valid ( ) {
+
+        if(!in_array(0, $this->_coveredRules[$this->_id]))
+            return false;
+
+        $element      = $this->_foo;
+        $this->_trace = array();
+        $this->_todo  = array(
+            new Trace\RuleEntry($element, $this->_coveredRules, 0)
+        );
+        $out          = $this->unfold();
+
+        if(null !== $out) {
+
+            $this->_current = $this->printTrace();
+            ++$this->_key;
+            $this->_tests[] = $this->_trace;
+            $this->resetRuleCoverage();
+
+            return true;
+        }
+
+        return false;
     }
 
     public function initializeRuleCoverage ( \Hoa\Visitor\Element $element,
@@ -226,16 +277,17 @@ class Coverage implements \Hoa\Visitor\Visit {
 
     public function printTrace ( ) {
 
-        echo '>>> ';
+        $out   = null;
+        $_skip = $this->getMeta()->getToken('skip');
+        $skip  = $_skip['ast'];
 
         foreach($this->_trace as $trace)
             if(   $trace instanceof \Hoa\Visitor\Element
                && 'token' == $trace->getId())
-                echo $this->sample($trace) . ' ';
+                $out .= $this->sample($trace) .
+                     $skip->accept($this->getMeta()->getTokenSampler());
 
-        echo "\n";
-
-        return;
+        return $out;
     }
 
     public function extract ( $rules, $tests, $trace ) {

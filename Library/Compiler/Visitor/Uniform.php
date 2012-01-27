@@ -44,9 +44,29 @@ from('Hoa')
 -> import('Compiler.Visitor.Exception')
 
 /**
+ * \Hoa\Compiler\Visitor\Generic
+ */
+-> import('Compiler.Visitor.Generic')
+
+/**
+ * \Hoa\Compiler\Visitor\UniformPreCompute
+ */
+-> import('Compiler.Visitor.UniformPreCompute')
+
+/**
  * \Hoa\Visitor\Visit
  */
--> import('Visitor.Visit');
+-> import('Visitor.Visit')
+
+/**
+ * \Hoa\Test\Sampler\Random
+ */
+-> import('Test.Sampler.Random')
+
+/**
+ * \Hoa\Regex\Visitor\Isotropic
+ */
+-> import('Regex.Visitor.Isotropic');
 
 }
 
@@ -62,14 +82,9 @@ namespace Hoa\Compiler\Visitor {
  * @license    New BSD License
  */
 
-class Uniform implements \Hoa\Visitor\Visit {
-
-    /**
-     * Numeric-sampler.
-     *
-     * @var \Hoa\Test\Sampler object
-     */
-    protected $_sampler = null;
+class          Uniform
+    extends    Generic
+    implements \Hoa\Visitor\Visit {
 
     /**
      * Given size: n.
@@ -84,14 +99,27 @@ class Uniform implements \Hoa\Visitor\Visit {
      * Initialize numeric-sampler and the size.
      *
      * @access  public
-     * @param   \Hoa\Test\Sampler  $sampler    Numeric-sampler.
-     * @param   int                $n          Size.
      * @return  void
      */
-    public function __construct ( \Hoa\Test\Sampler $sampler, $n = 0 ) {
+    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+                                                           $rootRuleName = null,
+                                                           $n            = 7,
+                                  \Hoa\Test\Sampler        $sampler      = null,
+                                  \Hoa\Regex\Visitor\Visit $tokenSampler = null ) {
 
-        $this->_sampler = $sampler;
+        parent::__construct(
+            $grammar,
+            $rootRuleName,
+            $sampler      ?: $sampler = new \Hoa\Test\Sampler\Random(),
+            $tokenSampler ?: new \Hoa\Regex\Visitor\Isotropic($sampler)
+        );
+        $this->_rootRule = $this->getRuleAst($this->_rootRuleName);
         $this->setSize($n);
+
+        $precompute = new UniformPreCompute($n, $this);
+
+        foreach($this->_rules as $i => $rule)
+            $precompute->visit($rule['ast']);
 
         return;
     }
@@ -173,7 +201,7 @@ class Uniform implements \Hoa\Visitor\Visit {
               break;
 
             case '#named':
-                $rule = $this->getMeta()->getRule(
+                $rule = $this->getRule(
                     $element->getChild(0)->getValueValue()
                 );
 
@@ -187,7 +215,7 @@ class Uniform implements \Hoa\Visitor\Visit {
               break;
 
             case 'token':
-                $token = $this->getMeta()->getToken(
+                $token = $this->getToken(
                     $element->getValueValue()
                 );
 
@@ -198,7 +226,7 @@ class Uniform implements \Hoa\Visitor\Visit {
                         1, $element->getValueValue());
 
                 return $token['ast']->accept(
-                    $this->getMeta()->getTokenSampler(),
+                    $this->_tokenSampler,
                     $handle,
                     $n
                 );
@@ -234,30 +262,9 @@ class Uniform implements \Hoa\Visitor\Visit {
         return $this->_n;
     }
 
-    /**
-     * Set meta visitor.
-     *
-     * @access  public
-     * @param   \Hoa\Compiler\Visitor\Meta  $meta    Meta visitor.
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function setMeta ( Meta $meta ) {
+    public function getRootRule ( ) {
 
-        $old         = $meta;
-        $this->_meta = $meta;
-
-        return $old;
-    }
-
-    /**
-     * Get meta visitor.
-     *
-     * @access  public
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function getMeta ( ) {
-
-        return $this->_meta;
+        return $this->_rootRule;
     }
 }
 

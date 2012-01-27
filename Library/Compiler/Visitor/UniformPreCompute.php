@@ -81,7 +81,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
      */
     protected $_n    = 0;
 
-    protected $_meta = null;
+    protected $_parent = null;
 
 
 
@@ -92,9 +92,10 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
      * @param   int  $n    Size.
      * @return  void
      */
-    public function __construct ( $n = 0 ) {
+    public function __construct ( $n = 0, Uniform $parent ) {
 
         $this->setSize($n);
+        $this->_parent = $parent;
 
         return;
     }
@@ -249,7 +250,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
               break;
 
             case '#named':
-                $rule = $this->getMeta()->getRule(
+                $rule = $this->_parent->getRule(
                     $element->getChild(0)->getValueValue()
                 );
 
@@ -294,32 +295,6 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
     public function getSize ( ) {
 
         return $this->_n;
-    }
-
-    /**
-     * Set meta visitor.
-     *
-     * @access  public
-     * @param   \Hoa\Compiler\Visitor\Meta  $meta    Meta visitor.
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function setMeta ( Meta $meta ) {
-
-        $old         = $meta;
-        $this->_meta = $meta;
-
-        return $old;
-    }
-
-    /**
-     * Get meta visitor.
-     *
-     * @access  public
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function getMeta ( ) {
-
-        return $this->_meta;
     }
 }
 

@@ -44,12 +44,34 @@ from('Hoa')
 -> import('Compiler.Visitor.Exception')
 
 /**
+ * \Hoa\Compiler\Visitor\Generic
+ */
+-> import('Compiler.Visitor.Generic')
+
+/**
+ * \Hoa\Compiler\Visitor\Trace\RuleEntry
+ */
+-> import('Compiler.Visitor.Trace.RuleEntry')
+
+/**
+ * \Hoa\Compiler\Visitor\Trace\RuleExit
+ */
+-> import('Compiler.Visitor.Trace.RuleExit')
+
+/**
  * \Hoa\Visitor\Visit
  */
 -> import('Visitor.Visit')
 
--> import('Compiler.Visitor.Trace.RuleEntry')
--> import('Compiler.Visitor.Trace.RuleExit');
+/**
+ * \Hoa\Test\Sampler\Random
+ */
+-> import('Test.Sampler.Random')
+
+/**
+ * \Hoa\Regex\Visitor\Isotropic
+ */
+-> import('Regex.Visitor.Isotropic');
 
 }
 
@@ -65,34 +87,21 @@ namespace Hoa\Compiler\Visitor {
  * @license    New BSD License
  */
 
-class Coverage implements \Hoa\Visitor\Visit, \Iterator {
+class          Coverage
+    extends    Generic
+    implements \Hoa\Visitor\Visit,
+               \Iterator {
 
-    /**
-     * Numeric-sampler.
-     *
-     * @var \Hoa\Test\Sampler object
-     */
-    protected $_sampler  = null;
-
-    /**
-     * Given size: n.
-     *
-     * @var \Hoa\Compiler\Visitor\Coverage int
-     */
-    protected $_n        = 0;
+    protected $_rootRule = null;
 
     protected $_todo         = null;
     protected $_trace        = null;
     protected $_tests        = null;
     protected $_coveredRules = null;
-    protected $_first = true;
+
     protected $_key = -1;
     protected $_current = null;
-    protected $_eod = false;
     protected $_id = null;
-
-    protected $_foo = null;
-    protected $_bar = null;
 
 
 
@@ -100,22 +109,24 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
      * Initialize numeric-sampler and the size.
      *
      * @access  public
-     * @param   \Hoa\Test\Sampler  $sampler    Numeric-sampler.
-     * @param   int                $n          Size.
      * @return  void
      */
-    public function __construct ( \Hoa\Test\Sampler $sampler, $n = 0 ) {
+    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+                                                           $rootRuleName = null,
+                                  \Hoa\Test\Sampler        $sampler      = null,
+                                  \Hoa\Regex\Visitor\Visit $tokenSampler = null ) {
 
-        $this->_sampler = $sampler;
-        $this->setSize($n);
+        parent::__construct(
+            $grammar,
+            $rootRuleName,
+            $sampler      ?: $sampler = new \Hoa\Test\Sampler\Random(),
+            $tokenSampler ?: new \Hoa\Regex\Visitor\Isotropic($sampler)
+        );
+        $this->_rootRule = $this->flatNode(
+            $this->getRuleAst($this->_rootRuleName)
+        );
 
         return;
-    }
-
-    public function foo ( \Hoa\Visitor\Element $element, $bar ) {
-
-        $this->_foo = $this->flatNode($element);
-        $this->_bar = $bar;
     }
 
     public function current ( ) {
@@ -147,11 +158,11 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
             return;
         }
 
-        $element             = $this->_foo;
         $this->_tests        = array();
         $this->_coveredRules = array();
-        $this->initializeRuleCoverage($element, $this->_bar);
-        $data                = $element->getData();
+        // Initialize rule coverage.
+        $this->_rootRule->accept($this, $handle, $this->_rootRuleName);
+        $data                = $this->_rootRule->getData();
         $this->_id           = $data['cov']['id'];
 
         return;
@@ -162,10 +173,9 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
         if(!in_array(0, $this->_coveredRules[$this->_id]))
             return false;
 
-        $element      = $this->_foo;
         $this->_trace = array();
         $this->_todo  = array(
-            new Trace\RuleEntry($element, $this->_coveredRules, 0)
+            new Trace\RuleEntry($this->_rootRule, $this->_coveredRules, 0)
         );
         $out          = $this->unfold();
 
@@ -174,7 +184,11 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
             $this->_current = $this->printTrace();
             ++$this->_key;
             $this->_tests[] = $this->_trace;
-            $this->resetRuleCoverage();
+            // Reset rule coverage.
+            foreach($this->_coveredRules as $key => $value)
+                foreach($value as $k => $v)
+                    if(-1 === $v)
+                        $this->_coveredRules[$key][$k] = 0;
 
             return true;
         }
@@ -182,27 +196,10 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
         return false;
     }
 
-    public function initializeRuleCoverage ( \Hoa\Visitor\Element $element,
-                                             $eldnah ) {
-
-        $element->accept($this, $handle, $eldnah);
-
-        return;
-    }
-
-    public function resetRuleCoverage ( ) {
-
-        foreach($this->_coveredRules as $key => $value)
-            foreach($value as $k => $v)
-                if(-1 === $v)
-                    $this->_coveredRules[$key][$k] = 0;
-    }
-
     public function unfold ( ) {
 
         while(0 < count($this->_todo)) {
 
-            //var_dump($this->_todo);
             $rule = array_pop($this->_todo);
 
             if($rule instanceof Trace\RuleExit) {
@@ -278,14 +275,14 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
     public function printTrace ( ) {
 
         $out   = null;
-        $_skip = $this->getMeta()->getToken('skip');
+        $_skip = $this->getToken('skip');
         $skip  = $_skip['ast'];
 
         foreach($this->_trace as $trace)
             if(   $trace instanceof \Hoa\Visitor\Element
                && 'token' == $trace->getId())
                 $out .= $this->sample($trace) .
-                     $skip->accept($this->getMeta()->getTokenSampler());
+                        $skip->accept($this->_tokenSampler);
 
         return $out;
     }
@@ -358,7 +355,7 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
 
     public function sample ( \Hoa\Visitor\Element $element ) {
 
-        $token = $this->getMeta()->getToken(
+        $token = $this->getToken(
             $element->getValueValue()
         );
 
@@ -368,7 +365,7 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
                 '(Clue: the token %s does not exist).',
                 0, $element->getValueValue());
 
-        return $token['ast']->accept($this->getMeta()->getTokenSampler());
+        return $token['ast']->accept($this->_tokenSampler);
     }
 
     /**
@@ -701,58 +698,6 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
         return;
     }
 
-    /**
-     * Set size.
-     *
-     * @access  public
-     * @param   int  $n    Size.
-     * @return  int
-     */
-    public function setSize ( $n ) {
-
-        $old      = $this->_n;
-        $this->_n = $n;
-
-        return $old;
-    }
-
-    /**
-     * Get size.
-     *
-     * @access  public
-     * @return  int
-     */
-    public function getSize ( ) {
-
-        return $this->_n;
-    }
-
-    /**
-     * Set meta visitor.
-     *
-     * @access  public
-     * @param   \Hoa\Compiler\Visitor\Meta  $meta    Meta visitor.
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function setMeta ( Meta $meta ) {
-
-        $old         = $meta;
-        $this->_meta = $meta;
-
-        return $old;
-    }
-
-    /**
-     * Get meta visitor.
-     *
-     * @access  public
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function getMeta ( ) {
-
-        return $this->_meta;
-    }
-
     public function flatNode ( \Hoa\Visitor\Element $element ) {
 
         switch($element->getId()) {
@@ -767,7 +712,7 @@ class Coverage implements \Hoa\Visitor\Visit, \Iterator {
               break;
 
             case '#named':
-                $rule = $this->getMeta()->getRule(
+                $rule = $this->getRule(
                     $element->getChild(0)->getValueValue()
                 );
 

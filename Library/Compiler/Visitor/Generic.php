@@ -44,32 +44,9 @@ from('Hoa')
 -> import('Compiler.Visitor.Exception')
 
 /**
- * \Hoa\Visitor\Visit
- */
--> import('Visitor.Visit')
-
-/**
  * \Hoa\Compiler\Llk
  */
 -> import('Compiler.Llk')
-
--> import('Compiler.Visitor.BoundedExaustive')
--> import('Compiler.Visitor.Coverage')
-
-/**
- * \Hoa\Compiler\Visitor\Uniform
- */
--> import('Compiler.Visitor.Uniform')
-
-/**
- * \Hoa\Compiler\Visitor\UniformPreCompute
- */
--> import('Compiler.Visitor.UniformPreCompute')
-
-/**
- * \Hoa\Regex\Visitor\Isotropic
- */
--> import('Regex.Visitor.Isotropic')
 
 /**
  * \Hoa\File\Read
@@ -81,67 +58,59 @@ from('Hoa')
 namespace Hoa\Compiler\Visitor {
 
 /**
- * Class \Hoa\Compiler\Visitor\Meta.
+ * Class \Hoa\Compiler\Visitor\Generic.
  *
- * Visitor that exposes the LL(k) compiler compiler as a meta compiler compiler.
+ *
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2012 Ivan Enderlin.
  * @license    New BSD License
  */
 
-class Meta implements \Hoa\Visitor\Visit {
+class Generic {
 
     /**
      * Grammar tokens.
      *
-     * @var \Hoa\Compiler\Visitor\Meta array
+     * @var \Hoa\Compiler\Visitor\Generic array
      */
     protected $_tokens          = array();
 
     /**
      * Grammar rules.
      *
-     * @var \Hoa\Compiler\Visitor\Meta array
+     * @var \Hoa\Compiler\Visitor\Generic array
      */
     protected $_rules           = array();
 
-    /**
-     * Visitor of tokens (isotropic).
-     *
-     * @var \Hoa\Regex\Visitor\Isotropic object
-     */
-    protected $_tokenSampler    = null;
+    protected $_grammar      = null;
+    protected $_rootRuleName = null;
 
     /**
-     * Visitor of rules (uniform).
+     * Numeric-sampler.
      *
-     * @var \Hoa\Compiler\Visitor\Uniform object
+     * @var \Hoa\Test\Sampler object
      */
-    protected $_ruleSampler     = null;
-
-    /**
-     * Visitor of rules (uniform pre-compute).
-     *
-     * @var \Hoa\Compiler\Visitor\UniformPrecompute object
-     */
-    protected $_rulePreCompute  = null;
+    protected $_sampler      = null;
+    protected $_tokenSampler = null;
 
 
 
     /**
      * @access  public
      * @param   \Hoa\Compiler\Llk  $grammar    Grammar.
-     * @param   \Hoa\Test\Sampler  $sampler    Numeric-sampler.
-     * @param   int                $n          Size of data to generate.
-     *                                         This is the number of tokens.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk $grammar,
-                                  \Hoa\Test\Sampler $sampler,
-                                  $n = 1 ) {
+    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+                                                           $rootRuleName = null,
+                                  \Hoa\Test\Sampler        $sampler      = null,
+                                  \Hoa\Regex\Visitor\Visit $tokenSampler = null ) {
 
-        // Initialize.
+        $this->_grammar      = $grammar;
+        $this->_rootRuleName = $rootRuleName ?: $grammar->getRootRule();
+        $this->_sampler      = $sampler;
+        $this->_tokenSampler = $tokenSampler;
+
         $llk   = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
             'hoa://Library/Compiler/Llk.pp'
         ));
@@ -149,16 +118,7 @@ class Meta implements \Hoa\Visitor\Visit {
             'hoa://Library/Regex/Grammar.pp'
         ));
 
-        $this->_tokenSampler    = new \Hoa\Regex\Visitor\Isotropic($sampler);
-        //$this->_ruleSampler     = new \Hoa\Compiler\Visitor\Uniform($sampler, $n);
-        $this->_ruleSampler     = new \Hoa\Compiler\Visitor\Coverage($sampler, $n);
-        //$this->_rulePreCompute  = new \Hoa\Compiler\Visitor\UniformPreCompute($n);
-
-        $this->_ruleSampler->setMeta($this);
-        //$this->_rulePreCompute->setMeta($this);
-
-        // Collect.
-        foreach($grammar->getTokens() as $namespace => $tokens) {
+        foreach($this->_grammar->getTokens() as $namespace => $tokens) {
 
             foreach($tokens as $name => $value) {
 
@@ -175,7 +135,7 @@ class Meta implements \Hoa\Visitor\Visit {
             }
         }
 
-        foreach($grammar->getRules() as $name => $rule) {
+        foreach($this->_grammar->getRules() as $name => $rule) {
 
             if('#' == $name[0])
                 $name = substr($name, 1);
@@ -189,28 +149,9 @@ class Meta implements \Hoa\Visitor\Visit {
         return;
     }
 
-    /**
-     * Visit an element.
-     *
-     * @access  public
-     * @param   \Hoa\Visitor\Element  $element    Element to visit.
-     * @param   mixed                 &$handle    Handle (reference).
-     * @param   mixed                 $eldnah     Handle (not reference).
-     * @return  mixed
-     */
-    public function visit ( \Hoa\Visitor\Element $element,
-                            &$handle = null, $eldnah = null ) {
+    public function &getTokens ( ) {
 
-        /*
-        foreach($this->_rules as $rule)
-            $this->_rulePreCompute->visit($rule['ast']);
-        */
-
-        return $out = $this->getRuleSampler()->visit(
-            $element,
-            $handle,
-            $eldnah
-        );
+        return $this->_tokens;
     }
 
     /**
@@ -230,17 +171,6 @@ class Meta implements \Hoa\Visitor\Visit {
         }
 
         return $this->_tokens[$token];
-    }
-
-    /**
-     * Get the token visitor (uniform).
-     *
-     * @access  public
-     * @return  \Hoa\Regex\Visitor\Isotropic
-     */
-    public function getTokenSampler ( ) {
-
-        return $this->_tokenSampler;
     }
 
     /**
@@ -280,32 +210,6 @@ class Meta implements \Hoa\Visitor\Visit {
         }
 
         return $this->_rules[$rule];
-    }
-
-    /**
-     * Get the rule visitor (uniform).
-     *
-     * @access  public
-     * @return  \Hoa\Compiler\Visitor\Uniform
-     */
-    public function getRuleSampler ( ) {
-
-        return $this->_ruleSampler;
-    }
-
-    /**
-     * Set size.
-     *
-     * @access  public
-     * @param   int  $n    Size.
-     * @return  void
-     */
-    public function setSize ( $n ) {
-
-        $this->_ruleSampler->setSize($n);
-        $this->_rulePreCompute->setSize($n);
-
-        return;
     }
 }
 

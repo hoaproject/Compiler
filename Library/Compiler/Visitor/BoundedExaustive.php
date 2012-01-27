@@ -44,12 +44,35 @@ from('Hoa')
 -> import('Compiler.Visitor.Exception')
 
 /**
+ * \Hoa\Compiler\Visitor\Generic
+ */
+-> import('Compiler.Visitor.Generic')
+
+/**
+ * \Hoa\Compiler\Visitor\Trace\RuleEntry
+ */
+-> import('Compiler.Visitor.Trace.RuleEntry')
+
+/**
+ * \Hoa\Compiler\Visitor\Trace\RuleExit
+ */
+-> import('Compiler.Visitor.Trace.RuleExit')
+
+/**
  * \Hoa\Visitor\Visit
  */
 -> import('Visitor.Visit')
 
--> import('Compiler.Visitor.Trace.RuleEntry')
--> import('Compiler.Visitor.Trace.RuleExit');
+/**
+ * \Hoa\Test\Sampler\Random
+ */
+-> import('Test.Sampler.Random')
+
+/**
+ * \Hoa\Regex\Visitor\Isotropic
+ */
+-> import('Regex.Visitor.Isotropic');
+
 
 }
 
@@ -65,14 +88,10 @@ namespace Hoa\Compiler\Visitor {
  * @license    New BSD License
  */
 
-class BoundedExaustive implements \Hoa\Visitor\Visit {
-
-    /**
-     * Numeric-sampler.
-     *
-     * @var \Hoa\Test\Sampler object
-     */
-    protected $_sampler  = null;
+class          BoundedExaustive
+    extends    Generic
+    implements \Hoa\Visitor\Visit,
+               \Iterator {
 
     /**
      * Given size: n.
@@ -81,8 +100,12 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
      */
     protected $_n        = 0;
 
+    protected $_rootRule = null;
     protected $_todo  = null;
     protected $_trace = null;
+
+    protected $_key = -1;
+    protected $_current = null;
 
 
 
@@ -90,38 +113,73 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
      * Initialize numeric-sampler and the size.
      *
      * @access  public
-     * @param   \Hoa\Test\Sampler  $sampler    Numeric-sampler.
-     * @param   int                $n          Size.
      * @return  void
      */
-    public function __construct ( \Hoa\Test\Sampler $sampler, $n = 0 ) {
+    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+                                                           $rootRuleName = null,
+                                                           $n            = 7,
+                                  \Hoa\Test\Sampler        $sampler      = null,
+                                  \Hoa\Regex\Visitor\Visit $tokenSampler = null ) {
 
-        $this->_sampler = $sampler;
+        parent::__construct(
+            $grammar,
+            $rootRuleName,
+            $sampler      ?: $sampler = new \Hoa\Test\Sampler\Random(),
+            $tokenSampler ?: new \Hoa\Regex\Visitor\Isotropic($sampler)
+        );
+        $this->_rootRule = $this->getRuleAst($this->_rootRuleName);
         $this->setSize($n);
 
         return;
     }
 
-    public function generate ( \Hoa\Visitor\Element $element,
-                               &$handle = null, $eldnah = null ) {
+    public function current ( ) {
 
-        $this->_trace = array();
-        $closeRule    = new Trace\RuleExit($element,  0, array());
-        $openRule     = new Trace\RuleEntry($element, 0, array($closeRule));
-        $this->_todo  = array($closeRule, $openRule);
+        return $this->_current;
+    }
 
-        while(null !== $this->unfold()) {
+    public function key ( ) {
 
-            $this->printTrace();
+        return $this->_key;
+    }
+
+    public function next ( ) {
+
+        return;
+    }
+
+    public function rewind ( ) {
+
+        unset($this->_trace);
+        unset($this->_todo);
+        $this->_key     = -1;
+        $this->_current = null;
+        $this->_trace   = array();
+        $closeRule      = new Trace\RuleExit($this->_rootRule,  0, array());
+        $openRule       = new Trace\RuleEntry($this->_rootRule, 0, array($closeRule));
+        $this->_todo    = array($closeRule, $openRule);
+
+        return;
+    }
+
+    public function valid ( ) {
+
+        if(null !== $this->_current) {
 
             if(null === $lastCP = $this->backtrack($this->_trace))
-                return;
+                return false;
 
             $this->_trace = $lastCP['trace'];
             $this->_todo  = $lastCP['todo'];
         }
 
-        return;
+        if(true !== $this->unfold())
+            return false;
+
+        $this->_current = $this->printTrace();
+        ++$this->_key;
+
+        return true;
     }
 
     public function unfold ( ) {
@@ -191,23 +249,22 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
 
     public function printTrace ( ) {
 
-        echo '>>> ';
+        $out   = null;
+        $_skip = $this->getToken('skip');
+        $skip  = $_skip['ast'];
 
         foreach($this->_trace as $trace)
             if(   $trace instanceof \Hoa\Visitor\Element
                && 'token' == $trace->getId())
-                echo $this->sample($trace) . ' ';
+                $out .= $this->sample($trace) .
+                        $skip->accept($this->_tokenSampler);
 
-        echo "\n";
-
-        return;
+        return $out;
     }
 
     public function sample ( \Hoa\Visitor\Element $element ) {
 
-        $token = $this->getMeta()->getToken(
-            $element->getValueValue()
-        );
+        $token = $this->getToken($element->getValueValue());
 
         if(null === $token)
             throw new Exception(
@@ -215,7 +272,7 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
                 '(Clue: the token %s does not exist).',
                 1, $element->getValueValue());
 
-        return $token['ast']->accept($this->getMeta()->getTokenSampler());
+        return $token['ast']->accept($this->_tokenSampler);
     }
 
     /**
@@ -337,7 +394,7 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
               break;
 
             case '#named':
-                $rule = $this->getMeta()->getRule(
+                $rule = $this->getRule(
                     $element->getChild(0)->getValueValue()
                 );
 
@@ -395,32 +452,6 @@ class BoundedExaustive implements \Hoa\Visitor\Visit {
     public function getSize ( ) {
 
         return $this->_n;
-    }
-
-    /**
-     * Set meta visitor.
-     *
-     * @access  public
-     * @param   \Hoa\Compiler\Visitor\Meta  $meta    Meta visitor.
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function setMeta ( Meta $meta ) {
-
-        $old         = $meta;
-        $this->_meta = $meta;
-
-        return $old;
-    }
-
-    /**
-     * Get meta visitor.
-     *
-     * @access  public
-     * @return  \Hoa\Compiler\Visitor\Meta
-     */
-    public function getMeta ( ) {
-
-        return $this->_meta;
     }
 }
 

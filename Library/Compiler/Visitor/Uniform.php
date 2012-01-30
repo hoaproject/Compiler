@@ -91,7 +91,14 @@ class          Uniform
      *
      * @var \Hoa\Compiler\Visitor\Uniform int
      */
-    protected $_n       = 0;
+    protected $_n          = 0;
+
+    /**
+     * Pre-compute.
+     *
+     * @var \Hoa\Compiler\Visitor\UniformPrecompute object
+     */
+    protected $_precompute = null;
 
 
 
@@ -113,13 +120,9 @@ class          Uniform
             $sampler      ?: $sampler = new \Hoa\Test\Sampler\Random(),
             $tokenSampler ?: new \Hoa\Regex\Visitor\Isotropic($sampler)
         );
-        $this->_rootRule = $this->getRuleAst($this->_rootRuleName);
+        $this->_rootRule   = $this->getRuleAst($this->_rootRuleName);
+        $this->_precompute = new UniformPreCompute($n, $this);
         $this->setSize($n);
-
-        $precompute = new UniformPreCompute($n, $this);
-
-        foreach($this->_rules as $i => $rule)
-            $precompute->visit($rule['ast']);
 
         return;
     }
@@ -247,6 +250,12 @@ class          Uniform
 
         $old      = $this->_n;
         $this->_n = $n;
+
+        $this->_precompute->setSize($n);
+
+        foreach($this->_rules as $i => $rule)
+            $this->_precompute->visit($rule['ast']);
+
 
         return $old;
     }

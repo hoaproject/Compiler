@@ -419,7 +419,6 @@ class Parser {
 
             if($trace instanceof Rule\Entry) {
 
-
                 $ruleName  = $trace->getRule();
                 $rule      = $this->_rules[$ruleName];
                 $nextTrace = $this->_trace[$i + 1];

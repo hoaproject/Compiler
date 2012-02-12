@@ -424,7 +424,7 @@ class Parser {
                 $nextTrace = $this->_trace[$i + 1];
 
                 // Optmization: skip empty trace sequence.
-                if(    $nextTrace instanceof Rule\Ekzit
+                if(   $nextTrace instanceof Rule\Ekzit
                    && $ruleName == $nextTrace->getRule()) {
 
                     $i += 2;

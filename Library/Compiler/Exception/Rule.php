@@ -51,10 +51,8 @@ namespace Hoa\Compiler\Exception {
  * Class \Hoa\Compiler\Exception\FinalStateHasNotBeenReached.
  *
  * Extending the \Hoa\Compiler\Exception class.
- * Is used when analyzing grammar rules, to display the errors in the rules
- * (rule parsing error, undefined rules, undefined tokens, empty rule set…).
  *
- * @author     Frédéric Dadeau <frederic.dadeau@lifc.univ-fcomte.fr>
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2012 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License

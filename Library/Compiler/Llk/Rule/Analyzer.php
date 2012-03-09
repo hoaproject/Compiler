@@ -202,7 +202,8 @@ class Analyzer {
                 $buildNode = false;
             }
 
-            $rule = $this->rule($nodeId);
+            $pNodeId = $nodeId;
+            $rule    = $this->rule($pNodeId);
 
             if(null === $rule)
                 throw new \Hoa\Compiler\Exception(
@@ -210,9 +211,6 @@ class Analyzer {
 
             $zeRule = $this->_createdRules[$rule];
             $zeRule->setName($key);
-
-            if(null !== $nodeId)
-                $zeRule->setNodeId($nodeId);
 
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;
@@ -249,6 +247,11 @@ class Analyzer {
         if(null === $rule)
             return null;
 
+        if(null === $nNodeId && null !== $pNodeId)
+            $this->_createdRules[$rule]->setNodeId($pNodeId);
+        elseif(null !== $nNodeId)
+            $this->_createdRules[$rule]->setNodeId($nNodeId);
+
         $content[] = $rule;
         $others    = false;
 
@@ -258,19 +261,25 @@ class Analyzer {
             $this->consumeToken();
             $others   = true;
             $nNodeId  = null;
-            $r1       = $this->concatenation($nnNodeId);
+            $rule     = $this->concatenation($nNodeId);
 
-            if(null === $r1)
+            if(null === $rule)
                 return null;
 
-            $content[] = $r1;
+            if(null === $nNodeId && null !== $pNodeId)
+                $this->_createdRules[$rule]->setNodeId($pNodeId);
+            elseif(null !== $nNodeId)
+                $this->_createdRules[$rule]->setNodeId($nNodeId);
+
+            $content[] = $rule;
         }
 
         if(false === $others)
             return $rule;
 
         $name                       = count($this->_createdRules) + 1;
-        $this->_createdRules[$name] = new Choice($name, $content, $pNodeId);
+        $this->_createdRules[$name] = new Choice($name, $content, null);
+        $pNodeId                    = null;
 
         return $name;
     }
@@ -285,9 +294,8 @@ class Analyzer {
 
         $content = array();
 
-        // repeat() …
-        $nNodeId = null;
-        $rule    = $this->repetition($nNodeId);
+        // repetition() …
+        $rule    = $this->repetition($pNodeId);
 
         if(null === $rule)
             return null;
@@ -295,32 +303,21 @@ class Analyzer {
         $content[] = $rule;
         $others    = false;
 
-        // … repeat()*
-        $nnNodeId = null;
-        while(null !== $r1 = $this->repetition($nnNodeId)) {
+        // … repetition()*
+        while(null !== $r1 = $this->repetition($pNodeId)) {
 
             $content[] = $r1;
             $others    = true;
-
-            if(null !== $nnNodeId)
-                $nNodeId = $nnNodeId;
-
-            $nnNodeId  = null;
         }
 
-        if(false === $others)
+        if(false === $others && null === $pNodeId)
             return $rule;
-
-        if(null === $nNodeId)
-            $nNodeId = $pNodeId;
-        else
-            $pNodeId = $nNodeId;
 
         $name                       = count($this->_createdRules) + 1;
         $this->_createdRules[$name] = new Concatenation(
             $name,
             $content,
-            $nNodeId
+            null
         );
 
         return $name;
@@ -336,8 +333,7 @@ class Analyzer {
     protected function repetition ( &$pNodeId ) {
 
         // simple() …
-        $nNodeId = null;
-        $content = $this->simple($nNodeId);
+        $content = $this->simple($pNodeId);
 
         if(null === $content)
             return null;
@@ -387,13 +383,9 @@ class Analyzer {
         // … <node>?
         if('node' == $this->getCurrentToken()) {
 
-            if(null === $nNodeId)
-                $nNodeId = $this->getCurrentToken('value');
-
+            $pNodeId = $this->getCurrentToken('value');
             $this->consumeToken();
         }
-
-        $pNodeId = $nNodeId;
 
         if(!isset($min))
             return $content;
@@ -409,7 +401,7 @@ class Analyzer {
             $min,
             $max,
             $content,
-            $nNodeId
+            null
         );
 
         return $name;
@@ -426,8 +418,7 @@ class Analyzer {
         if('capturing_' == $this->getCurrentToken()) {
 
             $this->consumeToken();
-            $nNodeId = $pNodeId;
-            $rule    = $this->choice($nNodeId);
+            $rule    = $this->choice($pNodeId);
 
             if(null === $rule)
                 return null;
@@ -466,7 +457,7 @@ class Analyzer {
                     3, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $this->_createdRules[$name] = new Token($value, $regex, $pNodeId);
+            $this->_createdRules[$name] = new Token($value, $regex, null);
             $this->consumeToken();
 
             return $name;
@@ -498,7 +489,7 @@ class Analyzer {
                     4, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $token                      = new Token($value, $regex, $pNodeId);
+            $token                      = new Token($value, $regex, null);
             $token->setKept(true);
             $this->_createdRules[$name] = $token;
             $this->consumeToken();
@@ -523,7 +514,7 @@ class Analyzer {
                 $this->_createdRules[$name] = new Concatenation(
                     $name,
                     array($value),
-                    $pNodeId
+                    null
                 );
             }
             else

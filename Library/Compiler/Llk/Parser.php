@@ -411,7 +411,8 @@ class Parser {
     protected function _buildTree ( $i = 0, &$children = array(), &$pArity = 0,
                                     &$pTree = null, $repeat = false ) {
 
-        $max = count($this->_trace);
+        static $depth = 0;
+        $max          = count($this->_trace);
 
         while($i < $max) {
 
@@ -432,6 +433,7 @@ class Parser {
                     continue;
                 }
 
+                ++$depth;
                 ++$pArity;
                 $repetition = $rule instanceof Rule\Repetition;
 
@@ -447,6 +449,8 @@ class Parser {
                     $repetition
                 );
 
+                --$depth;
+
                 if(true === $repetition) {
 
                     $pArity += $nArity - 1;
@@ -458,13 +462,17 @@ class Parser {
                     if(null !== $pTree)
                         $children[] = $pTree;
 
-                    if(true === $repeat)
+                    if(true === $repeat) {
+
                         for($_j = $j = count($children) - 1; $j >= 0; --$j) {
 
-                            if(null === $children[$j])
+                            $child = $children[$j];
+
+                            if(null === $child)
                                 break;
 
-                            if($id === $children[$j]->getId()) {
+                            if(   $id    === $child->getId()
+                               && $depth === $child->getDepthInTrace()) {
 
                                 $handle = $children[$j];
 
@@ -472,15 +480,15 @@ class Parser {
                                     $children[$h] = $children[$h + 1];
 
                                 $children[$_j] = $handle;
-                                $pTree = null;
+                                $pTree         = null;
 
                                 continue 2;
                             }
                         }
+                    }
 
                     $pTree = new TreeNode($id);
-
-                    continue;
+                    $pTree->setDepthInTrace($depth);
                 }
                 elseif(null === $pTree)
                     if(true === $repetition)
@@ -490,7 +498,9 @@ class Parser {
 
                 $marker = array();
 
-                for($j = $pTree->getChildrenNumber(); $j < $nArity; ++$j) {
+                for($j = $pTree->getChildrenNumber();
+                    $j < $nArity && !empty($children);
+                    ++$j) {
 
                     $pop = array_pop($children);
 
@@ -498,6 +508,7 @@ class Parser {
 
                         $marker[] = $pop;
                         --$j;
+
                         continue;
                     }
 
@@ -538,10 +549,12 @@ class Parser {
                     $pTree      = null;
                 }
 
-                $children[] = new TreeNode('token', array(
+                $child      = new TreeNode('token', array(
                     'token' => $trace->getName(),
                     'value' => $trace->getValue()
                 ));
+                $child->setDepthInTrace($depth);
+                $children[] = $child;
                 ++$i;
             }
         }

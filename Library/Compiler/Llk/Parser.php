@@ -489,6 +489,9 @@ class Parser {
 
                     $pTree = new TreeNode($id);
                     $pTree->setDepthInTrace($depth);
+
+                    if(1 >= $nArity)
+                        continue;
                 }
                 elseif(null === $pTree)
                     if(true === $repetition)
@@ -555,6 +558,7 @@ class Parser {
                 ));
                 $child->setDepthInTrace($depth);
                 $children[] = $child;
+                ++$pArity;
                 ++$i;
             }
         }

@@ -190,6 +190,17 @@ class TreeNode implements \Hoa\Visitor\Element {
     }
 
     /**
+     * Check if the node represents a token or not.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function isToken ( ) {
+
+        return null !== $this->_value;
+    }
+
+    /**
      * Prepend a child.
      *
      * @access  public

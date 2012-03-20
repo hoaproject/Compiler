@@ -63,6 +63,11 @@ abstract class Rule {
      */
     protected $_content = null;
 
+    /**
+     * Node ID.
+     *
+     * @var \Hoa\Compiler\Llk\Rule string
+     */
     protected $_nodeId  = null;
 
 

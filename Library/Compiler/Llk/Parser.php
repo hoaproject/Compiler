@@ -39,6 +39,11 @@ namespace {
 from('Hoa')
 
 /**
+ * \Hoa\Compiler\Exception
+ */
+-> import('Compiler.Exception.~')
+
+/**
  * \Hoa\Compiler\Exception\UnexpectedToken
  */
 -> import('Compiler.Exception.UnexpectedToken')
@@ -217,9 +222,13 @@ class Parser {
         if(false === $tree)
             return true;
 
-        $this->_tree = $this->_buildTree();
+        $tree = $this->_buildTree();
 
-        return $this->_tree;
+        if(!($tree instanceof TreeNode))
+            throw new \Hoa\Compiler\Exception(
+                'Parsing error: cannot build AST, the trace is corrupted.', 0);
+
+        return $this->_tree = $tree;
     }
 
     /**

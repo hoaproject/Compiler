@@ -392,24 +392,14 @@ class Parser {
 
     /**
      * Build AST from trace.
-     * Walk through the trace iteratively and recursively. During the walk, we
-     * collect children. When we exit a rule which has an ID, we build a new
-     * node and push (from left or from right according to priority) missing
-     * children thanks to computed arity. That's the main principle. Have fun
-     * reading :-).
+     * Walk through the trace iteratively and recursively.
      *
      * @access  protected
-     * @param   int                         $i           Current trace.
-     * @param   array                       $children    Collected children.
-     * @param   int                         $pArity      Current rule arity.
-     * @param   \Hoa\Compiler\Llk\TreeNode  $pTree       Current tree.
-     * @param   bool                        $repeat      Whether the level is
-     *                                                   first child of a
-     *                                                   repetition.
+     * @param   int      $i           Current trace index.
+     * @param   array    $children    Collected children.
      * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    protected function _buildTree ( $i = 0, &$children = array(), &$pArity = 0,
-                                    &$pTree = null, $repeat = false ) {
+    protected function _buildTree ( $i = 0, &$children = array() ) {
 
         static $depth = 0;
         $max          = count($this->_trace);
@@ -422,6 +412,7 @@ class Parser {
 
                 $ruleName  = $trace->getRule();
                 $rule      = $this->_rules[$ruleName];
+                $isRule    = false === is_numeric($ruleName);
                 $nextTrace = $this->_trace[$i + 1];
                 $id        = $rule->getNodeId();
 
@@ -434,106 +425,51 @@ class Parser {
                 }
 
                 ++$depth;
-                ++$pArity;
-                $repetition = $rule instanceof Rule\Repetition;
 
-                if(true === $repetition)
-                    $children[] = null;
+                if(true === $isRule)
+                    $children[] = $ruleName;
 
-                $nArity     = 0;
-                $i          = $this->_buildTree(
-                    $i + 1,
-                    $children,
-                    $nArity,
-                    $pTree,
-                    $repetition
-                );
+                if(null !== $id)
+                    $children[] = $id;
 
+                $i = $this->_buildTree($i + 1, $children);
                 --$depth;
 
-                if(true === $repetition) {
+                if(false === $isRule)
+                    continue;
 
-                    $pArity += $nArity - 1;
-                    $nArity  = 1;
-                }
+                $handle = array();
+                $cId    = null;
 
-                if(null !== $id) {
-
-                    if(null !== $pTree)
-                        $children[] = $pTree;
-
-                    if(true === $repeat) {
-
-                        for($_j = $j = count($children) - 1; $j >= 0; --$j) {
-
-                            $child = $children[$j];
-
-                            if(null === $child)
-                                break;
-
-                            if(   $id    === $child->getId()
-                               && $depth === $child->getDepthInTrace()) {
-
-                                $handle = $children[$j];
-
-                                for($h = $j; $h < $_j; ++$h)
-                                    $children[$h] = $children[$h + 1];
-
-                                $children[$_j] = $handle;
-                                $pTree         = null;
-
-                                continue 2;
-                            }
-                        }
-                    }
-
-                    $pTree = new TreeNode($id);
-                    $pTree->setDepthInTrace($depth);
-
-                    if(1 >= $nArity)
-                        continue;
-                }
-                elseif(null === $pTree)
-                    if(true === $repetition)
-                        $pTree = array_pop($children);
-                    else
-                        continue;
-
-                $marker = array();
-
-                for($j = $pTree->getChildrenNumber();
-                    $j < $nArity && !empty($children);
-                    ++$j) {
+                do {
 
                     $pop = array_pop($children);
 
-                    if(null === $pop) {
+                    if(true === is_object($pop))
+                        $handle[] = $pop;
+                    elseif('#' == $pop[0])
+                        $cId = $pop;
+                    elseif($ruleName == $pop)
+                        break;
 
-                        $marker[] = $pop;
-                        --$j;
+                } while(null !== $pop);
 
-                        continue;
-                    }
+                if(null === $cId) {
 
-                    $pTree->prependChild($pop);
+                    for($j = count($handle) - 1; $j >= 0; --$j)
+                        $children[] = $handle[$j];
+
+                    continue;
                 }
 
-                foreach($marker as $m)
-                    $children[] = $m;
+                $cTree = new TreeNode($cId);
+                $cTree->setDepthInTrace($depth);
 
-                if(true === $repetition)
-                    for($_j = $j = count($children) - 1; $j >= 0; --$j) {
+                foreach($handle as $child)
+                    $cTree->prependChild($child);
 
-                        if(null !== $children[$j])
-                            continue;
+                $children[] = $cTree;
 
-                        for($h = $j; $h < $_j; ++$h)
-                            $children[$h] = $children[$h + 1];
-
-                        array_pop($children);
-
-                        break;
-                    }
             }
             elseif($trace instanceof Rule\Ekzit)
                 return $i + 1;
@@ -546,32 +482,17 @@ class Parser {
                     continue;
                 }
 
-                if(null !== $pTree) {
-
-                    $children[] = $pTree;
-                    $pTree      = null;
-                }
-
                 $child      = new TreeNode('token', array(
                     'token' => $trace->getName(),
                     'value' => $trace->getValue()
                 ));
                 $child->setDepthInTrace($depth);
                 $children[] = $child;
-                ++$pArity;
                 ++$i;
             }
         }
 
-        foreach($children as $child) {
-
-            if(null === $child)
-                continue;
-
-            $pTree->appendChild($child);
-        }
-
-        return $pTree;
+        return $children[0];
     }
 
     /**

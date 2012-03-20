@@ -225,6 +225,12 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
+        foreach($tokens as $space => $_tokens)
+            if(!isset($_tokens['skip']))
+                throw new \Hoa\Compiler\Exception(
+                    'Token %s:skip does not exit, you must specify one.',
+                    1, $space);
+
         $ruleAnalyzer = new Rule\Analyzer($tokens);
         $rules        = $ruleAnalyzer->analyzeRules($rules);
 

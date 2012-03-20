@@ -241,15 +241,17 @@ class Analyzer {
         $content = array();
 
         // concatenation() …
-        $nNodeId = null;
+        $nNodeId = $pNodeId;
         $rule    = $this->concatenation($nNodeId);
 
-        if(null === $rule)
-            return null;
+        if(null === $rule) {
 
-        if(null === $nNodeId && null !== $pNodeId)
-            $this->_createdRules[$rule]->setNodeId($pNodeId);
-        elseif(null !== $nNodeId)
+            $pNodeId = null;
+
+            return null;
+        }
+
+        if(null !== $nNodeId)
             $this->_createdRules[$rule]->setNodeId($nNodeId);
 
         $content[] = $rule;
@@ -260,26 +262,25 @@ class Analyzer {
 
             $this->consumeToken();
             $others   = true;
-            $nNodeId  = null;
+            $nNodeId  = $pNodeId;
             $rule     = $this->concatenation($nNodeId);
 
             if(null === $rule)
                 return null;
 
-            if(null === $nNodeId && null !== $pNodeId)
-                $this->_createdRules[$rule]->setNodeId($pNodeId);
-            elseif(null !== $nNodeId)
+            if(null !== $nNodeId)
                 $this->_createdRules[$rule]->setNodeId($nNodeId);
 
             $content[] = $rule;
         }
+
+        $pNodeId = null;
 
         if(false === $others)
             return $rule;
 
         $name                       = count($this->_createdRules) + 1;
         $this->_createdRules[$name] = new Choice($name, $content, null);
-        $pNodeId                    = null;
 
         return $name;
     }

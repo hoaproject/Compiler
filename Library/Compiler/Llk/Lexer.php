@@ -79,7 +79,7 @@ class Lexer {
      * @return  array
      * @throw   \Hoa\Compiler\Exception\UnrecognizedToken
      */
-     public function lexMe ( $text, Array $tokens ) {
+    public function lexMe ( $text, Array $tokens ) {
 
         $_text             = $text;
         $offset            = 0;
@@ -144,23 +144,17 @@ class Lexer {
 
             $out = $this->matchesLexem($text, $lexeme, $regexp);
 
-            if(   $lexeme !== 'skip'
-               && null    !== $out) {
+            if(null !== $out) {
 
-                $out['keep']       = true;
                 $this->_lexerState = $nextState;
+
+                if('skip' !== $lexeme)
+                    $out['keep'] = true;
+                else
+                    $out['keep'] = false;
 
                 return $out;
             }
-        }
-
-        $out = $this->matchesLexem($text, $lexeme, $tokenArray['skip']);
-
-        if(null !== $out) {
-
-            $out['keep'] = false;
-
-            return $out;
         }
 
         return null;

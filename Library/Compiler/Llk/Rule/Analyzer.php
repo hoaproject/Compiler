@@ -210,7 +210,9 @@ class Analyzer {
                     'Error while parsing rule %s.', 1, $key);
 
             $zeRule = $this->_createdRules[$rule];
-            $zeRule->setName($key);
+
+            if(!($zeRule instanceof Token))
+                $zeRule->setName($key);
 
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;
@@ -311,7 +313,7 @@ class Analyzer {
             $others    = true;
         }
 
-        if(false === $others && null === $pNodeId)
+        if(false === $others)
             return $rule;
 
         $name                       = count($this->_createdRules) + 1;

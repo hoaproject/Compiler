@@ -250,11 +250,10 @@ class Parser {
                 $ruleName = $rule->getRule();
                 $next     = $rule->getData();
                 $zeRule   = $this->_rules[$ruleName];
-
                 $out      = $this->_parse($zeRule, $next);
 
                 if(false === $out)
-                    if(null === $this->backtrack())
+                    if(false === $this->backtrack())
                         return null;
             }
         }

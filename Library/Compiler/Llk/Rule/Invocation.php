@@ -52,21 +52,21 @@ abstract class Invocation {
     /**
      * Rule.
      *
-     * @var \Hoa\Compiler\Llk\Rule object
+     * @var \Hoa\Compiler\Llk\Rule\Invocation string
      */
     protected $_rule = null;
 
     /**
      * Data.
      *
-     * @var \Hoa\Compiler\Llk\Rule object
+     * @var \Hoa\Compiler\Llk\Rule\Invocation mixed
      */
     protected $_data = null;
 
     /**
      * Piece of todo sequence.
      *
-     * @var \Hoa\Compiler\Llk\Rule object
+     * @var \Hoa\Compiler\Llk\Rule\Invocation array
      */
     protected $_todo = null;
 

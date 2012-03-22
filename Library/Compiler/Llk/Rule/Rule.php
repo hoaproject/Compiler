@@ -127,6 +127,13 @@ abstract class Rule {
         return $this->_content;
     }
 
+    /**
+     * Set node ID.
+     *
+     * @access  public
+     * @param   string  $nodeId    Node ID.
+     * @return  string
+     */
     public function setNodeId ( $nodeId ) {
 
         $old           = $this->_nodeId;
@@ -135,6 +142,12 @@ abstract class Rule {
         return $old;
     }
 
+    /**
+     * Get node ID.
+     *
+     * @access  public
+     * @return  string
+     */
     public function getNodeId ( ) {
 
         return $this->_nodeId;

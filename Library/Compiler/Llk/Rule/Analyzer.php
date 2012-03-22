@@ -313,7 +313,7 @@ class Analyzer {
             $others    = true;
         }
 
-        if(false === $others)
+        if(false === $others && null === $pNodeId)
             return $rule;
 
         $name                       = count($this->_createdRules) + 1;

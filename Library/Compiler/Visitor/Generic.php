@@ -75,19 +75,19 @@ class Generic {
      *
      * @var \Hoa\Compiler\Visitor\Generic array
      */
-    protected $_tokens          = array();
+    protected $_tokens       = array();
 
     /**
      * Grammar rules.
      *
      * @var \Hoa\Compiler\Visitor\Generic array
      */
-    protected $_rules           = array();
+    protected $_rules        = array();
 
     /**
      * Grammar.
      *
-     * @var \Hoa\Compiler\Llk object
+     * @var \Hoa\Compiler\Llk\Parser object
      */
     protected $_grammar      = null;
 
@@ -116,13 +116,13 @@ class Generic {
 
     /**
      * @access  public
-     * @param   \Hoa\Compiler\Llk         $grammar         Grammar.
+     * @param   \Hoa\Compiler\Llk\Parser  $grammar         Grammar.
      * @param   string                    $rootRuleName    Root rule name.
      * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
      * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+    public function __construct ( \Hoa\Compiler\Llk\Parser $grammar,
                                                            $rootRuleName = null,
                                   \Hoa\Test\Sampler        $sampler      = null,
                                   \Hoa\Regex\Visitor\Visit $tokenSampler = null ) {
@@ -133,7 +133,7 @@ class Generic {
         $this->_tokenSampler = $tokenSampler;
 
         $llk   = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
-            'hoa://Library/Compiler/Llk.pp'
+            'hoa://Library/Compiler/Llk/Llk.pp'
         ));
         $regex = \Hoa\Compiler\Llk::load(new \Hoa\File\Read(
             'hoa://Library/Regex/Grammar.pp'
@@ -158,12 +158,12 @@ class Generic {
 
         foreach($this->_grammar->getRules() as $name => $rule) {
 
-            if('#' == $name[0])
-                $name = substr($name, 1);
+            if(true === is_numeric($name))
+                continue;
 
             $this->_rules[$name] = array(
                 'value' => $rule,
-                'ast'   => $llk->parse($rule)
+                'ast'   => $llk->parse($rule->getPPRepresentation())
             );
         }
 

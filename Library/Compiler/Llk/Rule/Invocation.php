@@ -54,21 +54,36 @@ abstract class Invocation {
      *
      * @var \Hoa\Compiler\Llk\Rule\Invocation string
      */
-    protected $_rule = null;
+    protected $_rule         = null;
 
     /**
      * Data.
      *
      * @var \Hoa\Compiler\Llk\Rule\Invocation mixed
      */
-    protected $_data = null;
+    protected $_data         = null;
 
     /**
      * Piece of todo sequence.
      *
      * @var \Hoa\Compiler\Llk\Rule\Invocation array
      */
-    protected $_todo = null;
+    protected $_todo         = null;
+
+    /**
+     * Depth in the trace.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Invocation int
+     */
+    protected $_depth        = -1;
+
+    /**
+     * Whether the rule is transitional or not (i.e. not declared in the grammar
+     * but created by the analyzer).
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Invocation bool
+     */
+    protected $_transitional = false;
 
 
 
@@ -76,16 +91,20 @@ abstract class Invocation {
      * Constructor.
      *
      * @access  public
-     * @param   string  $rule    Rule name.
-     * @param   mixed   $data    Data.
-     * @param   array   $todo    Todo.
+     * @param   string  $rule     Rule name.
+     * @param   mixed   $data     Data.
+     * @param   array   $todo     Todo.
+     * @param   int     $depth    Depth.
      * @return  void
      */
-    public function __construct ( $rule, $data, Array $todo = null ) {
+    public function __construct ( $rule, $data, Array $todo = null,
+                                  $depth = -1 ) {
 
-        $this->_rule = $rule;
-        $this->_data = $data;
-        $this->_todo = $todo;
+        $this->_rule         = $rule;
+        $this->_data         = $data;
+        $this->_todo         = $todo;
+        $this->_depth        = $depth;
+        $this->_transitional = is_numeric($rule);
 
         return;
     }
@@ -121,6 +140,43 @@ abstract class Invocation {
     public function getTodo ( ) {
 
         return $this->_todo;
+    }
+
+    /**
+     * Set depth in trace.
+     *
+     * @access  public
+     * @parma   int  $depth    Depth.
+     * @return  int
+     */
+    public function setDepth ( $depth) {
+
+        $old          = $this->_depth;
+        $this->_depth = $depth;
+
+        return $old;
+    }
+
+    /**
+     * Get depth in trace.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function getDepth ( ) {
+
+        return $this->_depth;
+    }
+
+    /**
+     * Check whether the rule is transitional or not.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function isTransitional ( ) {
+
+        return $this->_transitional;
     }
 }
 

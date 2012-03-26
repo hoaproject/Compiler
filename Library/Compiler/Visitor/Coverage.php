@@ -49,19 +49,24 @@ from('Hoa')
 -> import('Compiler.Visitor.Generic')
 
 /**
- * \Hoa\Compiler\Visitor\Trace\RuleEntry
+ * \Hoa\Compiler\Llk\Rule\Entry
  */
--> import('Compiler.Visitor.Trace.RuleEntry')
+-> import('Compiler.Llk.Rule.Entry')
 
 /**
- * \Hoa\Compiler\Visitor\Trace\RuleExit
+ * \Hoa\Compiler\Llk\Rule\Ekzit
  */
--> import('Compiler.Visitor.Trace.RuleExit')
+-> import('Compiler.Llk.Rule.Ekzit')
 
 /**
  * \Hoa\Visitor\Visit
  */
 -> import('Visitor.Visit')
+
+/**
+ * \Hoa\Iterator
+ */
+-> import('Iterator.~')
 
 /**
  * \Hoa\Test\Sampler\Random
@@ -80,9 +85,10 @@ namespace Hoa\Compiler\Visitor {
 /**
  * Class \Hoa\Compiler\Visitor\Coverage.
  *
- * Generate a data of size n that can be matched by a LL(k) grammar.
+ * Generate data by covering all branches.
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @copyright  Copyright © 2007-2012 Ivan Enderlin.
  * @license    New BSD License
  */
@@ -90,18 +96,63 @@ namespace Hoa\Compiler\Visitor {
 class          Coverage
     extends    Generic
     implements \Hoa\Visitor\Visit,
-               \Iterator {
+               \Hoa\Iterator {
 
-    protected $_rootRule = null;
+    /**
+     * Root rule.
+     *
+     * @var \Hoa\Visitor\Element object
+     */
+    protected $_rootRule     = null;
 
+    /**
+     * Todo trace.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
     protected $_todo         = null;
+
+    /**
+     * Trace.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
     protected $_trace        = null;
+
+    /**
+     * Tests.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
     protected $_tests        = null;
+
+    /**
+     * Covered rules matrix.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
     protected $_coveredRules = null;
 
-    protected $_key = -1;
-    protected $_current = null;
-    protected $_id = null;
+    /**
+     * Current key of the iterator.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
+    protected $_key          = -1;
+
+    /**
+     * Current value of the iterator.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage array
+     */
+    protected $_current      = null;
+
+    /**
+     * Current ID of the covered rules.
+     *
+     * @var \Hoa\Compiler\Visitor\Coverage int
+     */
+    protected $_id           = null;
 
 
 
@@ -109,6 +160,10 @@ class          Coverage
      * Initialize numeric-sampler and the size.
      *
      * @access  public
+     * @param   \Hoa\Compiler\Llk         $grammar         Grammar.
+     * @param   string                    $rootRuleName    Root rule name.
+     * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
+     * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
     public function __construct ( \Hoa\Compiler\Llk        $grammar,
@@ -129,21 +184,45 @@ class          Coverage
         return;
     }
 
+    /**
+     * Get the current value of the iterator.
+     *
+     * @access  public
+     * @return  string
+     */
     public function current ( ) {
 
         return $this->_current;
     }
 
+    /**
+     * Get the current key of the iterator.
+     *
+     * @access  public
+     * @return  int
+     */
     public function key ( ) {
 
         return $this->_key;
     }
 
+    /**
+     * Advance the pointer to the next position in the iterator.
+     *
+     * @access  public
+     * @return  void
+     */
     public function next ( ) {
 
         return;
     }
 
+    /**
+     * Rewind the pointer of the iterator.
+     *
+     * @access  public
+     * @return  void
+     */
     public function rewind ( ) {
 
         if(!empty($this->_coveredRules)) {
@@ -168,20 +247,27 @@ class          Coverage
         return;
     }
 
+    /**
+     * Check if the current value is valid.
+     *
+     * @access  public
+     * @return  bool
+     */
     public function valid ( ) {
 
         if(!in_array(0, $this->_coveredRules[$this->_id]))
             return false;
 
         $this->_trace = array();
-        $this->_todo  = array(
-            new Trace\RuleEntry($this->_rootRule, $this->_coveredRules, 0)
-        );
+        $this->_todo  = array(new \Hoa\Compiler\Llk\Rule\Entry(
+            $this->_rootRule,
+            $this->_coveredRules
+        ));
         $out          = $this->unfold();
 
         if(null !== $out) {
 
-            $this->_current = $this->printTrace();
+            $this->_current = $this->generate();
             ++$this->_key;
             $this->_tests[] = $this->_trace;
             // Reset rule coverage.
@@ -196,13 +282,19 @@ class          Coverage
         return false;
     }
 
-    public function unfold ( ) {
+    /**
+     * Unfold a solution.
+     *
+     * @access  protected
+     * @return  bool
+     */
+    protected function unfold ( ) {
 
         while(0 < count($this->_todo)) {
 
             $rule = array_pop($this->_todo);
 
-            if($rule instanceof Trace\RuleExit) {
+            if($rule instanceof \Hoa\Compiler\Llk\Rule\Ekzit) {
 
                 $this->_trace[] = $rule;
                 $this->updateCoverage($rule);
@@ -217,17 +309,9 @@ class          Coverage
                     $this->_tests
                 ));
 
-                if(null == $out) {
-
-                    $lastCP = $this->backtrack($this->_trace);
-
-                    if(null == $lastCP)
+                if(   null === $out
+                   && true !== $this->backtrack())
                         return null;
-
-                    $this->_trace        = $lastCP['trace'];
-                    $this->_todo         = $lastCP['todo'];
-                    $this->_coveredRules = $lastCP['covered'];
-                }
                 else {
 
                     $this->_trace        = $out['trace'];
@@ -240,39 +324,49 @@ class          Coverage
         return true;
     }
 
-    public function backtrack ( $trace ) {
+    /**
+     * Backtrack the solution.
+     *
+     * @access  protected
+     * @return  bool
+     */
+    protected function backtrack ( ) {
 
         $found = false;
 
         do {
 
-            $last = array_pop($trace);
+            $last = array_pop($this->_trace);
 
-            if($last instanceof Trace\RuleEntry) {
+            if($last instanceof \Hoa\Compiler\Llk\Rule\Entry) {
 
-                $id = $last->getRule()->getId();
-
-                if(   '#alternation'    == $id
-                   && '#quantification' == $id)
-                    $found = true;
+                $id    = $last->getRule()->getId();
+                $found =    '#alternation'    == $id
+                         || '#quantification' == $id;
             }
-        } while(0 < count($trace) && false === $found);
+        } while(0 < count($this->_trace) && false === $found);
 
         if(false === $found)
-            return null;
+            return false;
 
-        $covered = $last->getData();
-        $todo    = $last->getTodo();
-        $todo[]  = new Trace\RuleEntry($last->getRule(), $covered, $todo);
-
-        return array(
-            'trace'   => $trace,
-            'todo'    => $todo,
-            'covered' => $covered
+        $this->_coveredRules = $last->getData();
+        $this->_todo         = $last->getTodo();
+        $this->_todo[]       = new \Hoa\Compiler\Llk\Rule\Entry(
+            $last->getRule(),
+            $this->_coveredRules,
+            $this->_todo
         );
+
+        return true;
     }
 
-    public function printTrace ( ) {
+    /**
+     * Generate a token.
+     *
+     * @access  protected
+     * @return  string
+     */
+    protected function generate ( ) {
 
         $out   = null;
         $_skip = $this->getToken('skip');
@@ -287,7 +381,16 @@ class          Coverage
         return $out;
     }
 
-    public function extract ( $rules, $tests, $trace ) {
+    /**
+     * Extract test from trace.
+     *
+     * @access  protected
+     * @param   array  $rules    Rules.
+     * @param   array  $tests    Tests.
+     * @param   array  $trace    Trace.
+     * @return  array
+     */
+    protected function extract ( Array $rules, Array $tests, Array $trace ) {
 
         $out = array();
 
@@ -303,14 +406,14 @@ class          Coverage
 
                     $test_i = $test[$i];
 
-                    if(    $test_i instanceof Trace\RuleEntry
+                    if(    $test_i instanceof \Hoa\Compiler\Llk\Rule\Entry
                        &&  $test_i->getRule() == $rule)
                         ++$nbOpen;
 
                     if(0 < $nbOpen)
                         $out[] = $test_i;
 
-                    if(   $test_i instanceof Trace\RuleExit
+                    if(   $test_i instanceof \Hoa\Compiler\Llk\Rule\Ekzit
                        && $test_i->getRule() == $rule) {
 
                         --$nbOpen;
@@ -332,14 +435,14 @@ class          Coverage
 
                 $test_i = $trace[$i];
 
-                if(   $test_i instanceof Trace\RuleExit
+                if(   $test_i instanceof \Hoa\Compiler\Llk\Rule\Ekzit
                    && $test_i->getRule() == $rule)
                     ++$nbClosed;
 
                 if(0 < $nbClosed)
                     $out[] = $test_i;
 
-                if(   $test_i instanceof Trace\RuleEntry
+                if(   $test_i instanceof \Hoa\Compiler\Llk\Rule\Entry
                    && $test_i->getRule() == $rule) {
 
                     --$nbClosed;
@@ -353,21 +456,6 @@ class          Coverage
         return null;
     }
 
-    public function sample ( \Hoa\Visitor\Element $element ) {
-
-        $token = $this->getToken(
-            $element->getValueValue()
-        );
-
-        if(null === $token)
-            throw new Exception(
-                'Something has failed somewhere. Good luck. ' .
-                '(Clue: the token %s does not exist).',
-                0, $element->getValueValue());
-
-        return $token['ast']->accept($this->_tokenSampler);
-    }
-
     /**
      * Visit an element.
      *
@@ -376,6 +464,7 @@ class          Coverage
      * @param   mixed                 &$handle    Handle (reference).
      * @param   mixed                 $eldnah     Handle (not reference).
      * @return  mixed
+     * @throw   \Hoa\Compiler\Visitor\Exception
      */
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
@@ -404,7 +493,11 @@ class          Coverage
 
                 if(empty($uncovered)) {
 
-                    $trace[]  = new Trace\RuleEntry($element, $covered, $todo);
+                    $trace[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $element,
+                        $covered,
+                        $todo
+                    );
                     $sequence = $this->extract(
                         $element->getChildren(),
                         $tests,
@@ -418,20 +511,27 @@ class          Coverage
 
                         $trace[] = $seq;
 
-                        if($seq instanceof Trace\RuleExit)
+                        if($seq instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
                             $rand = $seq->getData();
                     }
 
-                    $todo[] = new Trace\RuleExit($element, $rand, null);
+                    $todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit($element, $rand);
                 }
                 else {
 
                     $r       = $this->_sampler->getInteger(0, count($uncovered) - 1);
                     $rand    = $uncovered[$r];
                     $covered[$uid][$rand] = -1;
-                    $trace[] = new Trace\RuleEntry($element, $covered, $todo);
-                    $todo[]  = new Trace\RuleExit($element, $rand, null);
-                    $todo[]  = new Trace\RuleEntry(
+                    $trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $element,
+                        $covered,
+                        $todo
+                    );
+                    $todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                        $element,
+                        $rand
+                    );
+                    $todo[]  = new \Hoa\Compiler\Llk\Rule\Entry(
                         $this->flatNode($element->getChild($rand)),
                         $covered,
                         $todo
@@ -447,11 +547,11 @@ class          Coverage
 
             case '#concatenation':
                 $covered[$uid][0] = -1;
-                $trace[]          = new Trace\RuleEntry($element, 0, null);
-                $todo[]           = new Trace\RuleExit($element,  0, null);
+                $trace[] = new \Hoa\Compiler\Llk\Rule\Entry($element, 0);
+                $todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit($element, 0);
 
                 for($i = $element->getChildrenNumber() - 1; $i >= 0; --$i)
-                    $todo[] = new Trace\RuleEntry(
+                    $todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
                         $this->flatNode($element->getChild($i)),
                         0,
                         $todo
@@ -490,7 +590,11 @@ class          Coverage
                             count($already) - 1
                         )];
 
-                    $trace[]  = new Trace\RuleEntry($element, $covered, $todo);
+                    $trace[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $element,
+                        $covered,
+                        $todo
+                    );
                     $sequence = $this->extract(
                         $element->getChildren(),
                         $tests,
@@ -504,7 +608,7 @@ class          Coverage
                         foreach($sequence as $seq)
                             $trace[] = $seq;
 
-                    $todo[] = new Trace\RuleExit($element, $rand, null);
+                    $todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit($element, $rand);
                 }
                 else {
 
@@ -513,12 +617,23 @@ class          Coverage
                         count($uncovered) - 1
                     )];
                     $covered[$uid][$rand] = -1;
-                    $trace[] = new Trace\RuleEntry($element, $covered, $todo);
-                    $todo[]  = new Trace\RuleExit($element, $rand, null);
+                    $trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $element,
+                        $covered,
+                        $todo
+                    );
+                    $todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                        $element,
+                        $rand
+                    );
                     $child   = $this->flatNode($element->getChild(0));
 
                     for($i = 0; $i < $rand; ++$i)
-                        $todo[] = new Trace\RuleEntry($child, $covered, $todo);
+                        $todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                            $child,
+                            $covered,
+                            $todo
+                        );
                 }
 
                 return array(
@@ -529,9 +644,9 @@ class          Coverage
               break;
 
             case 'token':
-                $trace[] = new Trace\RuleEntry($element, 0, null);
+                $trace[] = new \Hoa\Compiler\Llk\Rule\Entry($element, 0);
                 $trace[] = $element;
-                $todo[]  = new Trace\RuleExit($element, 0, null);
+                $todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit($element, 0);
 
                 return array(
                     'trace'   => $trace,
@@ -544,8 +659,17 @@ class          Coverage
         throw new Exception('Damned…', 42);
     }
 
-    public function _visitInit ( \Hoa\Visitor\Element $element,
-                                 &$handle = null, $eldnah = null ) {
+    /**
+     * Initialize before visiting.
+     *
+     * @access  protected
+     * @param   \Hoa\Visitor\Element  $element    Element to visit.
+     * @param   mixed                 &$handle    Handle (reference).
+     * @param   mixed                 $eldnah     Handle (not reference).
+     * @return  void
+     */
+    protected function _visitInit ( \Hoa\Visitor\Element $element,
+                                    &$handle = null, $eldnah = null ) {
 
         $data              = &$element->getData();
 
@@ -637,7 +761,14 @@ class          Coverage
         return;
     }
 
-    public function updateCoverage ( Trace\RuleExit $rule ) {
+    /**
+     * Update coverage of a rule.
+     *
+     * @access  protected
+     * @param   \Hoa\Compiler\Llk\Rule\Ekzit  $rule    Rule.
+     * @return  void
+     */
+    protected function updateCoverage ( \Hoa\Compiler\Llk\Rule\Ekzit $rule ) {
 
         $Rule  = $rule->getRule();
         $child = $rule->getData();
@@ -649,7 +780,15 @@ class          Coverage
         return;
     }
 
-    public function _updateCoverage ( \Hoa\Visitor\Element $element, $child ) {
+    /**
+     * Real update coverage method.
+     *
+     * @access  protected
+     * @param   \Hoa\Visitor\Element  $element    Element.
+     * @param   int                   $child      Child number.
+     * @return  void
+     */
+    protected function _updateCoverage ( \Hoa\Visitor\Element $element, $child ) {
 
         $data = $element->getData();
         $uid  = $data['cov']['id'];
@@ -698,7 +837,15 @@ class          Coverage
         return;
     }
 
-    public function flatNode ( \Hoa\Visitor\Element $element ) {
+    /**
+     * Flat node (to simplify computing).
+     *
+     * @access  protected
+     * @param   \Hoa\Visitor\Element  $element    Element to flat.
+     * @return  \Hoa\Visitor\Element
+     * @throw   \Hoa\Compiler\Visitor\Exception
+     */
+    protected function flatNode ( \Hoa\Visitor\Element $element ) {
 
         switch($element->getId()) {
 

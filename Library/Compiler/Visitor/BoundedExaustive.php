@@ -49,19 +49,24 @@ from('Hoa')
 -> import('Compiler.Visitor.Generic')
 
 /**
- * \Hoa\Compiler\Visitor\Trace\RuleEntry
+ * \Hoa\Compiler\Llk\Rule\Entry
  */
--> import('Compiler.Visitor.Trace.RuleEntry')
+-> import('Compiler.Llk.Rule.Entry')
 
 /**
- * \Hoa\Compiler\Visitor\Trace\RuleExit
+ * \Hoa\Compiler\Llk\Rule\Ekzit
  */
--> import('Compiler.Visitor.Trace.RuleExit')
+-> import('Compiler.Llk.Rule.Ekzit')
 
 /**
  * \Hoa\Visitor\Visit
  */
 -> import('Visitor.Visit')
+
+/**
+ * \Hoa\Iterator
+ */
+-> import('Iterator.~')
 
 /**
  * \Hoa\Test\Sampler\Random
@@ -81,9 +86,10 @@ namespace Hoa\Compiler\Visitor {
 /**
  * Class \Hoa\Compiler\Visitor\BoundedExaustive.
  *
- * Generate a data of size n that can be matched by a LL(k) grammar.
+ * Generate data by walking in all branches, all combinations etc.
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @copyright  Copyright © 2007-2012 Ivan Enderlin.
  * @license    New BSD License
  */
@@ -91,7 +97,7 @@ namespace Hoa\Compiler\Visitor {
 class          BoundedExaustive
     extends    Generic
     implements \Hoa\Visitor\Visit,
-               \Iterator {
+               \Hoa\Iterator {
 
     /**
      * Given size: n.
@@ -100,12 +106,40 @@ class          BoundedExaustive
      */
     protected $_n        = 0;
 
+    /**
+     * Root rule.
+     *
+     * @var \Hoa\Visitor\Element object
+     */
     protected $_rootRule = null;
-    protected $_todo  = null;
-    protected $_trace = null;
 
-    protected $_key = -1;
-    protected $_current = null;
+    /**
+     * Todo trace.
+     *
+     * @var \Hoa\Compiler\Visitor\BoundedExaustive array
+     */
+    protected $_todo     = null;
+
+    /**
+     * Trace.
+     *
+     * @var \Hoa\Compiler\Visitor\BoundedExaustive array
+     */
+    protected $_trace    = null;
+
+    /**
+     * Current key of the iterator.
+     *
+     * @var \Hoa\Compiler\Visitor\BoundedExaustive int
+     */
+    protected $_key      = -1;
+
+    /**
+     * Current element of the iterator.
+     *
+     * @var \Hoa\Compiler\Visitor\BoundedExaustive string
+     */
+    protected $_current  = null;
 
 
 
@@ -113,6 +147,11 @@ class          BoundedExaustive
      * Initialize numeric-sampler and the size.
      *
      * @access  public
+     * @param   \Hoa\Compiler\Llk         $grammar         Grammar.
+     * @param   string                    $rootRuleName    Root rule name.
+     * @param   int                       $n               Token size.
+     * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
+     * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
     public function __construct ( \Hoa\Compiler\Llk        $grammar,
@@ -133,21 +172,45 @@ class          BoundedExaustive
         return;
     }
 
+    /**
+     * Get the current value of the iterator.
+     *
+     * @access  public
+     * @return  string
+     */
     public function current ( ) {
 
         return $this->_current;
     }
 
+    /**
+     * Get the current key of the iterator.
+     *
+     * @access  public
+     * @return  int
+     */
     public function key ( ) {
 
         return $this->_key;
     }
 
+    /**
+     * Advance the pointer to the next position in the iterator.
+     *
+     * @access  public
+     * @return  void
+     */
     public function next ( ) {
 
         return;
     }
 
+    /**
+     * Rewind the pointer of the iterator.
+     *
+     * @access  public
+     * @return  void
+     */
     public function rewind ( ) {
 
         unset($this->_trace);
@@ -155,66 +218,65 @@ class          BoundedExaustive
         $this->_key     = -1;
         $this->_current = null;
         $this->_trace   = array();
-        $closeRule      = new Trace\RuleExit($this->_rootRule,  0, array());
-        $openRule       = new Trace\RuleEntry($this->_rootRule, 0, array($closeRule));
+        $closeRule      = new \Hoa\Compiler\Llk\Rule\Ekzit($this->_rootRule, 0);
+        $openRule       = new \Hoa\Compiler\Llk\Rule\Entry(
+            $this->_rootRule,
+            0,
+            array($closeRule)
+        );
         $this->_todo    = array($closeRule, $openRule);
 
         return;
     }
 
+    /**
+     * Check if the current value is valid.
+     *
+     * @access  public
+     * @return  bool
+     */
     public function valid ( ) {
 
-        if(null !== $this->_current) {
-
-            if(null === $lastCP = $this->backtrack($this->_trace))
-                return false;
-
-            $this->_trace = $lastCP['trace'];
-            $this->_todo  = $lastCP['todo'];
-        }
+        if(   null !== $this->_current
+           && true !== $this->backtrack())
+            return false;
 
         if(true !== $this->unfold())
             return false;
 
-        $this->_current = $this->printTrace();
+        $this->_current = $this->generate();
         ++$this->_key;
 
         return true;
     }
 
-    public function unfold ( ) {
+    /**
+     * Unfold a solution.
+     *
+     * @access  protected
+     * @return  bool
+     */
+    protected function unfold ( ) {
 
         while(0 < count($this->_todo)) {
 
             $rule = array_pop($this->_todo);
 
-            if($rule instanceof Trace\RuleExit)
+            if($rule instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
                 $this->_trace[] = $rule;
             else {
 
                 $next   = $rule->getData();
                 $Rule   = $rule->getRule();
                 $result = $Rule->accept($this, $handle, array(
-                    $this->_trace,
-                    $this->_todo,
-                    $this->_n,
+                    $this->getSize(),
                     $next
                 ));
 
                 if(null === $result) {
 
-                    $lastCP = $this->backtrack($this->_trace);
-
-                    if(null === $lastCP)
+                    if(true !== $this->backtrack())
                         return null;
-
-                    $this->_trace = $lastCP['trace'];
-                    $this->_todo  = $lastCP['todo'];
-                }
-                else {
-
-                    $this->_trace = $result['trace'];
-                    $this->_todo  = $result['todo'];
                 }
             }
         }
@@ -222,32 +284,48 @@ class          BoundedExaustive
         return true;
     }
 
-    public function backtrack ( $trace ) {
+    /**
+     * Backtrack the solution.
+     *
+     * @access  protected
+     * @return  bool
+     */
+    protected function backtrack ( ) {
 
         $found = false;
 
         do {
 
-            $last = array_pop($trace);
+            $last = array_pop($this->_trace);
 
-            if($last instanceof Trace\RuleEntry)
+            if($last instanceof \Hoa\Compiler\Llk\Rule\Entry)
                 $found = '#alternation' == $last->getRule()->getId();
-            elseif($last instanceof Trace\RuleExit)
+            elseif($last instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
                 $found = '#quantification' == $last->getRule()->getId();
 
-        } while(0 < count($trace) && false === $found);
+        } while(0 < count($this->_trace) && false === $found);
 
         if(false === $found)
-            return null;
+            return false;
 
-        $next   = $last->getData() + 1;
-        $todo   = $last->getTodo();
-        $todo[] = new Trace\RuleEntry($last->getRule(), $next, $todo);
+        $next          = $last->getData() + 1;
+        $this->_todo   = $last->getTodo();
+        $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+            $last->getRule(),
+            $next,
+            $this->_todo
+        );
 
-        return array('trace' => $trace, 'todo' => $todo);
+        return true;
     }
 
-    public function printTrace ( ) {
+    /**
+     * Generate a token.
+     *
+     * @access  protected
+     * @return  string
+     */
+    protected function generate ( ) {
 
         $out   = null;
         $_skip = $this->getToken('skip');
@@ -262,19 +340,6 @@ class          BoundedExaustive
         return $out;
     }
 
-    public function sample ( \Hoa\Visitor\Element $element ) {
-
-        $token = $this->getToken($element->getValueValue());
-
-        if(null === $token)
-            throw new Exception(
-                'Something has failed somewhere. Good luck. ' .
-                '(Clue: the token %s does not exist).',
-                1, $element->getValueValue());
-
-        return $token['ast']->accept($this->_tokenSampler);
-    }
-
     /**
      * Visit an element.
      *
@@ -287,7 +352,7 @@ class          BoundedExaustive
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
 
-        list($trace, $todo, $maxlength, $next) = $eldnah;
+        list($maxlength, $next) = $eldnah;
 
         switch($element->getId()) {
 
@@ -301,25 +366,49 @@ class          BoundedExaustive
                 if($next >= $element->getChildrenNumber())
                     return null;
 
-                $trace[]  = new Trace\RuleEntry($element, $next, $todo);
-                $nextRule = $element->getChild($next);
-                $todo[]   = new Trace\RuleExit($nextRule, 0, $todo);
-                $todo[]   = new Trace\RuleEntry($nextRule, 0, $todo);
+                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $element,
+                    $next,
+                    $this->_todo
+                );
+                $nextRule       = $element->getChild($next);
+                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                    $nextRule,
+                    0,
+                    $this->_todo
+                );
+                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $nextRule,
+                    0,
+                    $this->_todo
+                );
 
-                return array('trace' => $trace, 'todo' => $todo);
+                return true;
               break;
 
             case '#concatenation':
-                $trace[] = new Trace\RuleEntry($element, $next, $todo);
+                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $element,
+                    $next,
+                    $this->_todo
+                );
 
                 for($i = $element->getChildrenNumber() - 1; $i >= 0; --$i) {
 
-                    $nextRule = $element->getChild($i);
-                    $todo[]   = new Trace\RuleExit($nextRule, 0, $todo);
-                    $todo[]   = new Trace\RuleEntry($nextRule, 0, $todo);
+                    $nextRule      = $element->getChild($i);
+                    $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                        $nextRule,
+                        0,
+                        $this->_todo
+                    );
+                    $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $nextRule,
+                        0,
+                        $this->_todo
+                    );
                 }
 
-                return array('trace' => $trace, 'todo' => $todo);
+                return true;
               break;
 
             case '#quantification':
@@ -361,21 +450,33 @@ class          BoundedExaustive
 
                 if(0 === $next) {
 
-                    $trace[] = new Trace\RuleEntry($element, $next, $todo);
-                    $child   = $element->getChild(0);
+                    $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $element,
+                        $next,
+                        $this->_todo
+                    );
+                    $child          = $element->getChild(0);
 
                     for($i = 0; $i < $x; ++$i) {
 
-                        $todo[] = new Trace\RuleExit($child, 0, $todo);
-                        $todo[] = new Trace\RuleEntry($child, 0, $todo);
+                        $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                            $child,
+                            0,
+                            $this->_todo
+                        );
+                        $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                            $child,
+                            0,
+                            $this->_todo
+                        );
                     }
 
-                    return array('trace' => $trace, 'todo' => $todo);
+                    return true;
                 }
 
                 $nbToken = 0;
 
-                foreach($trace as $t)
+                foreach($this->_trace as $t)
                     if(   $t instanceof \Hoa\Visitor\Element
                        && 'token' == $t->getId())
                         ++$nbToken;
@@ -385,12 +486,24 @@ class          BoundedExaustive
                 if($nbToken + 1 > $max)
                     return null;
 
-                $todo[] = new Trace\RuleExit($element, $next, $todo);
-                $child  = $element->getChild(0);
-                $todo[] = new Trace\RuleExit($child, 0, $todo);
-                $todo[] = new Trace\RuleEntry($child, 0, $todo);
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                    $element,
+                    $next,
+                    $this->_todo
+                );
+                $child         = $element->getChild(0);
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                    $child,
+                    0,
+                    $this->_todo
+                );
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $child,
+                    0,
+                    $this->_todo
+                );
 
-                return array('trace' => $trace, 'todo' => $todo);
+                return true;
               break;
 
             case '#named':
@@ -410,7 +523,7 @@ class          BoundedExaustive
             case 'token':
                 $nbToken = 0;
 
-                foreach($trace as $t)
+                foreach($this->_trace as $t)
                     if(   $t instanceof \Hoa\Visitor\Element
                        && 'token' == $t->getId())
                         ++$nbToken;
@@ -418,14 +531,14 @@ class          BoundedExaustive
                 if($nbToken >= $maxlength)
                     return null;
 
-                $trace[] = $element;
-                array_pop($todo);
+                $this->_trace[] = $element;
+                array_pop($this->_todo);
 
-                return array('trace' => $trace, 'todo' => $todo);
+                return true;
               break;
         }
 
-        return '???';
+        return false;
     }
 
     /**

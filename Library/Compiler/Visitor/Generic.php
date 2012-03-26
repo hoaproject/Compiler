@@ -60,7 +60,8 @@ namespace Hoa\Compiler\Visitor {
 /**
  * Class \Hoa\Compiler\Visitor\Generic.
  *
- *
+ * Generic visitor that prepares the grammar and offers some tools to manipulate
+ * them.
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2012 Ivan Enderlin.
@@ -83,7 +84,18 @@ class Generic {
      */
     protected $_rules           = array();
 
+    /**
+     * Grammar.
+     *
+     * @var \Hoa\Compiler\Llk object
+     */
     protected $_grammar      = null;
+
+    /**
+     * Root rule name.
+     *
+     * @var \Hoa\Compiler\Visitor\Generic string
+     */
     protected $_rootRuleName = null;
 
     /**
@@ -92,13 +104,22 @@ class Generic {
      * @var \Hoa\Test\Sampler object
      */
     protected $_sampler      = null;
+
+    /**
+     * Token sampler.
+     *
+     * @var \Hoa\Regex\Visitor\Visit object
+     */
     protected $_tokenSampler = null;
 
 
 
     /**
      * @access  public
-     * @param   \Hoa\Compiler\Llk  $grammar    Grammar.
+     * @param   \Hoa\Compiler\Llk         $grammar         Grammar.
+     * @param   string                    $rootRuleName    Root rule name.
+     * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
+     * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
     public function __construct ( \Hoa\Compiler\Llk        $grammar,
@@ -149,6 +170,12 @@ class Generic {
         return;
     }
 
+    /**
+     * Get all tokens buckets.
+     *
+     * @access  public
+     * @return  array
+     */
     public function &getTokens ( ) {
 
         return $this->_tokens;
@@ -188,6 +215,12 @@ class Generic {
         return $this->_rules[$rule]['ast'];
     }
 
+    /**
+     * Get all rules buckets.
+     *
+     * @access  public
+     * @return  array
+     */
     public function getRules ( ) {
 
         return $this->_rules;
@@ -210,6 +243,26 @@ class Generic {
         }
 
         return $this->_rules[$rule];
+    }
+
+    /**
+     * Sample a token.
+     *
+     * @access  public
+     * @param   \Hoa\Visitor\Element  $element    Element.
+     * @return  string
+     */
+    protected function sample ( \Hoa\Visitor\Element $element ) {
+
+        $token = $this->getToken($element->getValueValue());
+
+        if(null === $token)
+            throw new Exception(
+                'Something has failed somewhere. Good luck. ' .
+                '(Clue: the token %s does not exist).',
+                1, $element->getValueValue());
+
+        return $token['ast']->accept($this->_tokenSampler);
     }
 }
 

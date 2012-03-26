@@ -54,9 +54,9 @@ from('Hoa')
 -> import('Math.Util')
 
 /**
- * \Hoa\Math\Combinatorics\Combination
+ * \Hoa\Math\Combinatorics\Combination\Γ
  */
--> import('Math.Combinatorics.Combination');
+-> import('Math.Combinatorics.Combination.Γ');
 
 }
 
@@ -79,17 +79,23 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
      *
      * @var \Hoa\Compiler\Visitor\UniformPreCompute int
      */
-    protected $_n    = 0;
+    protected $_n      = 0;
 
+    /**
+     * Parent.
+     *
+     * @var \Hoa\Compiler\Visitor\Uniform object
+     */
     protected $_parent = null;
 
 
 
     /**
-     * Initialize the size.
+     * Constructor.
      *
      * @access  public
-     * @param   int  $n    Size.
+     * @param   int                            $n         Size.
+     * @param   \Hoa\Compiler\Visitor\Uniform  $parent    Parent.
      * @return  void
      */
     public function __construct ( $n = 0, Uniform $parent ) {
@@ -108,6 +114,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
      * @param   mixed                 &$handle    Handle (reference).
      * @param   mixed                 $eldnah     Handle (not reference).
      * @return  mixed
+     * @throw   \Hoa\Compiler\Visitor\Exception
      */
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
@@ -144,10 +151,9 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
               break;
 
             case '#concatenation':
-                $Γ = \Hoa\Math\Combinatorics\Combination::Γ(
+                $Γ = new \Hoa\Math\Combinatorics\Combination\Γ(
                     $element->getChildrenNumber(),
-                    $n,
-                    true
+                    $n
                 );
 
                 if(!isset($data['precompute'][$n]['Γ']))
@@ -219,7 +225,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
                 for($α = $x; $α <= $y; ++$α) {
 
                     $data['precompute'][$n]['xy'][$α] = array();
-                    $Γ  = \Hoa\Math\Combinatorics\Combination::Γ($α, $n, true);
+                    $Γ  = new \Hoa\Math\Combinatorics\Combination\Γ($α, $n);
                     $ut = 0;
 
                     foreach($Γ as $γ) {

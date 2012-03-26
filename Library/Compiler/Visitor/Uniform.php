@@ -135,6 +135,7 @@ class          Uniform
      * @param   mixed                 &$handle    Handle (reference).
      * @param   mixed                 $eldnah     Handle (not reference).
      * @return  mixed
+     * @throw   \Hoa\Compiler\Visitor\Exception
      */
     public function visit ( \Hoa\Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
@@ -271,6 +272,12 @@ class          Uniform
         return $this->_n;
     }
 
+    /**
+     * Get root rule.
+     *
+     * @access  public
+     * @return  \Hoa\Visitor\Element
+     */
     public function getRootRule ( ) {
 
         return $this->_rootRule;

@@ -41,8 +41,8 @@ namespace Hoa\Compiler\Llk\Rule {
  *
  * Rule parent.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @copyright  Copyright © 2007-2012 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
@@ -69,6 +69,13 @@ abstract class Rule {
      * @var \Hoa\Compiler\Llk\Rule string
      */
     protected $_nodeId  = null;
+
+    /**
+     * For non-transitional rule: PP representation.
+     *
+     * @var \Hoa\Compiler\Llk\Rule string
+     */
+    protected $_pp      = null;
 
 
 
@@ -151,6 +158,32 @@ abstract class Rule {
     public function getNodeId ( ) {
 
         return $this->_nodeId;
+    }
+
+    /**
+     * Set PP representation of the rule.
+     *
+     * @access  public
+     * @param   string  $pp    PP representation.
+     * @return  string
+     */
+    public function setPPRepresentation ( $pp ) {
+
+        $old       = $this->_pp;
+        $this->_pp = $pp;
+
+        return $old;
+    }
+
+    /**
+     * Get PP representation of the rule.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getPPRepresentation ( ) {
+
+        return $this->_pp;
     }
 }
 

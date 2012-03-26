@@ -39,9 +39,9 @@ namespace {
 from('Hoa')
 
 /**
- * \Hoa\Compiler\Exception
+ * \Hoa\Compiler\Exception\Rule
  */
--> import('Compiler.Exception.~')
+-> import('Compiler.Exception.Rule')
 
 /**
  * \Hoa\Compiler\Llk\Rule\Choice
@@ -158,7 +158,7 @@ class Analyzer {
     public function analyzeRules ( Array $rules ) {
 
         if(empty($rules))
-            throw new \Hoa\Compiler\Exception('No rules specified!', 0);
+            throw new \Hoa\Compiler\Exception\Rule('No rules specified!', 0);
 
         $tokens = array('default' =>
             array(
@@ -214,8 +214,10 @@ class Analyzer {
             if(!($zeRule instanceof Token))
                 $zeRule->setName($key);
 
+            $zeRule->setPPRepresentation($value);
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;
+
         }
 
         return $this->_createdRules;
@@ -415,6 +417,7 @@ class Analyzer {
      *
      * @access  protected
      * @return  mixed
+     * @throw   \Hoa\Compiler\Exception\Rule
      */
     protected function simple ( &$pNodeId ) {
 
@@ -449,7 +452,7 @@ class Analyzer {
             $regex = $this->checkTokenExistence($value, $this->_tokens);
 
             if(false === $regex)
-                throw new Exception(
+                throw new \Hoa\Compiler\Exception\Rule(
                     'Specified token %s not declared in tokens.',
                     3, $value);
 
@@ -475,7 +478,7 @@ class Analyzer {
             $regex = $this->checkTokenExistence($value, $this->_tokens);
 
             if(false === $regex)
-                throw new Exception(
+                throw new \Hoa\Compiler\Exception\Rule(
                     'Specified token %s not declared in tokens.',
                     4, $value);
 
@@ -494,7 +497,7 @@ class Analyzer {
 
             if(   false === array_key_exists(      $value, $this->_rules)
                && false === array_key_exists('#' . $value, $this->_rules))
-                throw new Exception\Rule(
+                throw new \Hoa\Compiler\Exception\Rule(
                     'Specified rule %s not declared in rules.',
                     5, $value);
 

@@ -65,21 +65,28 @@ class Token extends Rule {
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
      */
-    protected $_regex = null;
+    protected $_regex       = null;
 
     /**
      * Token value.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
      */
-    protected $_value = null;
+    protected $_value       = null;
 
     /**
      * Whether the token is kept or not in the AST.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token bool
      */
-    protected $_kept  = false;
+    protected $_kept        = false;
+
+    /**
+     * Unification index.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Token int
+     */
+    protected $_unification = -1;
 
 
 
@@ -87,17 +94,34 @@ class Token extends Rule {
      * Constructor.
      *
      * @access  public
-     * @param   string  $name      Name.
-     * @param   string  $regex     Representation.
-     * @param   string  $nodeId    Node ID.
+     * @param   string  $name           Name.
+     * @param   string  $regex          Representation.
+     * @param   string  $nodeId         Node ID.
+     * @param   int     $unification    Unification index.
      * @return  void
      */
-    public function __construct ( $name, $regex, $nodeId ) {
+    public function __construct ( $name, $regex, $nodeId, $unification ) {
 
         parent::__construct($name, null, $nodeId);
-        $this->_regex = $regex;
+        $this->_regex       = $regex;
+        $this->_unification = $unification;
 
         return;
+    }
+
+    /**
+     * Set token representation.
+     *
+     * @access  public
+     * @param   string  $regex    Representation.
+     * @return  string
+     */
+    public function setRepresentation ( $regex ) {
+
+        $old          = $this->_regex;
+        $this->_regex = $regex;
+
+        return $old;
     }
 
     /**
@@ -111,6 +135,13 @@ class Token extends Rule {
         return $this->_regex;
     }
 
+    /**
+     * Set token value.
+     *
+     * @access  public
+     * @param   string  $value    Value.
+     * @return  string
+     */
     public function setValue ( $value ) {
 
         $old          = $this->_value;
@@ -119,6 +150,12 @@ class Token extends Rule {
         return $old;
     }
 
+    /**
+     * Get token value.
+     *
+     * @access  public
+     * @return  string
+     */
     public function getValue ( ) {
 
         return $this->_value;
@@ -148,6 +185,32 @@ class Token extends Rule {
     public function isKept ( ) {
 
         return $this->_kept;
+    }
+
+    /**
+     * Set unification index.
+     *
+     * @access  public
+     * @param   int  $unification    Unification index.
+     * @return  int
+     */
+    public function setUnificationIndex ( $unification ) {
+
+        $old                = $this->_unification;
+        $this->_unification = $unification;
+
+        return $old;
+    }
+
+    /**
+     * Get unification index.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function getUnificationIndex ( ) {
+
+        return $this->_unification;
     }
 }
 

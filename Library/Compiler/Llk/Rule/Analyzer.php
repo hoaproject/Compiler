@@ -170,8 +170,8 @@ class Analyzer {
                 'n_to_m'        => '\{[0-9]+,[0-9]+\}',
                 'zero_to_m'     => '\{,[0-9]+\}',
                 'n_or_more'     => '\{[0-9]+,\}',
-                'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*::',
-                'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*>',
+                'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
+                'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?' . '>',
                 'named'         => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
                 'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*',
                 'capturing_'    => '\(',
@@ -438,19 +438,13 @@ class Analyzer {
 
             $value = trim($this->getCurrentToken('value'), ':');
 
-            /*
-            if(']' == substr($tokValue, -1)) {
+            if(']' == substr($value, -1)) {
 
-                $id       = substr(
-                    $tokValue,
-                    strpos($tokValue, '[') + 1,
-                    strlen($tokValue) - strpos($tokValue, ']')
-                );
-                $tokValue = substr($tokValue, 0, strpos($tokValue, '['));
+                $uId   = (int) substr($value, strpos($value, '[') + 1, -1);
+                $value = substr($value, 0, strpos($value, '['));
             }
             else
-                $id = -1;
-            */
+                $uId   = -1;
 
             $regex = $this->checkTokenExistence($value, $this->_tokens);
 
@@ -460,7 +454,7 @@ class Analyzer {
                     3, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $this->_createdRules[$name] = new Token($value, $regex, null);
+            $this->_createdRules[$name] = new Token($value, $regex, null, $uId);
             $this->consumeToken();
 
             return $name;
@@ -470,19 +464,13 @@ class Analyzer {
 
             $value = trim($this->getCurrentToken('value'), '<>');
 
-            /*
-            if(']' == substr($tokValue, -1)) {
+            if(']' == substr($value, -1)) {
 
-                $id       = substr(
-                    $tokValue,
-                    strpos($tokValue, '[') + 1,
-                    strlen($tokValue) - strpos($tokValue, ']')
-                );
-                $tokValue = substr($tokValue, 0, strpos($tokValue, '['));
+                $uId   = (int) substr($value, strpos($value, '[') + 1, -1);
+                $value = substr($value, 0, strpos($value, '['));
             }
             else
-                $id = -1;
-            */
+                $uId   = -1;
 
             $regex = $this->checkTokenExistence($value, $this->_tokens);
 
@@ -492,7 +480,7 @@ class Analyzer {
                     4, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $token                      = new Token($value, $regex, null);
+            $token                      = new Token($value, $regex, null, $uId);
             $token->setKept(true);
             $this->_createdRules[$name] = $token;
             $this->consumeToken();

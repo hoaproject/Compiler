@@ -65,35 +65,28 @@ class TreeNode implements \Hoa\Visitor\Element {
      *
      * @var \Hoa\Compiler\TreeNode string
      */
-    protected $_id           = null;
+    protected $_id       = null;
 
     /**
      * Value of the node (non-null for token nodes).
      *
      * @var \Hoa\Compiler\TreeNode string
      */
-    protected $_value        = null;
+    protected $_value    = null;
 
     /**
      * Children.
      *
      * @var \Hoa\Compiler\TreeNode array
      */
-    protected $_children     = null;
-
-    /**
-     * Depth of the node in the trace.
-     *
-     * @var \Hoa\Compiler\TreeNode int
-     */
-    protected $_depthInTrace = 0;
+    protected $_children = null;
 
     /**
      * Attached data.
      *
      * @var \Hoa\Compiler\TreeNode array
      */
-    protected $_data         = array();
+    protected $_data     = array();
 
 
 
@@ -106,7 +99,8 @@ class TreeNode implements \Hoa\Visitor\Element {
      * @param   array   $children    Children.
      * @return  void
      */
-    public function __construct ( $id, $value = null, Array $children = array() ) {
+    public function __construct ( $id, $value = null,
+                                  Array $children = array() ) {
 
         $this->setId($id);
         $this->setValue($value);
@@ -274,33 +268,6 @@ class TreeNode implements \Hoa\Visitor\Element {
     public function getChildrenNumber ( ) {
 
         return count($this->_children);
-    }
-
-    /**
-     * Set depth of the node in the trace.
-     *
-     * @access  public
-     * @param   int  $depth    Depth.
-     * @return  int
-     */
-    public function setDepthInTrace ( $depth ) {
-
-        $old                 = $this->_depthInTrace;
-        $this->_depthInTrace = $depth;
-
-        return $old;
-    }
-
-    /**
-     * Get depth of the node in the trace.
-     *
-     * @access  public
-     * @return  int
-     *
-     */
-    public function getDepthInTrace ( ) {
-
-        return $this->_depthInTrace;
     }
 
     /**

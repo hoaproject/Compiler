@@ -195,9 +195,7 @@ class Parser {
         $this->_todo          = array();
 
         if(false === array_key_exists($rule, $this->_rules))
-            foreach($this->_rules as $rule => $_)
-                if(!is_int($rule))
-                    break;
+            $rule = $this->getRootRule();
 
         $closeRule   = new Rule\Ekzit($rule, 0);
         $openRule    = new Rule\Entry($rule, 0, array($closeRule));
@@ -597,6 +595,43 @@ class Parser {
     public function getTrace ( ) {
 
         return $this->_trace;
+    }
+
+    /**
+     * Get tokens.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getTokens ( ) {
+
+        return $this->_tokens;
+    }
+
+    /**
+     * Get rules.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getRules ( ) {
+
+        return $this->_rules;
+    }
+
+    /**
+     * Get root rule.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getRootRule ( ) {
+
+        foreach($this->_rules as $rule => $_)
+            if(!is_int($rule))
+                break;
+
+        return $rule;
     }
 }
 

@@ -143,7 +143,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
                 return $out = $element->getChild(0)->accept($this, $handle, $n);
               break;
 
-            case '#alternation':
+            case '#choice':
                 foreach($element->getChildren() as $child)
                     $out += $child->accept($this, $handle, $n);
 
@@ -182,7 +182,7 @@ class UniformPreCompute implements \Hoa\Visitor\Visit {
                 return $out;
               break;
 
-            case '#quantification':
+            case '#repetition':
                 if(!isset($data['precompute'][$n]['xy']))
                     $data['precompute'][$n]['xy'] = array();
 

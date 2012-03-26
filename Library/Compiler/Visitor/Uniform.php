@@ -106,9 +106,14 @@ class          Uniform
      * Initialize numeric-sampler and the size.
      *
      * @access  public
+     * @param   \Hoa\Compiler\Llk\Parser  $grammar         Grammar.
+     * @param   string                    $rootRuleName    Root rule name.
+     * @param   int                       $n               Size of the data.
+     * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
+     * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+    public function __construct ( \Hoa\Compiler\Llk\Parser $grammar,
                                                            $rootRuleName = null,
                                                            $n            = 7,
                                   \Hoa\Test\Sampler        $sampler      = null,
@@ -154,7 +159,7 @@ class          Uniform
                 return $element->getChild(0)->accept($this, $handle, $n);
               break;
 
-            case '#alternation':
+            case '#choice':
                 $stat = array();
 
                 foreach($element->getChildren() as $c => $child) {
@@ -183,7 +188,7 @@ class          Uniform
                 return $out;
               break;
 
-            case '#quantification':
+            case '#repetition':
                 $out  = null;
                 $stat = $data['precompute'][$n]['xy'];
                 $i    = $this->_sampler->getInteger(1, $computed);

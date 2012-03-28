@@ -147,14 +147,14 @@ class          BoundedExaustive
      * Initialize numeric-sampler and the size.
      *
      * @access  public
-     * @param   \Hoa\Compiler\Llk         $grammar         Grammar.
+     * @param   \Hoa\Compiler\Llk\Parser  $grammar         Grammar.
      * @param   string                    $rootRuleName    Root rule name.
      * @param   int                       $n               Token size.
      * @param   \Hoa\Test\Sampler         $sampler         Numeric-sampler.
      * @param   \Hoa\Regex\Visitor\Visit  $tokenSampler    Token sampler.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk        $grammar,
+    public function __construct ( \Hoa\Compiler\Llk\Parser $grammar,
                                                            $rootRuleName = null,
                                                            $n            = 7,
                                   \Hoa\Test\Sampler        $sampler      = null,
@@ -299,9 +299,9 @@ class          BoundedExaustive
             $last = array_pop($this->_trace);
 
             if($last instanceof \Hoa\Compiler\Llk\Rule\Entry)
-                $found = '#alternation' == $last->getRule()->getId();
+                $found = '#choice' == $last->getRule()->getId();
             elseif($last instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
-                $found = '#quantification' == $last->getRule()->getId();
+                $found = '#repetition' == $last->getRule()->getId();
 
         } while(0 < count($this->_trace) && false === $found);
 
@@ -362,7 +362,7 @@ class          BoundedExaustive
                 return $element->getChild(0)->accept($this, $handle, $eldnah);
               break;
 
-            case '#alternation':
+            case '#choice':
                 if($next >= $element->getChildrenNumber())
                     return null;
 
@@ -411,7 +411,7 @@ class          BoundedExaustive
                 return true;
               break;
 
-            case '#quantification':
+            case '#repetition':
                 $xy = $element->getChild(1)->getValueValue();
                 $x  = 0;
                 $y  = 0;

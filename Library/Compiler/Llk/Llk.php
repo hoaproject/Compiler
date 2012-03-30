@@ -225,11 +225,6 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
-        if(!isset($tokens['default']['skip']))
-            throw new \Hoa\Compiler\Exception(
-                'Token default:skip does not exit, you must specify one at ' .
-                'least.', 1);
-
         $ruleAnalyzer = new Rule\Analyzer($tokens);
         $rules        = $ruleAnalyzer->analyzeRules($rules);
 

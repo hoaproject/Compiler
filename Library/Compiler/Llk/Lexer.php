@@ -124,7 +124,6 @@ class Lexer {
      *
      * @access  protected
      * @param   string  $text      Text to tokenize.
-     * @param   array   $skip      Tokens to be skipped.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
      */

@@ -329,13 +329,19 @@ class          BoundedExaustive
 
         $out   = null;
         $_skip = $this->getToken('skip');
-        $skip  = $_skip['ast'];
+
+        if(null !== $_skip)
+            $skip = $_skip['ast'];
+        else
+            $skip = null;
 
         foreach($this->_trace as $trace)
             if(   $trace instanceof \Hoa\Visitor\Element
                && 'token' == $trace->getId())
                 $out .= $this->sample($trace) .
-                        $skip->accept($this->_tokenSampler);
+                        (null !== $skip
+                            ? $skip->accept($this->_tokenSampler)
+                            : '');
 
         return $out;
     }

@@ -205,8 +205,8 @@ class Parser {
 
             $out = $this->unfold();
 
-            if(   null !== $out
-               && 'EOF' == $this->getCurrentToken())
+            if(   null  !== $out
+               && 'EOF'  == $this->getCurrentToken())
                 break;
 
             if(false === $this->backtrack()) {

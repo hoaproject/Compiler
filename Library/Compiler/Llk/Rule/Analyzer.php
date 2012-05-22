@@ -100,13 +100,6 @@ class Analyzer {
     protected $_currentState = 0;
 
     /**
-     * Error state.
-     *
-     * @var \Hoa\Compiler\Llk\rule\Analyzer array
-     */
-    protected $_errorState   = 0;
-
-    /**
      * Tokens representing rules.
      *
      * @var \Hoa\Compiler\Llk\rule\Analyzer array
@@ -198,7 +191,7 @@ class Analyzer {
             }
             else {
 
-                $nodeName  = NULL;
+                $nodeName  = null;
                 $buildNode = false;
             }
 
@@ -217,7 +210,6 @@ class Analyzer {
             $zeRule->setPPRepresentation($value);
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;
-
         }
 
         return $this->_createdRules;
@@ -579,7 +571,7 @@ class Analyzer {
      */
     public function consumeToken ( ) {
 
-        return $this->_errorState = ++$this->_currentState;
+        return ++$this->_currentState;
     }
 }
 

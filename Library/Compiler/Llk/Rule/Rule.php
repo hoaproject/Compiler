@@ -54,28 +54,35 @@ abstract class Rule {
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_name    = null;
+    protected $_name         = null;
 
     /**
      * Rule content.
      *
      * @var \Hoa\Compiler\Llk\Rule mixed
      */
-    protected $_content = null;
+    protected $_content      = null;
 
     /**
      * Node ID.
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_nodeId  = null;
+    protected $_nodeId       = null;
 
     /**
      * For non-transitional rule: PP representation.
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_pp      = null;
+    protected $_pp           = null;
+    /**
+     * Whether the rule is transitional or not (i.e. not declared in the grammar
+     * but created by the analyzer).
+     *
+     * @var \Hoa\Compiler\Llk\Rule bool
+     */
+    protected $_transitional = true;
 
 
 
@@ -127,7 +134,7 @@ abstract class Rule {
      * Get rule content.
      *
      * @access  public
-     * @return  string
+     * @return  mixed
      */
     public function getContent ( ) {
 
@@ -169,8 +176,9 @@ abstract class Rule {
      */
     public function setPPRepresentation ( $pp ) {
 
-        $old       = $this->_pp;
-        $this->_pp = $pp;
+        $old                 = $this->_pp;
+        $this->_pp           = $pp;
+        $this->_transitional = false;
 
         return $old;
     }
@@ -184,6 +192,17 @@ abstract class Rule {
     public function getPPRepresentation ( ) {
 
         return $this->_pp;
+    }
+
+    /**
+     * Check whether the rule is transitional or not.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function isTransitional ( ) {
+
+        return $this->_transitional;
     }
 }
 

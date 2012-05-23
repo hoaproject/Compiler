@@ -284,7 +284,7 @@ class Parser {
 
         if($zeRule instanceof Rule\Token) {
 
-            if($zeRule->getName() != $this->getCurrentToken())
+            if($zeRule->getTokenName() != $this->getCurrentToken())
                 return false;
 
             $value = $this->getCurrentToken('value');
@@ -326,7 +326,7 @@ class Parser {
         }
         elseif($zeRule instanceof Rule\Concatenation) {
 
-            if(false === is_numeric($zeRule->getName()))
+            if(false === $zeRule->isTransitional())
                 ++$this->_depth;
 
             $this->_trace[] = new Rule\Entry(
@@ -353,7 +353,7 @@ class Parser {
             if($next >= count($content))
                 return false;
 
-            if(false === is_numeric($zeRule->getName()))
+            if(false === $zeRule->isTransitional())
                 ++$this->_depth;
 
             $this->_trace[] = new Rule\Entry(
@@ -377,7 +377,7 @@ class Parser {
                 $name = $zeRule->getName();
                 $min  = $zeRule->getMin();
 
-                if(false === is_numeric($name))
+                if(false === $zeRule->isTransitional())
                     ++$this->_depth;
 
                 $this->_trace[] = new Rule\Entry(
@@ -552,7 +552,7 @@ class Parser {
                 }
 
                 $child      = new TreeNode('token', array(
-                    'token' => $trace->getName(),
+                    'token' => $trace->getTokenName(),
                     'value' => $trace->getValue()
                 ));
                 $children[] = $child;

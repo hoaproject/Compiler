@@ -41,7 +41,17 @@ from('Hoa')
 /**
  * \Hoa\Compiler\Llk\Rule
  */
--> import('Compiler.Llk.Rule.~');
+-> import('Compiler.Llk.Rule.~')
+
+/**
+ * \Hoa\File\Read
+ */
+-> import('File.Read')
+
+/**
+ * \Hoa\Compiler\Llk
+ */
+-> import('Compiler.Llk.~');
 
 }
 
@@ -61,39 +71,53 @@ namespace Hoa\Compiler\Llk\Rule {
 class Token extends Rule {
 
     /**
+     * LL(k) compiler of hoa://Library/Regex/Grammar.pp
+     *
+     * @var \Hoa\Compiler\Llk object
+     */
+    protected static $_regexCompiler = null;
+
+    /**
      * Token name.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
      */
-    protected $_tokenName   = null;
+    protected $_tokenName            = null;
 
     /**
      * Token representation.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
      */
-    protected $_regex       = null;
+    protected $_regex                = null;
+
+    /**
+     * AST of the regex.
+     *
+     * @var \Hoa\Compiler\Llk\TreeNode object
+     */
+    protected $_ast                  = null;
 
     /**
      * Token value.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
      */
-    protected $_value       = null;
+    protected $_value                = null;
 
     /**
      * Whether the token is kept or not in the AST.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token bool
      */
-    protected $_kept        = false;
+    protected $_kept                 = false;
 
     /**
      * Unification index.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token int
      */
-    protected $_unification = -1;
+    protected $_unification          = -1;
 
 
 
@@ -141,6 +165,7 @@ class Token extends Rule {
 
         $old          = $this->_regex;
         $this->_regex = $regex;
+        unset($this->_ast);
 
         return $old;
     }
@@ -154,6 +179,27 @@ class Token extends Rule {
     public function getRepresentation ( ) {
 
         return $this->_regex;
+    }
+
+    /**
+     * Get AST of the token representation.
+     *
+     * @access  public
+     * @return  \Hoa\Compiler\Llk\TreeNode
+     */
+    public function getAST ( ) {
+
+        if(null === static::$_regexCompiler)
+            static::$_regexCompiler = \Hoa\Compiler\Llk::load(
+                new \Hoa\File\Read('hoa://Library/Regex/Grammar.pp')
+            );
+
+        if(null === $this->_ast)
+            $this->_ast = static::$_regexCompiler->parse(
+                $this->getRepresentation()
+            );
+
+        return $this->_ast;
     }
 
     /**

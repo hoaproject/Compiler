@@ -61,6 +61,13 @@ namespace Hoa\Compiler\Llk\Rule {
 class Token extends Rule {
 
     /**
+     * Token name.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Token string
+     */
+    protected $_tokenName   = null;
+
+    /**
      * Token representation.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
@@ -95,14 +102,17 @@ class Token extends Rule {
      *
      * @access  public
      * @param   string  $name           Name.
+     * @param   string  $tokenName      Token name.
      * @param   string  $regex          Representation.
      * @param   string  $nodeId         Node ID.
      * @param   int     $unification    Unification index.
      * @return  void
      */
-    public function __construct ( $name, $regex, $nodeId, $unification ) {
+    public function __construct ( $name, $tokenName, $regex, $nodeId,
+                                  $unification ) {
 
         parent::__construct($name, null, $nodeId);
+        $this->_tokenName   = $tokenName;
         $this->_regex       = $regex;
         $this->_unification = $unification;
 
@@ -110,6 +120,17 @@ class Token extends Rule {
     }
 
     /**
+     * Get token name.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getTokenName ( ) {
+
+        return $this->_tokenName;
+    }
+
+   /**
      * Set token representation.
      *
      * @access  public

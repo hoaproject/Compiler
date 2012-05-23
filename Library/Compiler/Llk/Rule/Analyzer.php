@@ -204,7 +204,6 @@ class Analyzer {
 
             $zeRule = $this->_createdRules[$rule];
 
-            if(!($zeRule instanceof Token))
                 $zeRule->setName($key);
 
             $zeRule->setPPRepresentation($value);
@@ -449,7 +448,13 @@ class Analyzer {
                     3, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $this->_createdRules[$name] = new Token($value, $regex, null, $uId);
+            $this->_createdRules[$name] = new Token(
+                $name,
+                $value,
+                $regex,
+                null,
+                $uId
+            );
             $this->consumeToken();
 
             return $name;
@@ -475,7 +480,13 @@ class Analyzer {
                     4, $value);
 
             $name                       = count($this->_createdRules) + 1;
-            $token                      = new Token($value, $regex, null, $uId);
+            $token                      = new Token(
+                $name,
+                $value,
+                $regex,
+                null,
+                $uId
+            );
             $token->setKept(true);
             $this->_createdRules[$name] = $token;
             $this->consumeToken();

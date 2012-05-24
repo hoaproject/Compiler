@@ -262,7 +262,6 @@ class          Uniform
         foreach($this->_rules as $i => $rule)
             $this->_precompute->visit($rule['ast']);
 
-
         return $old;
     }
 

@@ -256,7 +256,7 @@ class Coverage extends Sampler {
      */
     protected function unfold ( ) {
 
-        while(count($this->_todo) > 0) {
+        while(0 < count($this->_todo)) {
 
             $pop = array_pop($this->_todo);
 

@@ -34,6 +34,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+namespace {
+
+from('Hoa')
+
+/**
+ * \Hoa\Iterator
+ */
+-> import('Iterator.~');
+
+}
+
 namespace Hoa\Compiler\Llk\Sampler {
 
 /**
@@ -47,7 +58,7 @@ namespace Hoa\Compiler\Llk\Sampler {
  * @license    New BSD License
  */
 
-abstract class Sampler {
+abstract class Sampler implements \Hoa\Iterator {
 
     /**
      * Compiler.
@@ -70,6 +81,13 @@ abstract class Sampler {
      */
     protected $_tokenSampler = null;
 
+    /**
+     * Root rule name.
+     *
+     * @var \Hoa\Compiler\Llk\Sampler string
+     */
+    protected $_rootRuleName = null;
+
 
 
     /**
@@ -86,18 +104,10 @@ abstract class Sampler {
         $this->_compiler     = $compiler;
         $this->_rules        = $compiler->getRules();
         $this->_tokenSampler = $tokenSampler;
+        $this->_rootRuleName = $compiler->getRootRule();
 
         return;
     }
-
-    /**
-     * Generate data.
-     *
-     * @access  public
-     * @param   string  $ruleName    Starting rule.
-     * @return  array
-     */
-    abstract public function generate ( $ruleName = null );
 }
 
 }

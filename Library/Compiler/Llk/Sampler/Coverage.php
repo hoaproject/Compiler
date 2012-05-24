@@ -110,20 +110,65 @@ class Coverage extends Sampler {
      */
     protected $_coveredRules = null;
 
+    /**
+     * Current iterator key.
+     *
+     * @var \Hoa\Compiler\Llk\Sampler\Coverage int
+     */
+    protected $_key          = -1;
+
+    /**
+     * Current iterator value.
+     *
+     * @var \Hoa\Compiler\Llk\Sampler\Coverage string
+     */
+    protected $_current      = null;
+
 
 
     /**
-     * Generate data.
+     * Get the current iterator value.
      *
      * @access  public
-     * @param   string  $ruleName    Starting rule.
-     * @return  array
+     * @return  string
      */
-    public function generate ( $ruleName = null ) {
+    public function current ( ) {
 
-        if(null === $ruleName)
-            $ruleName = $this->_compiler->getRootRule();
+        return $this->_current;
+    }
 
+    /**
+     * Get the current iterator key.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function key ( ) {
+
+        return $this->_key;
+    }
+
+    /**
+     * Useless here.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function next ( ) {
+
+        return;
+    }
+
+    /**
+     * Rewind the internal iterator pointer.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function rewind ( ) {
+
+        $this->_key          = 0;
+        $this->_current      = null;
         $this->_tests        = array();
         $this->_coveredRules = array();
 
@@ -155,42 +200,52 @@ class Coverage extends Sampler {
                 $this->_coveredRules[$name][0] = 0;
         }
 
-        $out = array();
+        return;
+    }
 
-        do {
+    /**
+     * Compute the current iterator value, i.e. generate a new solution.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function valid ( ) {
 
-            $this->_trace = array();
-            $this->_todo  = array(new \Hoa\Compiler\Llk\Rule\Entry(
-                $ruleName,
-                $this->_coveredRules
-            ));
+        $ruleName = $this->_rootRuleName;
 
-            $result = $this->unfold();
+        if(   true !== in_array(0,  $this->_coveredRules[$ruleName])
+           && true !== in_array(.5, $this->_coveredRules[$ruleName]))
+            return false;
 
-            if(true === $result) {
+        $this->_trace = array();
+        $this->_todo  = array(new \Hoa\Compiler\Llk\Rule\Entry(
+            $ruleName,
+            $this->_coveredRules
+        ));
 
-                $handle = null;
+        $result = $this->unfold();
 
-                foreach($this->_trace as $trace)
-                    if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
-                        $handle .= $this->_tokenSampler->visit(
-                            $trace->getAST()
-                        ) . ' '; // use skip token @TODO
+        if(true !== $result)
+            return false;
 
-                $out[]          = $handle;
-                $this->_tests[] = $this->_trace;
+        $handle = null;
 
-                foreach($this->_coveredRules as $key => $value)
-                    foreach($value as $k => $v)
-                        if(-1 == $v)
-                            $this->_coveredRules[$key][$k] = 0;
-            }
+        foreach($this->_trace as $trace)
+            if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
+                $handle .= $this->_tokenSampler->visit(
+                    $trace->getAST()
+                ) . ' '; // use skip token @TODO
 
-        } while(   null !== $result
-                && (   true === in_array(0,  $this->_coveredRules[$ruleName])
-                    || true === in_array(.5, $this->_coveredRules[$ruleName])));
+        ++$this->_key;
+        $this->_current = $handle;
+        $this->_tests[] = $this->_trace;
 
-        return $out;
+        foreach($this->_coveredRules as $key => $value)
+            foreach($value as $k => $v)
+                if(-1 == $v)
+                    $this->_coveredRules[$key][$k] = 0;
+
+        return true;
     }
 
     /**

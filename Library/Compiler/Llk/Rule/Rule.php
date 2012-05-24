@@ -41,8 +41,8 @@ namespace Hoa\Compiler\Llk\Rule {
  *
  * Rule parent.
  *
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2012 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */

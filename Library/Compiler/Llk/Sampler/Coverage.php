@@ -167,7 +167,7 @@ class Coverage extends Sampler {
      */
     public function rewind ( ) {
 
-        $this->_key          = 0;
+        $this->_key          = -1;
         $this->_current      = null;
         $this->_tests        = array();
         $this->_coveredRules = array();

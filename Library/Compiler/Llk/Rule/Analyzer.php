@@ -203,9 +203,7 @@ class Analyzer {
                     'Error while parsing rule %s.', 1, $key);
 
             $zeRule = $this->_createdRules[$rule];
-
-                $zeRule->setName($key);
-
+            $zeRule->setName($key);
             $zeRule->setPPRepresentation($value);
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;

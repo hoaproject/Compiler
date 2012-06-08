@@ -413,7 +413,7 @@ class Analyzer {
         if('capturing_' == $this->getCurrentToken()) {
 
             $this->consumeToken();
-            $rule    = $this->choice($pNodeId);
+            $rule = $this->choice($pNodeId);
 
             if(null === $rule)
                 return null;
@@ -477,8 +477,8 @@ class Analyzer {
                     'Specified token %s not declared in tokens.',
                     4, $value);
 
-            $name                       = count($this->_createdRules) + 1;
-            $token                      = new Token(
+            $name  = count($this->_createdRules) + 1;
+            $token = new Token(
                 $name,
                 $value,
                 $regex,

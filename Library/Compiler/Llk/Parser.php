@@ -524,6 +524,9 @@ class Parser {
 
                 } while(null !== $pop);
 
+                if(null === $cId)
+                    $cId = $rule->getDefaultId();
+
                 if(null === $cId) {
 
                     for($j = count($handle) - 1; $j >= 0; --$j)

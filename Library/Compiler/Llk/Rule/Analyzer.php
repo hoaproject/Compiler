@@ -205,6 +205,10 @@ class Analyzer {
             $zeRule = $this->_createdRules[$rule];
             $zeRule->setName($key);
             $zeRule->setPPRepresentation($value);
+
+            if(null !== $nodeId)
+                $zeRule->setDefaultId($nodeId);
+
             unset($this->_createdRules[$rule]);
             $this->_createdRules[$key] = $zeRule;
         }
@@ -237,12 +241,8 @@ class Analyzer {
         $nNodeId = $pNodeId;
         $rule    = $this->concatenation($nNodeId);
 
-        if(null === $rule) {
-
-            $pNodeId = null;
-
+        if(null === $rule)
             return null;
-        }
 
         if(null !== $nNodeId)
             $this->_createdRules[$rule]->setNodeId($nNodeId);

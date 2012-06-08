@@ -71,6 +71,13 @@ abstract class Rule {
     protected $_nodeId       = null;
 
     /**
+     * Default ID.
+     *
+     * @var \Hoa\Compiler\Llk\Rule string
+     */
+    protected $_defaultId    = null;
+
+    /**
      * For non-transitional rule: PP representation.
      *
      * @var \Hoa\Compiler\Llk\Rule string
@@ -165,6 +172,33 @@ abstract class Rule {
     public function getNodeId ( ) {
 
         return $this->_nodeId;
+    }
+
+
+    /**
+     * Set default ID.
+     *
+     * @access  public
+     * @param   string  $defaultId    Default ID.
+     * @return  string
+     */
+    public function setDefaultId ( $defaultId ) {
+
+        $old              = $this->_defaultId;
+        $this->_defaultId = $defaultId;
+
+        return $old;
+    }
+
+    /**
+     * Get default ID.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getDefaultId ( ) {
+
+        return $this->_defaultId;
     }
 
     /**

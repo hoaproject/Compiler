@@ -48,7 +48,7 @@ from('Hoa')
 namespace Hoa\Compiler\Llk {
 
 /**
- * Class \Hoa\Compiler\TreeNode.
+ * Class \Hoa\Compiler\Llk\TreeNode.
  *
  * Provide a generic node for the AST produced by LL(k) parser.
  *
@@ -63,28 +63,28 @@ class TreeNode implements \Hoa\Visitor\Element {
     /**
      * ID (should be something like #ruleName or token).
      *
-     * @var \Hoa\Compiler\TreeNode string
+     * @var \Hoa\Compiler\Llk\TreeNode string
      */
     protected $_id       = null;
 
     /**
      * Value of the node (non-null for token nodes).
      *
-     * @var \Hoa\Compiler\TreeNode string
+     * @var \Hoa\Compiler\Llk\TreeNode string
      */
     protected $_value    = null;
 
     /**
      * Children.
      *
-     * @var \Hoa\Compiler\TreeNode array
+     * @var \Hoa\Compiler\Llk\TreeNode array
      */
     protected $_children = null;
 
     /**
      * Attached data.
      *
-     * @var \Hoa\Compiler\TreeNode array
+     * @var \Hoa\Compiler\Llk\TreeNode array
      */
     protected $_data     = array();
 
@@ -198,8 +198,8 @@ class TreeNode implements \Hoa\Visitor\Element {
      * Prepend a child.
      *
      * @access  public
-     * @param   \Hoa\Compiler\TreeNode  $child    Child.
-     * @return  \Hoa\Compiler\TreeNode
+     * @param   \Hoa\Compiler\Llk\TreeNode  $child    Child.
+     * @return  \Hoa\Compiler\Llk\TreeNode
      */
     public function prependChild ( TreeNode $child ) {
 
@@ -212,8 +212,8 @@ class TreeNode implements \Hoa\Visitor\Element {
      * Append a child.
      *
      * @access  public
-     * @param   \Hoa\Compiler\TreeNode  $child    Child.
-     * @return  \Hoa\Compiler\TreeNode
+     * @param   \Hoa\Compiler\Llk\TreeNode  $child    Child.
+     * @return  \Hoa\Compiler\Llk\TreeNode
      */
     public function appendChild ( TreeNode $child ) {
 
@@ -241,7 +241,7 @@ class TreeNode implements \Hoa\Visitor\Element {
      *
      * @access  public
      * @param   int  $i    Index.
-     * @return  \Hoa\Compiler\TreeNode
+     * @return  \Hoa\Compiler\Llk\TreeNode
      */
     public function getChild ( $i ) {
 

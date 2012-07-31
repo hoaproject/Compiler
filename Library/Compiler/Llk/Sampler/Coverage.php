@@ -232,9 +232,7 @@ class Coverage extends Sampler {
 
         foreach($this->_trace as $trace)
             if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
-                $handle .= $this->_tokenSampler->visit(
-                    $trace->getAST()
-                ) . ' '; // use skip token @TODO
+                $handle .= $this->generateToken($trace);
 
         ++$this->_key;
         $this->_current = $handle;

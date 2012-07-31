@@ -39,89 +39,24 @@ namespace {
 from('Hoa')
 
 /**
- * \Hoa\Iterator
+ * \Hoa\Compiler\Exception
  */
--> import('Iterator.~');
+-> import('Compiler.Exception.~');
 
 }
 
 namespace Hoa\Compiler\Llk\Sampler {
 
 /**
- * Class \Hoa\Compiler\Llk\Sampler.
+ * Class \Hoa\Compiler\Llk\Sampler\Exception.
  *
- * Sampler parent.
+ * Extending the \Hoa\Compiler\Exception class.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2012 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2012 Ivan Enderlin.
  * @license    New BSD License
  */
 
-abstract class Sampler implements \Hoa\Iterator {
-
-    /**
-     * Compiler.
-     *
-     * @var \Hoa\Compiler\Llk\Parser object
-     */
-    protected $_compiler     = null;
-
-    /**
-     * All rules (from the compiler).
-     *
-     * @var \Hoa\Compiler\Llk\Sampler array
-     */
-    protected $_rules        = null;
-
-    /**
-     * Token sampler.
-     *
-     * @var \Hoa\Visitor\Visit object
-     */
-    protected $_tokenSampler = null;
-
-    /**
-     * Root rule name.
-     *
-     * @var \Hoa\Compiler\Llk\Sampler string
-     */
-    protected $_rootRuleName = null;
-
-
-
-    /**
-     * Construct a generator.
-     *
-     * @access  public
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
-     * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
-     * @return  void
-     */
-    public function __construct ( \Hoa\Compiler\Llk\Parser $compiler,
-                                  \Hoa\Visitor\Visit       $tokenSampler ) {
-
-        $this->_compiler     = $compiler;
-        $this->_rules        = $compiler->getRules();
-        $this->_tokenSampler = $tokenSampler;
-        $this->_rootRuleName = $compiler->getRootRule();
-
-        return;
-    }
-
-    /**
-     * Generate a token value.
-     *
-     * @access  protected
-     * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
-     * @return  string
-     */
-    protected function generateToken ( \Hoa\Compiler\Llk\Rule\Token $token ) {
-
-        return $this->_tokenSampler->visit(
-            $token->getAST()
-        ) . ' '; // use skip token @TODO
-    }
-}
+class Exception extends \Hoa\Compiler\Exception { }
 
 }

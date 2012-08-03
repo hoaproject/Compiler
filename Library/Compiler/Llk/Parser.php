@@ -612,6 +612,20 @@ class Parser {
     }
 
     /**
+     * Get rule by name.
+     *
+     * @access  public
+     * @return  \Hoa\Compiler\Llk\Rule
+     */
+    public function getRule ( $name ) {
+
+        if(!isset($this->_rules[$name]))
+            return null;
+
+        return $this->_rules[$name];
+    }
+
+    /**
      * Get rules.
      *
      * @access  public

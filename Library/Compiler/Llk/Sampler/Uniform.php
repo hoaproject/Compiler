@@ -123,60 +123,13 @@ class Uniform extends Sampler {
     }
 
     /**
-     * Get the current iterator value.
+     * The random and uniform algorithm.
      *
      * @access  public
+     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to start.
+     * @param   int                     $n       Size.
      * @return  string
      */
-    public function current ( ) {
-
-        return $this->_current;
-    }
-
-    /**
-     * Get the current iterator key.
-     *
-     * @access  public
-     * @return  int
-     */
-    public function key ( ) {
-
-        return $this->_key;
-    }
-
-    /**
-     * Useless here.
-     *
-     * @access  public
-     * @return  void
-     */
-    public function next ( ) {
-
-        return;
-    }
-
-    /**
-     * Rewind the internal iterator pointer.
-     *
-     * @access  public
-     * @return  void
-     */
-    public function rewind ( ) {
-
-        return;
-    }
-
-    /**
-     * Compute the current iterator value, i.e. generate a new solution.
-     *
-     * @access  public
-     * @return  bool
-     */
-    public function valid ( ) {
-
-        return;
-    }
-
     public function uniform ( \Hoa\Compiler\Llk\Rule $rule, $n = -1 ) {
 
         if(-1 === $n)
@@ -244,6 +197,14 @@ class Uniform extends Sampler {
         return null;
     }
 
+    /**
+     * Recursive method applied to our problematic.
+     *
+     * @access  public
+     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to start.
+     * @param   int                     $n       Size.
+     * @return  int
+     */
     public function count ( \Hoa\Compiler\Llk\Rule $rule = null, $n = -1 ) {
 
         if(null === $rule || -1 === $n)

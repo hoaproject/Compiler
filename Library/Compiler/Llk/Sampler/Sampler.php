@@ -58,7 +58,7 @@ namespace Hoa\Compiler\Llk\Sampler {
  * @license    New BSD License
  */
 
-abstract class Sampler implements \Hoa\Iterator {
+abstract class Sampler {
 
     /**
      * Compiler.

@@ -75,7 +75,7 @@ namespace Hoa\Compiler\Llk\Sampler {
  * @copyright  Copyright © 2007-2012 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-class BoundedExhaustive extends Sampler {
+class BoundedExhaustive extends Sampler implements \Hoa\Iterator {
 
     /**
      * Stack of rules to explore.

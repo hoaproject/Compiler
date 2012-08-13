@@ -130,10 +130,13 @@ class Uniform extends Sampler {
      * @param   int                     $n       Size.
      * @return  string
      */
-    public function uniform ( \Hoa\Compiler\Llk\Rule $rule, $n = -1 ) {
+    public function uniform ( \Hoa\Compiler\Llk\Rule $rule = null, $n = -1 ) {
 
-        if(-1 === $n)
-            $n = $this->getLength();
+        if(null === $rule && -1 === $n) {
+
+            $rule = $this->_rules[$this->_rootRuleName];
+            $n    = $this->getLength();
+        }
 
         $data     = &$this->_data[$rule->getName()][$n];
         $computed = $data['n'];

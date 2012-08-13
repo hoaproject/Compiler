@@ -489,7 +489,7 @@ class Parser {
                 $nextTrace = $this->_trace[$i + 1];
                 $id        = $rule->getNodeId();
 
-                // Optmization: skip empty trace sequence.
+                // Optimization: skip empty trace sequence.
                 if(   $nextTrace instanceof Rule\Ekzit
                    && $ruleName == $nextTrace->getRule()) {
 

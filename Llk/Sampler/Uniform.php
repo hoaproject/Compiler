@@ -49,9 +49,9 @@ from('Hoa')
 -> import('Compiler.Llk.Sampler.Exception')
 
 /**
- * \Hoa\Test\Sampler\Random
+ * \Hoa\Math\Sampler\Random
  */
--> import('Test.Sampler.Random')
+-> import('Math.Sampler.Random')
 
 /**
  * \Hoa\Math\Combinatorics\Combination\Γ
@@ -117,7 +117,7 @@ class Uniform extends Sampler {
             $this->_data[$name] = array();
 
         $this->setLength($length);
-        $this->_sampler = new \Hoa\Test\Sampler\Random();
+        $this->_sampler = new \Hoa\Math\Sampler\Random();
 
         return;
     }

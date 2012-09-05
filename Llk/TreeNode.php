@@ -82,6 +82,13 @@ class TreeNode implements \Hoa\Visitor\Element {
     protected $_children = null;
 
     /**
+     * Parent.
+     *
+     * @var \Hoa\Compiler\Llk\TreeNode object
+     */
+    protected $_parent   = null;
+
+    /**
      * Attached data.
      *
      * @var \Hoa\Compiler\Llk\TreeNode array
@@ -100,11 +107,15 @@ class TreeNode implements \Hoa\Visitor\Element {
      * @return  void
      */
     public function __construct ( $id, $value = null,
-                                  Array $children = array() ) {
+                                  Array    $children = array(),
+                                  TreeNode $parent   = null ) {
 
         $this->setId($id);
         $this->setValue($value);
         $this->setChildren($children);
+
+        if(null !== $parent)
+            $this->setParent($parent);
 
         return;
     }
@@ -271,6 +282,32 @@ class TreeNode implements \Hoa\Visitor\Element {
     }
 
     /**
+     * Set parent.
+     *
+     * @access  public
+     * @param   \Hoa\Compiler\Llk\TreeNode  $parent    Parent.
+     * @return  \Hoa\Compiler\Llk\TreeNode
+     */
+    public function setParent ( TreeNode $parent ) {
+
+        $old           = $this->_parent;
+        $this->_parent = $parent;
+
+        return $parent;
+    }
+
+    /**
+     * Get parent.
+     *
+     * @access  public
+     * @return  \Hoa\Compiler\Llk\TreeNode
+     */
+    public function getParent ( ) {
+
+        return $this->_parent;
+    }
+
+    /**
      * Get data.
      *
      * @access  public
@@ -294,6 +331,19 @@ class TreeNode implements \Hoa\Visitor\Element {
                              &$handle = null, $eldnah = null ) {
 
         return $visitor->visit($this, $handle, $eldnah);
+    }
+
+    /**
+     * Remove circular reference to the parent (help the garbage collector).
+     *
+     * @access  public
+     * @return  void
+     */
+    public function __destruct ( ) {
+
+        unset($this->_parent);
+
+        return;
     }
 }
 

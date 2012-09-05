@@ -537,11 +537,13 @@ class Parser {
 
                 $cTree = new TreeNode($cId);
 
-                foreach($handle as $child)
+                foreach($handle as $child) {
+
+                    $child->setParent($cTree);
                     $cTree->prependChild($child);
+                }
 
                 $children[] = $cTree;
-
             }
             elseif($trace instanceof Rule\Ekzit)
                 return $i + 1;

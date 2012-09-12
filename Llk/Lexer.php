@@ -172,7 +172,7 @@ class Lexer {
 
         $regexp = str_replace('#', '\#', $regexp);
 
-        if(   0 !== preg_match('#' . $regexp . '#', $text, $matches)
+        if(   0 !== preg_match('#' . $regexp . '#u', $text, $matches)
            && 0 <   count($matches)
            && 0 === strpos($text, $matches[0]))
             return array(

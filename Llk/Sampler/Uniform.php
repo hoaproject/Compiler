@@ -54,9 +54,9 @@ from('Hoa')
 -> import('Math.Sampler.Random')
 
 /**
- * \Hoa\Math\Combinatorics\Combination\Γ
+ * \Hoa\Math\Combinatorics\Combination\Gamma
  */
--> import('Math.Combinatorics.Combination.Γ')
+-> import('Math.Combinatorics.Combination.Gamma')
 
 /**
  * \Hoa\Math\Util
@@ -230,7 +230,7 @@ class Uniform extends Sampler {
         elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
 
             $children = $rule->getContent();
-            $Γ        = new \Hoa\Math\Combinatorics\Combination\Γ(
+            $Γ        = new \Hoa\Math\Combinatorics\Combination\Gamma(
                 count($children),
                 $n
             );
@@ -265,7 +265,7 @@ class Uniform extends Sampler {
 
                     $ut         = 0;
                     $handle[$α] = array('n' => 0, 'Γ' => array());
-                    $Γ          = new \Hoa\Math\Combinatorics\Combination\Γ(
+                    $Γ          = new \Hoa\Math\Combinatorics\Combination\Gamma(
                         $α,
                         $n
                     );

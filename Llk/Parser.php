@@ -562,8 +562,6 @@ class Parser {
                 }
 
                 $children[] = $cTree;
-
-                continue;
             }
             elseif($trace instanceof Rule\Ekzit)
                 return $i + 1;

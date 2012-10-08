@@ -501,15 +501,19 @@ class Parser {
                     $children[] = $ruleName;
 
                 if(null !== $id)
-                    $children[] = $id;
+                    $children[] = array(
+                        'id'      => $id,
+                        'options' => $rule->getNodeOptions()
+                    );
 
                 $i = $this->_buildTree($i + 1, $children);
 
                 if(false === $isRule)
                     continue;
 
-                $handle = array();
-                $cId    = null;
+                $handle   = array();
+                $cId      = null;
+                $cOptions = array();
 
                 do {
 
@@ -517,15 +521,21 @@ class Parser {
 
                     if(true === is_object($pop))
                         $handle[] = $pop;
-                    elseif('#' == $pop[0])
-                        $cId = $pop;
+                    elseif(true === is_array($pop)) {
+
+                        $cId      = $pop['id'];
+                        $cOptions = $pop['options'];
+                    }
                     elseif($ruleName == $pop)
                         break;
 
                 } while(null !== $pop);
 
-                if(null === $cId)
-                    $cId = $rule->getDefaultId();
+                if(null === $cId) {
+
+                    $cId      = $rule->getDefaultId();
+                    $cOptions = $rule->getDefaultOptions();
+                }
 
                 if(null === $cId) {
 
@@ -534,6 +544,14 @@ class Parser {
 
                     continue;
                 }
+
+                if(   true === in_array('M', $cOptions)
+                   && true === $this->mergeTree($children, $handle, $cId))
+                    continue;
+
+                if(   true === in_array('m', $cOptions)
+                   && true === $this->mergeTree($children, $handle, $cId, true))
+                    continue;
 
                 $cTree = new TreeNode($cId);
 
@@ -544,6 +562,8 @@ class Parser {
                 }
 
                 $children[] = $cTree;
+
+                continue;
             }
             elseif($trace instanceof Rule\Ekzit)
                 return $i + 1;
@@ -566,6 +586,85 @@ class Parser {
         }
 
         return $children[0];
+    }
+
+    /**
+     * Try to merge directly children into an existing node.
+     *
+     * @access  protected
+     * @param   array   &$children    Current children being gathering.
+     * @param   array   &$handle      Children of the new node.
+     * @param   string  $cId          Node ID.
+     * @param   bool    $recursive    Whether we should merge recursively or
+     *                                not.
+     * @return  bool
+     */
+    protected function mergeTree ( &$children, &$handle, $cId,
+                                   $recursive = false ) {
+
+        end($children);
+        $last = current($children);
+
+        if(!is_object($last))
+            return false;
+
+        if($cId !== $last->getId())
+            return false;
+
+        if(true === $recursive) {
+
+            foreach($handle as $child)
+                $this->mergeTreeRecursive($last, $child);
+
+            return true;
+        }
+
+        foreach($handle as $child) {
+
+            $last->appendChild($child);
+            $child->setParent($last);
+        }
+
+        return true;
+    }
+
+    /**
+     * Merge recursively.
+     * Please, see self::mergeTree() to know the context.
+     *
+     * @access  protected
+     * @param   \Hoa\Compiler\Llk\TreeNode  $node       Node that receives.
+     * @param   \Hoa\Compiler\Llk\TreeNode  $newNode    Node to merge.
+     * @return  void
+     */
+    protected function mergeTreeRecursive ( TreeNode $node, TreeNode $newNode ) {
+
+        $nNId = $newNode->getId();
+
+        if('token' === $nNId) {
+
+            $node->appendChild($newNode);
+            $newNode->setParent($node);
+
+            return;
+        }
+
+        $children = $node->getChildren();
+        end($children);
+        $last     = current($children);
+
+        if($last->getId() !== $nNId) {
+
+            $node->appendChild($newNode);
+            $newNode->setParent($node);
+
+            return;
+        }
+
+        foreach($newNode->getChildren() as $child)
+            $this->mergeTreeRecursive($last, $child);
+
+        return;
     }
 
     /**

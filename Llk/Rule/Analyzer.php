@@ -166,7 +166,7 @@ class Analyzer {
                 'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
                 'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?' . '>',
                 'named'         => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
-                'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*',
+                'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
                 'capturing_'    => '\(',
                 '_capturing'    => '\)'
             )

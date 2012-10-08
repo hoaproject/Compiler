@@ -63,9 +63,9 @@ namespace Hoa\Compiler\Llk {
  * Provide a generic LL(k) compiler compiler using the PP language.
  * Support: skip (%skip), token (%token), token namespace (ns1:token name value
  * -> ns2), rule (rule:), disjunction (|), capturing (operators ( and )),
- * quantifiers (?, +, * and {n,m}), node (#node), skipped token (::token::),
- * kept token (<token>), token unification (token[i]) and rule unification
- * (rule()[j]).
+ * quantifiers (?, +, * and {n,m}), node (#node) with options (#node:options),
+ * skipped token (::token::), kept token (<token>), token unification (token[i])
+ * and rule unification (rule()[j]).
  *
  * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>

@@ -54,42 +54,56 @@ abstract class Rule {
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_name         = null;
+    protected $_name           = null;
 
     /**
      * Rule content.
      *
      * @var \Hoa\Compiler\Llk\Rule mixed
      */
-    protected $_content      = null;
+    protected $_content        = null;
 
     /**
      * Node ID.
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_nodeId       = null;
+    protected $_nodeId         = null;
+
+    /**
+     * Node options.
+     *
+     * @var \Hoa\Compiler\Llk\Rule array
+     */
+    protected $_nodeOptions    = array();
 
     /**
      * Default ID.
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_defaultId    = null;
+    protected $_defaultId      = null;
+
+    /**
+     * Default options.
+     *
+     * @var \Hoa\Compiler\Llk\Rule array
+     */
+    protected $_defaultOptions = array();
 
     /**
      * For non-transitional rule: PP representation.
      *
      * @var \Hoa\Compiler\Llk\Rule string
      */
-    protected $_pp           = null;
+    protected $_pp             = null;
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar
      * but created by the analyzer).
      *
      * @var \Hoa\Compiler\Llk\Rule bool
      */
-    protected $_transitional = true;
+    protected $_transitional   = true;
 
 
 
@@ -104,9 +118,9 @@ abstract class Rule {
      */
     public function __construct ( $name, $content, $nodeId = null ) {
 
-        $this->_name    = $name;
-        $this->_content = $content;
-        $this->_nodeId  = $nodeId;
+        $this->setName($name);
+        $this->setContent($content);
+        $this->setNodeId($nodeId);
 
         return;
     }
@@ -138,6 +152,20 @@ abstract class Rule {
     }
 
     /**
+     * Set rule content.
+     *
+     * @access  public
+     * @return  mixed
+     */
+    protected function setContent ( $content ) {
+
+        $old            = $this->_content;
+        $this->_content = $content;
+
+        return $old;
+    }
+
+    /**
      * Get rule content.
      *
      * @access  public
@@ -157,8 +185,18 @@ abstract class Rule {
      */
     public function setNodeId ( $nodeId ) {
 
-        $old           = $this->_nodeId;
-        $this->_nodeId = $nodeId;
+        $old = $this->_nodeId;
+
+        if(false !== $pos = strpos($nodeId, ':')) {
+
+            $this->_nodeId      = substr($nodeId, 0, $pos);
+            $this->_nodeOptions = str_split(substr($nodeId, $pos + 1));
+        }
+        else {
+
+            $this->_nodeId      = $nodeId;
+            $this->_nodeOptions = array();
+        }
 
         return $old;
     }
@@ -174,6 +212,16 @@ abstract class Rule {
         return $this->_nodeId;
     }
 
+    /**
+     * Get node options.
+     *
+     * @access  public
+     * @retrun  array
+     */
+    public function getNodeOptions ( ) {
+
+        return $this->_nodeOptions;
+    }
 
     /**
      * Set default ID.
@@ -184,8 +232,18 @@ abstract class Rule {
      */
     public function setDefaultId ( $defaultId ) {
 
-        $old              = $this->_defaultId;
-        $this->_defaultId = $defaultId;
+        $old = $this->_defaultId;
+
+        if(false !== $pos = strpos($defaultId, ':')) {
+
+            $this->_defaultId      = substr($defaultId, 0, $pos);
+            $this->_defaultOptions = str_split(substr($defaultId, $pos + 1));
+        }
+        else {
+
+            $this->_defaultId      = $defaultId;
+            $this->_defaultOptions = array();
+        }
 
         return $old;
     }
@@ -199,6 +257,17 @@ abstract class Rule {
     public function getDefaultId ( ) {
 
         return $this->_defaultId;
+    }
+
+    /**
+     * Get default options.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getDefaultOptions ( ) {
+
+        return $this->_defaultOptions;
     }
 
     /**

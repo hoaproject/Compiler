@@ -159,3 +159,6 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 }
 
 }
+
+__halt_compiler();
+Compile and visit languages with grammars.

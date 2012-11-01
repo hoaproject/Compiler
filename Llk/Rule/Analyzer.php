@@ -442,7 +442,7 @@ class Analyzer {
 
             if(false === $regex)
                 throw new \Hoa\Compiler\Exception\Rule(
-                    'Specified token %s not declared in tokens.',
+                    'Token ::%s:: does not exist.',
                     3, $value);
 
             $name                       = count($this->_createdRules) + 1;
@@ -474,7 +474,7 @@ class Analyzer {
 
             if(false === $regex)
                 throw new \Hoa\Compiler\Exception\Rule(
-                    'Specified token %s not declared in tokens.',
+                    'Token <%s> does not exist.',
                     4, $value);
 
             $name  = count($this->_createdRules) + 1;
@@ -499,7 +499,7 @@ class Analyzer {
             if(   false === array_key_exists(      $value, $this->_rules)
                && false === array_key_exists('#' . $value, $this->_rules))
                 throw new \Hoa\Compiler\Exception\Rule(
-                    'Specified rule %s not declared in rules.',
+                    'Rule %s() does not exist.',
                     5, $value);
 
             if(   0     == $this->_currentState

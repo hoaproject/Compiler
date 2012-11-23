@@ -163,6 +163,7 @@ class Analyzer {
                 'n_to_m'        => '\{[0-9]+,[0-9]+\}',
                 'zero_to_m'     => '\{,[0-9]+\}',
                 'n_or_more'     => '\{[0-9]+,\}',
+                'exactly_n'     => '\{[0-9]+\}',
                 'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
                 'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?' . '>',
                 'named'         => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
@@ -338,19 +339,16 @@ class Analyzer {
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;
-                $this->consumeToken();
               break;
 
             case 'one_or_more':
                 $min =  1;
                 $max = -1;
-                $this->consumeToken();
               break;
 
             case 'zero_or_more':
                 $min =  0;
                 $max = -1;
-                $this->consumeToken();
               break;
 
             case 'n_to_m':
@@ -358,21 +356,26 @@ class Analyzer {
                 $nm     = explode(',', $handle);
                 $min    = (int) trim($nm[0]);
                 $max    = (int) trim($nm[1]);
-                $this->consumeToken();
               break;
 
             case 'zero_to_m':
                 $min = 0;
                 $max = (int) trim($this->getCurrentToken('value'), '{,}');
-                $this->consumeToken();
               break;
 
             case 'n_or_more':
                 $min = (int) trim($this->getCurrentToken('value'), '{,}');
                 $max = -1;
-                $this->consumeToken();
+              break;
+
+            case 'exactly_n':
+                $handle = trim($this->getCurrentToken('value'), '{}');
+                $min    = (int) $handle;
+                $max    = $min;
               break;
         }
+
+        $this->consumeToken();
 
         // … <node>?
         if('node' == $this->getCurrentToken()) {

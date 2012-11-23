@@ -50,6 +50,7 @@
 %token  n_to_m         \{[0-9]+,[0-9]+\}
 %token  zero_to_m      \{,[0-9]+\}
 %token  n_or_more      \{[0-9]+,\}
+%token  exactly_n      \{[0-9]+\}
 
 %token  token          [a-zA-Z_][a-zA-Z0-9_]*
 
@@ -92,3 +93,4 @@ quantifier:
   | <zero_or_more>
   | <n_to_m>
   | <n_or_more>
+  | <exactly_n>

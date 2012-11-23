@@ -339,16 +339,19 @@ class Analyzer {
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;
+                $this->consumeToken();
               break;
 
             case 'one_or_more':
                 $min =  1;
                 $max = -1;
+                $this->consumeToken();
               break;
 
             case 'zero_or_more':
                 $min =  0;
                 $max = -1;
+                $this->consumeToken();
               break;
 
             case 'n_to_m':
@@ -356,26 +359,28 @@ class Analyzer {
                 $nm     = explode(',', $handle);
                 $min    = (int) trim($nm[0]);
                 $max    = (int) trim($nm[1]);
+                $this->consumeToken();
               break;
 
             case 'zero_to_m':
                 $min = 0;
                 $max = (int) trim($this->getCurrentToken('value'), '{,}');
+                $this->consumeToken();
               break;
 
             case 'n_or_more':
                 $min = (int) trim($this->getCurrentToken('value'), '{,}');
                 $max = -1;
+                $this->consumeToken();
               break;
 
             case 'exactly_n':
                 $handle = trim($this->getCurrentToken('value'), '{}');
                 $min    = (int) $handle;
                 $max    = $min;
+                $this->consumeToken();
               break;
         }
-
-        $this->consumeToken();
 
         // … <node>?
         if('node' == $this->getCurrentToken()) {

@@ -170,7 +170,7 @@ all branches and tokens in the grammar:
         // Grammar.
         Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp')),
         // Token sampler.
-        new Hoa\Regex\Visitor\Isotropic(new Hoa\Random\Sampler\Random())
+        new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random())
     );
  
     foreach($sampler as $i => $data)

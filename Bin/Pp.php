@@ -146,13 +146,13 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
      */
     public function usage ( ) {
 
-        cout('Usage   : compiler:pp <options> [grammar.pp] [language]');
-        cout('Options :');
-        cout($this->makeUsageOptionsList(array(
-            'v'    => 'Visitor name (only “dump” is supported).',
-            'c'    => 'Visitor classname (using . instead of \ works).',
-            'help' => 'This help.'
-        )));
+        echo 'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",
+             'Options :', "\n",
+             $this->makeUsageOptionsList(array(
+                 'v'    => 'Visitor name (only “dump” is supported).',
+                 'c'    => 'Visitor classname (using . instead of \ works).',
+                 'help' => 'This help.'
+             )), "\n";
 
         return;
     }

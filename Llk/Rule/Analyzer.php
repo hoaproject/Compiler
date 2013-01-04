@@ -88,28 +88,28 @@ class Analyzer {
     /**
      * Created rules.
      *
-     * @var \Hoa\Compiler\Llk\rule\Analyzer array
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer array
      */
     protected $_createdRules = null;
 
     /**
      * Current analyzer state.
      *
-     * @var \Hoa\Compiler\Llk\rule\Analyzer array
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer array
      */
     protected $_currentState = 0;
 
     /**
      * Tokens representing rules.
      *
-     * @var \Hoa\Compiler\Llk\rule\Analyzer array
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer array
      */
     protected $_tokens       = null;
 
     /**
      * Rules.
      *
-     * @var \Hoa\Compiler\Llk\rule\Analyzer array
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer array
      */
     protected $_rules        = null;
 

@@ -72,6 +72,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
     protected $options = array(
         array('visitor',       \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),
         array('visitor-class', \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'c'),
+        array('trace',         \Hoa\Console\GetOption::NO_ARGUMENT,       't'),
         array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       'h'),
         array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       '?')
     );
@@ -87,7 +88,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
     public function main ( ) {
 
         $visitor = null;
-        $debug   = false;
+        $trace   = false;
 
         while(false !== $c = $this->getOption($v)) switch($c) {
 
@@ -105,6 +106,10 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
             case 'c':
                 $visitor = str_replace('.', '\\', $v);
+              break;
+
+            case 't':
+                $trace = true;
               break;
 
             case '__ambiguous':
@@ -127,13 +132,52 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
             new \Hoa\File\Read($grammar)
         );
         $data     = new \Hoa\File\Read($language);
-        $ast      = $compiler->parse($data->readAll());
+
+        try {
+
+            $ast = $compiler->parse($data->readAll());
+        }
+        catch ( \Hoa\Compiler\Exception $e ) {
+
+            $this->printTrace($compiler);
+            throw $e;
+
+            return 1;
+        }
+
+        if(true === $trace) {
+
+            $this->printTrace($compiler);
+        }
 
         if(null !== $visitor) {
 
             $visitor = dnew($visitor);
             echo $visitor->visit($ast);
         }
+
+        return;
+    }
+
+    /**
+     * Print trace.
+     *
+     * @access  protected
+     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
+     * @return  void
+     */
+    protected function printTrace ( \Hoa\Compiler\Llk\Parser $compiler ) {
+
+        $i = 0;
+
+        foreach($compiler->getTrace() as $element)
+            if($element instanceof \Hoa\Compiler\Llk\Rule\Entry)
+                echo str_repeat('>  ', ++$i), 'enter ', $element->getRule(), "\n";
+            elseif($element instanceof \Hoa\Compiler\Llk\Rule\Token)
+                echo str_repeat('   ', $i + 1), 'token ',$element->getTokenName(),
+                    ', consumed ', $element->getValue(), "\n";
+            else
+                echo str_repeat('<  ', $i--), 'ekzit ', $element->getRule(), "\n";
 
         return;
     }
@@ -151,6 +195,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
              $this->makeUsageOptionsList(array(
                  'v'    => 'Visitor name (only “dump” is supported).',
                  'c'    => 'Visitor classname (using . instead of \ works).',
+                 't'    => 'Print trace.',
                  'help' => 'This help.'
              )), "\n";
 

@@ -133,7 +133,7 @@ class Parser {
      *
      * @var \Hoa\Compiler\Llk\Parser array
      */
-    protected $_trace         = null;
+    protected $_trace         = array();
 
     /**
      * Stack of todo list.

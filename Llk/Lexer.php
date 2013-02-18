@@ -67,6 +67,20 @@ class Lexer {
      */
     protected $_lexerState = null;
 
+    /**
+     * Text.
+     *
+     * @var \Hoa\Compiler\Llk\Lexer string
+     */
+    protected $_text       = null;
+
+    /**
+     * Tokens.
+     *
+     * @var \Hoa\Compiler\Llk\Lexer array
+     */
+    protected $_tokens     = array();
+
 
 
     /**
@@ -81,20 +95,21 @@ class Lexer {
      */
     public function lexMe ( $text, Array $tokens ) {
 
-        $_text             = $text;
+        $this->_text       = $text;
+        $this->_tokens     = $tokens;
         $offset            = 0;
         $tokenized         = array();
         $this->_lexerState = 'default';
 
-        while(0 < strlen($text)) {
+        while(0 < strlen($this->_text)) {
 
-            $nextToken = $this->nextToken($text, $tokens);
+            $nextToken = $this->nextToken();
 
             if(null === $nextToken)
                 throw new \Hoa\Compiler\Exception\UnrecognizedToken(
                     'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
-                    0, array($text[0], $offset + 1, $_text),
+                    0, array($this->_text[0], $offset + 1, $text),
                     1, $offset
                 );
 
@@ -104,8 +119,8 @@ class Lexer {
                 $tokenized[]         = $nextToken;
             }
 
-            $offset += $nextToken['length'];
-            $text    = substr($text, $nextToken['length']);
+            $offset      += $nextToken['length'];
+            $this->_text  = substr($this->_text, $nextToken['length']);
         }
 
         $tokenized[] = array(
@@ -123,13 +138,11 @@ class Lexer {
      * Compute the next token recognized at the beginning of the string.
      *
      * @access  protected
-     * @param   string  $text      Text to tokenize.
-     * @param   array   $tokens    Tokens to be returned.
      * @return  array
      */
-    protected function nextToken ( $text, Array &$tokens ) {
+    protected function nextToken ( ) {
 
-        $tokenArray = $tokens[$this->_lexerState];
+        $tokenArray = &$this->_tokens[$this->_lexerState];
 
         foreach($tokenArray as $fulllexeme => $regexp) {
 
@@ -141,7 +154,7 @@ class Lexer {
                 $nextState = $this->_lexerState;
             }
 
-            $out = $this->matchesLexem($text, $lexeme, $regexp);
+            $out = $this->matchesLexem($lexeme, $regexp);
 
             if(null !== $out) {
 
@@ -163,18 +176,17 @@ class Lexer {
      * Check if a given lexem is matched at the beginning of the text.
      *
      * @access  protected
-     * @param   string  $text      Text in which the lexem has to be found.
      * @param   string  $lexem     Name of the lexem.
      * @param   string  $regexp    Regular expression describing the lexem.
      * @return  array
      */
-    protected function matchesLexem ( $text, $lexem, $regexp ) {
+    protected function matchesLexem ( $lexem, $regexp ) {
 
         $regexp = str_replace('#', '\#', $regexp);
 
-        if(   0 !== preg_match('#' . $regexp . '#u', $text, $matches)
+        if(   0 !== preg_match('#' . $regexp . '#u', $this->_text, $matches)
            && 0 <   count($matches)
-           && 0 === strpos($text, $matches[0]))
+           && 0 === strpos($this->_text, $matches[0]))
             return array(
                 'token'  => $lexem,
                 'value'  => $matches[0],

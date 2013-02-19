@@ -127,8 +127,8 @@ class Lexer {
             'token'  => 'EOF',
             'value'  => 'EOF',
             'length' => 0,
-            'offset' => $offset,
-            'keep'   => true
+            'keep'   => true,
+            'offset' => $offset
         );
 
         return $tokenized;
@@ -144,13 +144,13 @@ class Lexer {
 
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
-        foreach($tokenArray as $fulllexeme => $regexp) {
+        foreach($tokenArray as $fullLexeme => $regexp) {
 
-            if(false !== strpos($fulllexeme, ':'))
-                list($lexeme, $nextState) = explode(':', $fulllexeme, 2);
+            if(false !== strpos($fullLexeme, ':'))
+                list($lexeme, $nextState) = explode(':', $fullLexeme, 2);
             else {
 
-                $lexeme    = $fulllexeme;
+                $lexeme    = $fullLexeme;
                 $nextState = $this->_lexerState;
             }
 
@@ -176,11 +176,11 @@ class Lexer {
      * Check if a given lexem is matched at the beginning of the text.
      *
      * @access  protected
-     * @param   string  $lexem     Name of the lexem.
+     * @param   string  $lexeme    Name of the lexeme.
      * @param   string  $regexp    Regular expression describing the lexem.
      * @return  array
      */
-    protected function matchesLexem ( $lexem, $regexp ) {
+    protected function matchesLexem ( $lexeme, $regexp ) {
 
         $regexp = str_replace('#', '\#', $regexp);
 
@@ -188,7 +188,7 @@ class Lexer {
            && 0 <   count($matches)
            && 0 === strpos($this->_text, $matches[0]))
             return array(
-                'token'  => $lexem,
+                'token'  => $lexeme,
                 'value'  => $matches[0],
                 'length' => strlen($matches[0])
             );

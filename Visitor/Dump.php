@@ -85,7 +85,11 @@ class Dump implements \Hoa\Visitor\Visit {
         $out  = str_repeat('>  ' , self::$_i) . $element->getId();
 
         if(null !== $value = $element->getValue())
-            $out .= '(' . $value['token'] . ', ' .
+            $out .= '(' .
+                    ('default' !== $value['namespace']
+                        ? $value['namespace'] . ':'
+                        : '') .
+                    $value['token'] . ', ' .
                     $value['value'] . ')';
 
         $data = $element->getData();

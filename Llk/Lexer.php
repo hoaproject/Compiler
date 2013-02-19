@@ -113,7 +113,7 @@ class Lexer {
                     1, $offset
                 );
 
-            if($nextToken['keep']) {
+            if(true === $nextToken['keep']) {
 
                 $nextToken['offset'] = $offset;
                 $tokenized[]         = $nextToken;
@@ -124,11 +124,12 @@ class Lexer {
         }
 
         $tokenized[] = array(
-            'token'  => 'EOF',
-            'value'  => 'EOF',
-            'length' => 0,
-            'keep'   => true,
-            'offset' => $offset
+            'token'     => 'EOF',
+            'value'     => 'EOF',
+            'length'    => 0,
+            'namespace' => 'default',
+            'keep'      => true,
+            'offset'    => $offset
         );
 
         return $tokenized;
@@ -158,6 +159,7 @@ class Lexer {
 
             if(null !== $out) {
 
+                $out['namespace']  = $this->_lexerState;
                 $this->_lexerState = $nextState;
 
                 if('skip' !== $lexeme)

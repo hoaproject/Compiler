@@ -85,6 +85,13 @@ class Token extends Rule {
     protected $_tokenName            = null;
 
     /**
+     * Namespace.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Token string
+     */
+    protected $_namespace            = null;
+
+    /**
      * Token representation.
      *
      * @var \Hoa\Compiler\Llk\Rule\Token string
@@ -200,6 +207,32 @@ class Token extends Rule {
             );
 
         return $this->_ast;
+    }
+
+    /**
+     * Set token namespace.
+     *
+     * @access  public
+     * @param   string   $namespace    Namespace.
+     * @return  string
+     */
+    public function setNamespace ( $namespace ) {
+
+        $old              = $this->_namespace;
+        $this->_namespace = $namespace;
+
+        return $old;
+    }
+
+    /**
+     * Get token namespace.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getNamespace ( ) {
+
+        return $this->_namespace;
     }
 
     /**

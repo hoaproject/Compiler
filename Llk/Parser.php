@@ -318,6 +318,7 @@ class Parser {
 
             $zzeRule = clone $zeRule;
             $zzeRule->setValue($value);
+            $zzeRule->setNamespace($this->getCurrentToken('namespace'));
             array_pop($this->_todo);
             $this->_trace[]    = $zzeRule;
             $this->_errorState = ++$this->_currentState;
@@ -575,8 +576,9 @@ class Parser {
                 }
 
                 $child      = new TreeNode('token', array(
-                    'token' => $trace->getTokenName(),
-                    'value' => $trace->getValue()
+                    'token'     => $trace->getTokenName(),
+                    'value'     => $trace->getValue(),
+                    'namespace' => $trace->getNamespace(),
                 ));
                 $children[] = $child;
                 ++$i;

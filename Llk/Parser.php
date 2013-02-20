@@ -286,7 +286,7 @@ class Parser {
 
             $name = $this->getCurrentToken();
 
-            if($zeRule->getTokenName() != $name)
+            if($zeRule->getTokenName() !== $name)
                 return false;
 
             $value = $this->getCurrentToken('value');

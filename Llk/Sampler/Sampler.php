@@ -65,28 +65,42 @@ abstract class Sampler {
      *
      * @var \Hoa\Compiler\Llk\Parser object
      */
-    protected $_compiler     = null;
+    protected $_compiler         = null;
+
+    /**
+     * Tokens.
+     *
+     * @var \Hoa\Compiler\Llk\Sampler array
+     */
+    protected $_tokens           = null;
 
     /**
      * All rules (from the compiler).
      *
      * @var \Hoa\Compiler\Llk\Sampler array
      */
-    protected $_rules        = null;
+    protected $_rules            = null;
 
     /**
      * Token sampler.
      *
      * @var \Hoa\Visitor\Visit object
      */
-    protected $_tokenSampler = null;
+    protected $_tokenSampler     = null;
 
     /**
      * Root rule name.
      *
      * @var \Hoa\Compiler\Llk\Sampler string
      */
-    protected $_rootRuleName = null;
+    protected $_rootRuleName     = null;
+
+    /**
+     * Current token namespace.
+     *
+     * @var \Hoa\Compiler\Llk\Sampler string
+     */
+    protected $_currentNamespace = 'default';
 
 
 
@@ -102,6 +116,7 @@ abstract class Sampler {
                                   \Hoa\Visitor\Visit       $tokenSampler ) {
 
         $this->_compiler     = $compiler;
+        $this->_tokens       = $compiler->getTokens();
         $this->_rules        = $compiler->getRules();
         $this->_tokenSampler = $tokenSampler;
         $this->_rootRuleName = $compiler->getRootRule();
@@ -110,13 +125,74 @@ abstract class Sampler {
     }
 
     /**
+     * Complete a token (namespace and representation).
+     * It returns the next namespace.
+     *
+     * @access  public
+     * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
+     * @return  string
+     */
+    protected function completeToken ( \Hoa\Compiler\Llk\Rule\Token $token ) {
+
+        if(null !== $token->getRepresentation())
+            return $this->_currentNamespace;
+
+        $name = $token->getTokenName();
+        $token->setNamespace($this->_currentNamespace);
+
+        if(isset($this->_tokens[$this->_currentNamespace][$name])) {
+
+            $token->setRepresentation(
+                $this->_tokens[$this->_currentNamespace][$name]
+            );
+            $toNamespace = $this->_currentNamespace;
+        }
+        else {
+
+            foreach($this->_tokens[$this->_currentNamespace] as $_name => $regex) {
+
+                if(false === strpos($_name, ':'))
+                    continue;
+
+                list($_name, $toNamespace) = explode(':', $_name, 2);
+
+                if($_name === $name)
+                    break;
+            }
+
+            $token->setRepresentation($regex);
+        }
+
+        return $toNamespace;
+    }
+
+    /**
+     * Set current token namespace.
+     *
+     * @access  public
+     * @param   string  $namespace    Token namespace.
+     * @return  string
+     */
+    protected function setCurrentNamespace ( $namespace ) {
+
+        $old                     = $this->_currentNamespace;
+        $this->_currentNamespace = $namespace;
+
+        return $old;
+    }
+
+    /**
      * Generate a token value.
+     * Complete and set next token namespace.
      *
      * @access  protected
      * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
      * @return  string
      */
     protected function generateToken ( \Hoa\Compiler\Llk\Rule\Token $token ) {
+
+        $toNamespace = $this->completeToken($token);
+        $this->setCurrentNamespace($toNamespace);
 
         return $this->_tokenSampler->visit(
             $token->getAST()

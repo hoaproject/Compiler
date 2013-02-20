@@ -93,13 +93,6 @@ class Analyzer {
     protected $_createdRules = null;
 
     /**
-     * Current analyzer state.
-     *
-     * @var \Hoa\Compiler\Llk\Rule\Analyzer array
-     */
-    protected $_currentState = 0;
-
-    /**
      * Tokens representing rules.
      *
      * @var \Hoa\Compiler\Llk\Rule\Analyzer array
@@ -112,6 +105,13 @@ class Analyzer {
      * @var \Hoa\Compiler\Llk\Rule\Analyzer array
      */
     protected $_rules        = null;
+
+    /**
+     * Current analyzer state.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer int
+     */
+    protected $_currentState = 0;
 
 
 
@@ -436,28 +436,20 @@ class Analyzer {
 
         if('skipped' == $this->getCurrentToken()) {
 
-            $value = trim($this->getCurrentToken('value'), ':');
+            $tokenName = trim($this->getCurrentToken('value'), ':');
 
-            if(']' == substr($value, -1)) {
+            if(']' == substr($tokenName, -1)) {
 
-                $uId   = (int) substr($value, strpos($value, '[') + 1, -1);
-                $value = substr($value, 0, strpos($value, '['));
+                $uId       = (int) substr($tokenName, strpos($tokenName, '[') + 1, -1);
+                $tokenName = substr($tokenName, 0, strpos($tokenName, '['));
             }
             else
-                $uId   = -1;
-
-            $regex = $this->checkTokenExistence($value, $this->_tokens);
-
-            if(false === $regex)
-                throw new \Hoa\Compiler\Exception\Rule(
-                    'Token ::%s:: does not exist.',
-                    3, $value);
+                $uId = -1;
 
             $name                       = count($this->_createdRules) + 1;
             $this->_createdRules[$name] = new Token(
                 $name,
-                $value,
-                $regex,
+                $tokenName,
                 null,
                 $uId
             );
@@ -468,28 +460,20 @@ class Analyzer {
 
         if('kept' == $this->getCurrentToken()) {
 
-            $value = trim($this->getCurrentToken('value'), '<>');
+            $tokenName = trim($this->getCurrentToken('value'), '<>');
 
-            if(']' == substr($value, -1)) {
+            if(']' == substr($tokenName, -1)) {
 
-                $uId   = (int) substr($value, strpos($value, '[') + 1, -1);
-                $value = substr($value, 0, strpos($value, '['));
+                $uId       = (int) substr($tokenName, strpos($tokenName, '[') + 1, -1);
+                $tokenName = substr($tokenName, 0, strpos($tokenName, '['));
             }
             else
-                $uId   = -1;
-
-            $regex = $this->checkTokenExistence($value, $this->_tokens);
-
-            if(false === $regex)
-                throw new \Hoa\Compiler\Exception\Rule(
-                    'Token <%s> does not exist.',
-                    4, $value);
+                $uId = -1;
 
             $name  = count($this->_createdRules) + 1;
             $token = new Token(
                 $name,
-                $value,
-                $regex,
+                $tokenName,
                 null,
                 $uId
             );
@@ -502,26 +486,26 @@ class Analyzer {
 
         if('named' == $this->getCurrentToken()) {
 
-            $value = rtrim($this->getCurrentToken('value'), '()');
+            $tokenName = rtrim($this->getCurrentToken('value'), '()');
 
-            if(   false === array_key_exists(      $value, $this->_rules)
-               && false === array_key_exists('#' . $value, $this->_rules))
+            if(   false === array_key_exists(      $tokenName, $this->_rules)
+               && false === array_key_exists('#' . $tokenName, $this->_rules))
                 throw new \Hoa\Compiler\Exception\Rule(
                     'Rule %s() does not exist.',
-                    5, $value);
+                    3, $tokenName);
 
-            if(   0     == $this->_currentState
+            if(      0  == $this->_currentState
                && 'EOF' == $this->getNextToken()) {
 
                 $name                       = count($this->_createdRules) + 1;
                 $this->_createdRules[$name] = new Concatenation(
                     $name,
-                    array($value),
+                    array($tokenName),
                     null
                 );
             }
             else
-                $name = $value;
+                $name = $tokenName;
 
             $this->consumeToken();
 
@@ -529,31 +513,6 @@ class Analyzer {
         }
 
         return null;
-    }
-
-    /**
-     * Check token existence.
-     *
-     * @access  public
-     * @param   string  $token         Token.
-     * @param   array   $tokenArray    Tokens.
-     * @return  bool
-     */
-    public function checkTokenExistence ( $token, &$tokenArray ) {
-
-        foreach($tokenArray as $tokens)
-            foreach($tokens as $tokName => $tokValue)
-                if(false !== strpos($tokName, ':')) {
-
-                    $tab = explode(':', $tokName);
-
-                    if($token == $tab[0])
-                        return $tokValue;
-                }
-                elseif($tokName == $token)
-                    return $tokValue;
-
-        return false;
     }
 
     /**

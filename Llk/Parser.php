@@ -284,7 +284,9 @@ class Parser {
 
         if($zeRule instanceof Rule\Token) {
 
-            if($zeRule->getTokenName() != $this->getCurrentToken())
+            $name = $this->getCurrentToken();
+
+            if($zeRule->getTokenName() != $name)
                 return false;
 
             $value = $this->getCurrentToken('value');
@@ -316,9 +318,29 @@ class Parser {
                         return false;
                 }
 
+            $namespace = $this->getCurrentToken('namespace');
             $zzeRule = clone $zeRule;
             $zzeRule->setValue($value);
-            $zzeRule->setNamespace($this->getCurrentToken('namespace'));
+            $zzeRule->setNamespace($namespace);
+
+            if(isset($this->_tokens[$namespace][$name]))
+                $zzeRule->setRepresentation($this->_tokens[$namespace][$name]);
+            else {
+
+                foreach($this->_tokens[$namespace] as $_name => $regex) {
+
+                    if(false === $pos = strpos($_name, ':'))
+                        continue;
+
+                    $_name = substr($_name, 0, $pos);
+
+                    if($_name === $name)
+                        break;
+                }
+
+                $zzeRule->setRepresentation($regex);
+            }
+
             array_pop($this->_todo);
             $this->_trace[]    = $zzeRule;
             $this->_errorState = ++$this->_currentState;

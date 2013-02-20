@@ -134,17 +134,14 @@ class Token extends Rule {
      * @access  public
      * @param   string  $name           Name.
      * @param   string  $tokenName      Token name.
-     * @param   string  $regex          Representation.
      * @param   string  $nodeId         Node ID.
      * @param   int     $unification    Unification index.
      * @return  void
      */
-    public function __construct ( $name, $tokenName, $regex, $nodeId,
-                                  $unification ) {
+    public function __construct ( $name, $tokenName, $nodeId, $unification ) {
 
         parent::__construct($name, null, $nodeId);
         $this->_tokenName   = $tokenName;
-        $this->_regex       = $regex;
         $this->_unification = $unification;
 
         return;
@@ -161,8 +158,34 @@ class Token extends Rule {
         return $this->_tokenName;
     }
 
-   /**
-     * Set token representation.
+    /**
+     * Set token namespace.
+     *
+     * @access  public
+     * @param   string  $namespace    Namespace.
+     * @return  string
+     */
+    public function setNamespace ( $namespace ) {
+
+        $old              = $this->_namespace;
+        $this->_namespace = $namespace;
+
+        return $old;
+    }
+
+    /**
+     * Get token namespace.
+     *
+     * @access  public
+     * @return  string
+     */
+    public function getNamespace ( ) {
+
+        return $this->_namespace;
+    }
+
+    /**
+     * Set representation.
      *
      * @access  public
      * @param   string  $regex    Representation.
@@ -172,7 +195,6 @@ class Token extends Rule {
 
         $old          = $this->_regex;
         $this->_regex = $regex;
-        unset($this->_ast);
 
         return $old;
     }
@@ -207,32 +229,6 @@ class Token extends Rule {
             );
 
         return $this->_ast;
-    }
-
-    /**
-     * Set token namespace.
-     *
-     * @access  public
-     * @param   string   $namespace    Namespace.
-     * @return  string
-     */
-    public function setNamespace ( $namespace ) {
-
-        $old              = $this->_namespace;
-        $this->_namespace = $namespace;
-
-        return $old;
-    }
-
-    /**
-     * Get token namespace.
-     *
-     * @access  public
-     * @return  string
-     */
-    public function getNamespace ( ) {
-
-        return $this->_namespace;
     }
 
     /**
@@ -285,21 +281,6 @@ class Token extends Rule {
     public function isKept ( ) {
 
         return $this->_kept;
-    }
-
-    /**
-     * Set unification index.
-     *
-     * @access  public
-     * @param   int  $unification    Unification index.
-     * @return  int
-     */
-    public function setUnificationIndex ( $unification ) {
-
-        $old                = $this->_unification;
-        $this->_unification = $unification;
-
-        return $old;
     }
 
     /**

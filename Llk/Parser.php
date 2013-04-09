@@ -211,14 +211,19 @@ class Parser {
 
             if(false === $this->backtrack()) {
 
-                $token  = $this->_tokenSequence[$this->_errorState];
-                $offset = $token['offset'] + 1;
+                $token   = $this->_tokenSequence[$this->_errorState];
+                $offset  = $token['offset'];
+                $leftnl  = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
+                $rightnl = strpos($text, "\n", $offset);
+                $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
+                $column  = $offset - $leftnl + (0 === $leftnl);
+                $text    = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
 
                 throw new \Hoa\Compiler\Exception\UnexpectedToken(
-                    'Unexpected token "%s" (%s) at line 1 and column %d:' .
-                    "\n" . '%s' . "\n" . str_repeat(' ', $offset - 1) . '↑',
-                    0, array($token['value'], $token['token'], $offset, $text),
-                    1, $offset
+                    'Unexpected token "%s" (%s) at line %d and column %d:' .
+                    "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
+                    0, array($token['value'], $token['token'], $line, $column, $text),
+                    $line, $column
                 );
             }
 

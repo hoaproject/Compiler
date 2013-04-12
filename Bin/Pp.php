@@ -67,7 +67,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
     /**
      * Options description.
      *
-     * @var Hoa\Compiler\Bin\Pp array
+     * @var \Hoa\Compiler\Bin\Pp array
      */
     protected $options = array(
         array('visitor',       \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),

@@ -26,10 +26,10 @@
         "source": "http://git.hoa-project.net/"
     },
     "require": {
-        "hoa/core"    : "master",
-        "hoa/file"    : "master",
-        "hoa/iterator": "master",
-        "hoa/math"    : "master",
-        "hoa/visitor" : "master"
+        "hoa/core"    : "dev-master",
+        "hoa/file"    : "dev-master",
+        "hoa/iterator": "dev-master",
+        "hoa/math"    : "dev-master",
+        "hoa/visitor" : "dev-master"
     }
 }

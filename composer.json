@@ -31,5 +31,6 @@
         "hoa/iterator": "dev-master",
         "hoa/math"    : "dev-master",
         "hoa/visitor" : "dev-master"
-    }
+    },
+    "minimum-stability": "dev"
 }

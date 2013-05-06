@@ -454,8 +454,8 @@ in hoa://Library/Compiler/Llk/Parser.php at line 1</code></pre>
   <code>#array</code>, sinon il s'appelera <code>#bigarray</code> ; voyons
   plutôt :</p>
   <pre><code class="language-shell">$ echo '[42]' | hoa compiler:pp Json.pp 0 --visitor dump
-  >  #array
-  >  >  token(number, 42)
+>  #array
+>  >  token(number, 42)
 $ echo '[4, 2]' | hoa compiler:pp Json.pp 0 --visitor dump
 >  #bigarray
 >  >  token(number, 4)

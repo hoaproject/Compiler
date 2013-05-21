@@ -295,7 +295,7 @@ number:
     des lexèmes entre eux.</li>
   </ul>
   <p>Peu de constructions mais amplement suffisantes.</p>
-  <p>Enfin, la grammaire du langage PP est écrite … dans le langage PP ! Vous
+  <p>Enfin, la grammaire du langage PP est écrite… dans le langage PP ! Vous
   pourrez la trouver dans le fichier
   <code>hoa://Library/Compiler/Llk/Llk.pp</code>.</p>
 

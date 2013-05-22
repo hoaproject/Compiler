@@ -208,12 +208,13 @@ rule4 ::= e f</code></pre>
   suivante : <code>%token <em>namespace_in</em>:<em>name</em> <em>value</em> ->
   <em>namespace_out</em></code>, où <code><em>name</em></code> représente le
   <strong>nom</strong> du lexème, <code><em>value</em></code> représente sa
-  <strong>valeur</strong>, au format <a href="http://pcre.org/">PCRE</a>, et
-  <code><em>namespace_in</em></code> et <code><em>namespace_out</em></code>
-  représentent les noms des <strong>espaces de noms</strong> et sont optionels
-  (vaut <code>default</code> par défaut). Par exemple <code>number</code> qui
-  représente un nombre composé de chiffres de <code>0</code> à
-  <code>9</code> :</p>
+  <strong>valeur</strong>, au format <a href="http://pcre.org/">PCRE</a>
+  (attention à ne pas reconnaître de valeur vide, auquel cas une exception sera
+  levée), et <code><em>namespace_in</em></code> et
+  <code><em>namespace_out</em></code> représentent les noms des <strong>espaces
+  de noms</strong> et sont optionels (vaut <code>default</code> par défaut). Par
+  exemple <code>number</code> qui représente un nombre composé de chiffres de
+  <code>0</code> à <code>9</code> :</p>
   <pre><code class="language-pp">%token number \d+</code></pre>
   <p>Les espaces de noms représentent des <strong>sous-ensembles</strong>
   disjoints de lexèmes, utilisés pour <strong>faciliter</strong> les analyses.
@@ -421,7 +422,10 @@ in hoa://Library/Compiler/Llk/Parser.php at line 1</code></pre>
     <li>durant l'analyse <strong>lexicale</strong>,
     <code>Hoa\Compiler\Exception\UnrecognizedToken</code> quand un lexème n'est
     pas reconnu, <em>i.e.</em> quand la donnée textuelle ne peut plus être
-    découpée en une séquence de lexèmes ;</li>
+    découpée en une séquence de lexèmes, et
+    <code>Hoa\Compiler\Exception\Lexer</code> quand d'autres erreurs plus
+    générales arrivent, par exemple si un lexème reconnaît une valeur
+    vide ;</li>
     <li>durant l'analyse <strong>syntaxique</strong>,
     <code>Hoa\Compiler\Exception\UnexpectedToken</code> quand un lexème n'est
     pas attendu, <em>i.e.</em> qu'il ne permet plus de dériver les règles de la

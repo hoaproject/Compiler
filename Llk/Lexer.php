@@ -155,7 +155,7 @@ class Lexer {
                 $nextState = $this->_lexerState;
             }
 
-            $out = $this->matchesLexem($lexeme, $regexp);
+            $out = $this->matchLexeme($lexeme, $regexp);
 
             if(null !== $out) {
 
@@ -175,14 +175,14 @@ class Lexer {
     }
 
     /**
-     * Check if a given lexem is matched at the beginning of the text.
+     * Check if a given lexeme is matched at the beginning of the text.
      *
      * @access  protected
      * @param   string  $lexeme    Name of the lexeme.
      * @param   string  $regexp    Regular expression describing the lexem.
      * @return  array
      */
-    protected function matchesLexem ( $lexeme, $regexp ) {
+    protected function matchLexeme ( $lexeme, $regexp ) {
 
         $regexp = str_replace('#', '\#', $regexp);
 

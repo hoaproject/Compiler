@@ -41,7 +41,12 @@ from('Hoa')
 /**
  * \Hoa\Compiler\Exception\UnrecognizedToken
  */
--> import('Compiler.Exception.UnrecognizedToken');
+-> import('Compiler.Exception.UnrecognizedToken')
+
+/**
+ * \Hoa\Compiler\Exception\Lexer
+ */
+-> import('Compiler.Exception.Lexer');
 
 }
 
@@ -179,21 +184,29 @@ class Lexer {
      *
      * @access  protected
      * @param   string  $lexeme    Name of the lexeme.
-     * @param   string  $regexp    Regular expression describing the lexem.
+     * @param   string  $regexp    Regular expression describing the lexeme.
      * @return  array
+     * @throw   \Hoa\Compiler\Exception\Lexer
      */
     protected function matchLexeme ( $lexeme, $regexp ) {
 
-        $regexp = str_replace('#', '\#', $regexp);
+        $_regexp = str_replace('#', '\#', $regexp);
 
-        if(   0 !== preg_match('#' . $regexp . '#u', $this->_text, $matches)
-           && 0 <   count($matches)
-           && 0 === strpos($this->_text, $matches[0]))
-            return array(
-                'token'  => $lexeme,
-                'value'  => $matches[0],
-                'length' => strlen($matches[0])
-            );
+        if(   0 !== preg_match('#' . $_regexp . '#u', $this->_text, $matches)
+           && 0 <   count($matches)) {
+
+            if('' === $matches[0])
+                throw new \Hoa\Compiler\Exception\Lexer(
+                    'A lexeme must not match an empty value, which is the ' .
+                    'case of "%s" (%s).', 1, array($lexeme, $regexp));
+
+            if(0 === strpos($this->_text, $matches[0]))
+                return array(
+                    'token'  => $lexeme,
+                    'value'  => $matches[0],
+                    'length' => strlen($matches[0])
+                );
+        }
 
         return null;
     }

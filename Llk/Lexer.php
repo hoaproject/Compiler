@@ -192,20 +192,18 @@ class Lexer {
 
         $_regexp = str_replace('#', '\#', $regexp);
 
-        if(   0 !== preg_match('#' . $_regexp . '#u', $this->_text, $matches)
-           && 0 <   count($matches)) {
+        if(0 !== preg_match('#^(' . $_regexp . ')#u', $this->_text, $matches)) {
 
             if('' === $matches[0])
                 throw new \Hoa\Compiler\Exception\Lexer(
                     'A lexeme must not match an empty value, which is the ' .
                     'case of "%s" (%s).', 1, array($lexeme, $regexp));
 
-            if(0 === strpos($this->_text, $matches[0]))
-                return array(
-                    'token'  => $lexeme,
-                    'value'  => $matches[0],
-                    'length' => strlen($matches[0])
-                );
+            return array(
+                'token'  => $lexeme,
+                'value'  => $matches[0],
+                'length' => strlen($matches[0])
+            );
         }
 
         return null;

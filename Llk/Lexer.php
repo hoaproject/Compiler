@@ -192,7 +192,7 @@ class Lexer {
 
         $_regexp = str_replace('#', '\#', $regexp);
 
-        if(0 !== preg_match('#^(' . $_regexp . ')#u', $this->_text, $matches)) {
+        if(0 !== preg_match('#^(?:' . $_regexp . ')#u', $this->_text, $matches)) {
 
             if('' === $matches[0])
                 throw new \Hoa\Compiler\Exception\Lexer(

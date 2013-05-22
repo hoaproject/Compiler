@@ -50,7 +50,7 @@ namespace Hoa\Compiler\Exception {
 /**
  * Class \Hoa\Compiler\Exception\UnexpectedToken.
  *
- * Extending the \Hoa\Compiler\Exception class.
+ * Extending the \Hoa\Compiler\Exception\UnrecognizedToken class.
  *
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
  * @copyright  Copyright © 2007-2013 Ivan Enderlin.

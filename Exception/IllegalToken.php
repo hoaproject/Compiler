@@ -41,7 +41,7 @@ from('Hoa')
 /**
  * \Hoa\Compiler\Exception
  */
--> import('Compiler.Exception');
+-> import('Compiler.Exception.~');
 
 }
 

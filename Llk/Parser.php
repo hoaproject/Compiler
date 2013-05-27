@@ -745,6 +745,17 @@ class Parser {
     }
 
     /**
+     * Get token sequence.
+     *
+     * @access  public
+     * @return  array
+     */
+    public function getTokenSequence ( ) {
+
+        return $this->_tokenSequence;
+    }
+
+    /**
      * Get rule by name.
      *
      * @access  public

@@ -126,7 +126,7 @@ class Parser {
      *
      * @var \Hoa\Compiler\Llk\Parser array
      */
-    protected $_tokenSequence = null;
+    protected $_tokenSequence = array();
 
     /**
      * Trace of activated rules.

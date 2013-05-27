@@ -145,7 +145,12 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
         }
         catch ( \Hoa\Compiler\Exception $e ) {
 
-            $this->printTrace($compiler);
+            if(true === $tokenSequence) {
+
+                $this->printTokenSequence($compiler);
+                echo "\n\n";
+            }
+
             throw $e;
 
             return 1;

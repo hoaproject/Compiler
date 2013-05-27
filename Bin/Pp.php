@@ -70,11 +70,12 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
      * @var \Hoa\Compiler\Bin\Pp array
      */
     protected $options = array(
-        array('visitor',       \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),
-        array('visitor-class', \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'c'),
-        array('trace',         \Hoa\Console\GetOption::NO_ARGUMENT,       't'),
-        array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       'h'),
-        array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       '?')
+        array('visitor',        \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),
+        array('visitor-class',  \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'c'),
+        array('token-sequence', \Hoa\Console\GetOption::NO_ARGUMENT,       's'),
+        array('trace',          \Hoa\Console\GetOption::NO_ARGUMENT,       't'),
+        array('help',           \Hoa\Console\GetOption::NO_ARGUMENT,       'h'),
+        array('help',           \Hoa\Console\GetOption::NO_ARGUMENT,       '?')
     );
 
 
@@ -87,8 +88,9 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
      */
     public function main ( ) {
 
-        $visitor = null;
-        $trace   = false;
+        $visitor       = null;
+        $tokenSequence = false;
+        $trace         = false;
 
         while(false !== $c = $this->getOption($v)) switch($c) {
 
@@ -106,6 +108,10 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
             case 'c':
                 $visitor = str_replace('.', '\\', $v);
+              break;
+
+            case 's':
+                $tokenSequence = true;
               break;
 
             case 't':
@@ -145,9 +151,16 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
             return 1;
         }
 
+        if(true === $tokenSequence) {
+
+            $this->printTokenSequence($compiler);
+            echo "\n\n";
+        }
+
         if(true === $trace) {
 
             $this->printTrace($compiler);
+            echo "\n\n";
         }
 
         if(null !== $visitor) {
@@ -183,6 +196,45 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
     }
 
     /**
+     * Print token sequence.
+     *
+     * @access  protected
+     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
+     * @return  void
+     */
+    protected function printTokenSequence ( \Hoa\Compiler\Llk\Parser $compiler ) {
+
+        $sequence = $compiler->getTokenSequence();
+        $format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
+                    '%-15s %-25s  %-35s  %7s' . "\n";
+
+        $header = sprintf(
+            $format,
+            '#',
+            'namespace',
+            'token name',
+            'token value',
+            'offset'
+        );
+
+        echo $header, str_repeat('-', strlen($header)), "\n";
+
+        foreach($compiler->getTokenSequence() as $i => $token)
+            printf(
+                $format,
+                $i,
+                $token['namespace'],
+                $token['token'],
+                35 < strlen($token['value'])
+                    ? substr($token['value'], 0, 34) . '…'
+                    : $token['value'],
+                $token['offset']
+            );
+
+        return;
+    }
+
+    /**
      * The command usage.
      *
      * @access  public
@@ -195,6 +247,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
              $this->makeUsageOptionsList(array(
                  'v'    => 'Visitor name (only “dump” is supported).',
                  'c'    => 'Visitor classname (using . instead of \ works).',
+                 's'    => 'Print token sequence.',
                  't'    => 'Print trace.',
                  'help' => 'This help.'
              )), "\n";

@@ -165,12 +165,8 @@ class Lexer {
             if(null !== $out) {
 
                 $out['namespace']  = $this->_lexerState;
+                $out['keep']       = 'skip' !== $lexeme;
                 $this->_lexerState = $nextState;
-
-                if('skip' !== $lexeme)
-                    $out['keep'] = true;
-                else
-                    $out['keep'] = false;
 
                 return $out;
             }

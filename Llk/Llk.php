@@ -140,7 +140,24 @@ class Llk {
      */
     public static function load ( \Hoa\Stream\IStream\In $stream ) {
 
-        $pp     = $stream->readAll();
+        $pp = $stream->readAll();
+
+        if(empty($pp)) {
+
+            $message = 'The grammar is empty';
+
+            if($stream instanceof \Hoa\Stream\IStream\Pointable)
+                if(0 < $stream->tell())
+                    $message .= ': the stream ' . $stream->getStreamName() .
+                                ' is pointable and not rewinded, maybe it ' .
+                                'could be the reason';
+                else
+                    $message .= ': nothing to read on the stream ' .
+                                $stream->getStreamName();
+
+            throw new \Hoa\Compiler\Exception($message . '.', 0);
+        }
+
         $lines  = explode("\n", $pp);
         $tokens = array('default' => array());
         $rules  = array();
@@ -194,7 +211,7 @@ class Llk {
                     throw new \Hoa\Compiler\Exception(
                         'Unrecognized instructions:' . "\n" .
                         '    %s' . "\n" . 'in file %s at line %d.',
-                        0, array($line, $stream->getStreamName(), $i + 1));
+                        1, array($line, $stream->getStreamName(), $i + 1));
 
                 continue;
             }

@@ -1044,7 +1044,7 @@ abstract class Ll1 {
                                 ' [label="' . $label . '"];' . "\n";
                     }
             }
-            
+
             $out .= '        node[shape=point,label=""] "' . $e . '_";' . "\n" .
                     '        "' . $e . '_" -> "' . $e . '_GO";' . "\n" .
                     '    }';

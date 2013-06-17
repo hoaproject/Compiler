@@ -534,6 +534,7 @@ rule:
     <code><em>$i</em></code>-ème enfant d'un nœud ;</li>
     <li><code>getChildren</code> pour obtenir tous les nœuds ;</li>
     <li><code>getChildrenNumber</code> pour connaître le nombre d'enfants ;</li>
+    <li><code>getParent</code> pour obtenir le nœud parent ;</li>
     <li><code>getData</code> pour obtenir une référence vers un tableau de
     données ;</li>
     <li><code>accept</code> pour appliquer un visiteur.</li>

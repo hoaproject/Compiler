@@ -211,7 +211,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
         $sequence = $compiler->getTokenSequence();
         $format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
-                    '%-15s %-25s  %-35s  %7s' . "\n";
+                    '%-13s %-20s  %-30s  %6s' . "\n";
 
         $header = sprintf(
             $format,

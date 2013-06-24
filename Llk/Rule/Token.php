@@ -218,10 +218,13 @@ class Token extends Rule {
      */
     public function getAST ( ) {
 
-        if(null === static::$_regexCompiler)
-            static::$_regexCompiler = \Hoa\Compiler\Llk::load(
-                new \Hoa\File\Read('hoa://Library/Regex/Grammar.pp')
-            );
+        if(null === static::$_regexCompiler) {
+
+            $stream = new \Hoa\File\Read('hoa://Library/Regex/Grammar.pp');
+            $stream->rewind();
+
+            static::$_regexCompiler = \Hoa\Compiler\Llk::load($stream);
+        }
 
         if(null === $this->_ast)
             $this->_ast = static::$_regexCompiler->parse(

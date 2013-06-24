@@ -107,6 +107,13 @@ class Analyzer {
     protected $_rules        = null;
 
     /**
+     * Current analyzed rule.
+     *
+     * @var \Hoa\Compiler\Llk\Rule\Analyzer string
+     */
+    protected $_rule         = null;
+
+    /**
      * Current analyzer state.
      *
      * @var \Hoa\Compiler\Llk\Rule\Analyzer int
@@ -180,6 +187,7 @@ class Analyzer {
 
             $lexer                = new \Hoa\Compiler\Llk\Lexer();
             $this->_tokenSequence = $lexer->lexMe($value, $tokens);
+            $this->_rule          = $value;
             $this->_currentState  = 0;
             $nodeId               = null;
 
@@ -447,10 +455,21 @@ class Analyzer {
             else
                 $uId = -1;
 
+            $exists = false;
+
             foreach($this->_tokens as $namespace => $tokens)
-                if(false === array_key_exists($tokenName, $tokens))
-                    throw new \Hoa\Compiler\Exception(
-                        'Token ::%s:: does not exist.', 3, $tokenName);
+                foreach($tokens as $token => $value)
+                    if(   $token === $tokenName
+                       || substr($token, 0, strpos($token, ':')) === $tokenName) {
+
+                        $exists = true;
+                        break 2;
+                    }
+
+            if(false == $exists)
+                throw new \Hoa\Compiler\Exception(
+                    'Token ::%s:: does not exist in%s.',
+                    3, array($tokenName, $this->_rule));
 
             $name                       = count($this->_createdRules) + 1;
             $this->_createdRules[$name] = new Token(
@@ -476,10 +495,21 @@ class Analyzer {
             else
                 $uId = -1;
 
+            $exists = false;
+
             foreach($this->_tokens as $namespace => $tokens)
-                if(false === array_key_exists($tokenName, $tokens))
-                    throw new \Hoa\Compiler\Exception(
-                        'Token <%s> does not exist.', 4, $tokenName);
+                foreach($tokens as $token => $value)
+                    if(   $token === $tokenName
+                       || substr($token, 0, strpos($token, ':')) === $tokenName) {
+
+                        $exists = true;
+                        break 2;
+                    }
+
+            if(false == $exists)
+                throw new \Hoa\Compiler\Exception(
+                    'Token <%s> does not exist in%s.',
+                    4, array($tokenName, $this->_rule));
 
             $name  = count($this->_createdRules) + 1;
             $token = new Token(

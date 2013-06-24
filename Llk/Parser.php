@@ -222,7 +222,9 @@ class Parser {
                 $rightnl = strpos($text, "\n", $offset);
                 $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
                 $column  = $offset - $leftnl + (0 === $leftnl);
-                $text    = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
+
+                if(false !== $rightnl)
+                    $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
 
                 throw new \Hoa\Compiler\Exception\UnexpectedToken(
                     'Unexpected token "%s" (%s) at line %d and column %d:' .

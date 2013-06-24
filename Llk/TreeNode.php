@@ -282,6 +282,17 @@ class TreeNode implements \Hoa\Visitor\Element {
     }
 
     /**
+     * Check if a child exists.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function childExists ( $i ) {
+
+        return array_key_exists($i, $this->_children);
+    }
+
+    /**
      * Set parent.
      *
      * @access  public

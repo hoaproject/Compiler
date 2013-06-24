@@ -401,12 +401,20 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                     $this->_trace[] = $seq;
 
-                    if($seq instanceof \Hoa\Compiler\Llk\Rule\Ekzit) {
-
-                        $rand = $seq->getData();
+                    if($seq instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
                         $this->updateCoverage($seq);
-                    }
                 }
+
+                if(empty($already))
+                    $rand = $inprogress[rand(
+                        0,
+                        count($inprogress) - 1
+                    )];
+                else
+                    $rand = $already[rand(
+                        0,
+                        count($already) - 1
+                    )];
 
                 $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
@@ -583,10 +591,10 @@ class Coverage extends Sampler implements \Hoa\Iterator {
      * Update coverage of a rule.
      *
      * @access  protected
-     * @param   \Hoa\Compiler\Llk\Invocation  $rule    Rule to consider.
+     * @param   \Hoa\Compiler\Llk\Rule\Ekzit  $rule    Rule to consider.
      * @return  void
      */
-    protected function updateCoverage ( \Hoa\Compiler\Llk\Rule\Invocation $Rule ) {
+    protected function updateCoverage ( \Hoa\Compiler\Llk\Rule\Ekzit $Rule ) {
 
         $ruleName = $Rule->getRule();
         $child    = $Rule->getData();

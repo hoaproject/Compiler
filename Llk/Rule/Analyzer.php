@@ -414,6 +414,7 @@ class Analyzer {
      *
      * @access  protected
      * @return  mixed
+     * @throw   \Hoa\Compiler\Exception
      * @throw   \Hoa\Compiler\Exception\Rule
      */
     protected function simple ( &$pNodeId ) {
@@ -446,6 +447,11 @@ class Analyzer {
             else
                 $uId = -1;
 
+            foreach($this->_tokens as $namespace => $tokens)
+                if(false === array_key_exists($tokenName, $tokens))
+                    throw new \Hoa\Compiler\Exception(
+                        'Token ::%s:: does not exist.', 3, $tokenName);
+
             $name                       = count($this->_createdRules) + 1;
             $this->_createdRules[$name] = new Token(
                 $name,
@@ -470,6 +476,11 @@ class Analyzer {
             else
                 $uId = -1;
 
+            foreach($this->_tokens as $namespace => $tokens)
+                if(false === array_key_exists($tokenName, $tokens))
+                    throw new \Hoa\Compiler\Exception(
+                        'Token <%s> does not exist.', 4, $tokenName);
+
             $name  = count($this->_createdRules) + 1;
             $token = new Token(
                 $name,
@@ -492,7 +503,7 @@ class Analyzer {
                && false === array_key_exists('#' . $tokenName, $this->_rules))
                 throw new \Hoa\Compiler\Exception\Rule(
                     'Rule %s() does not exist.',
-                    3, $tokenName);
+                    5, $tokenName);
 
             if(      0  == $this->_currentState
                && 'EOF' == $this->getNextToken()) {

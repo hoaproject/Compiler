@@ -139,13 +139,13 @@ abstract class Sampler {
 
         $name = $token->getTokenName();
         $token->setNamespace($this->_currentNamespace);
+        $toNamespace = $this->_currentNamespace;
 
         if(isset($this->_tokens[$this->_currentNamespace][$name])) {
 
             $token->setRepresentation(
                 $this->_tokens[$this->_currentNamespace][$name]
             );
-            $toNamespace = $this->_currentNamespace;
         }
         else {
 

@@ -114,7 +114,7 @@ class Lexer {
                 throw new \Hoa\Compiler\Exception\UnrecognizedToken(
                     'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
-                    0, array($this->_text[0], $offset + 1, $text),
+                    0, array(mb_substr($this->_text, 0, 1), $offset + 1, $text),
                     1, $offset
                 );
 
@@ -125,7 +125,7 @@ class Lexer {
             }
 
             $offset      += $nextToken['length'];
-            $this->_text  = substr($this->_text, $nextToken['length']);
+            $this->_text  = mb_substr($this->_text, $nextToken['length']);
         }
 
         $tokenized[] = array(
@@ -150,7 +150,7 @@ class Lexer {
 
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
-        foreach($tokenArray as $fullLexeme => $regexp) {
+        foreach($tokenArray as $fullLexeme => $regex) {
 
             if(false !== strpos($fullLexeme, ':'))
                 list($lexeme, $nextState) = explode(':', $fullLexeme, 2);
@@ -160,7 +160,7 @@ class Lexer {
                 $nextState = $this->_lexerState;
             }
 
-            $out = $this->matchLexeme($lexeme, $regexp);
+            $out = $this->matchLexeme($lexeme, $regex);
 
             if(null !== $out) {
 
@@ -180,25 +180,25 @@ class Lexer {
      *
      * @access  protected
      * @param   string  $lexeme    Name of the lexeme.
-     * @param   string  $regexp    Regular expression describing the lexeme.
+     * @param   string  $regex     Regular expression describing the lexeme.
      * @return  array
      * @throw   \Hoa\Compiler\Exception\Lexer
      */
-    protected function matchLexeme ( $lexeme, $regexp ) {
+    protected function matchLexeme ( $lexeme, $regex ) {
 
-        $_regexp = str_replace('#', '\#', $regexp);
+        $_regex = str_replace('#', '\#', $regex);
 
-        if(0 !== preg_match('#^(?:' . $_regexp . ')#u', $this->_text, $matches)) {
+        if(0 !== preg_match('#^(?:' . $_regex . ')#u', $this->_text, $matches)) {
 
             if('' === $matches[0])
                 throw new \Hoa\Compiler\Exception\Lexer(
                     'A lexeme must not match an empty value, which is the ' .
-                    'case of "%s" (%s).', 1, array($lexeme, $regexp));
+                    'case of "%s" (%s).', 1, array($lexeme, $regex));
 
             return array(
                 'token'  => $lexeme,
                 'value'  => $matches[0],
-                'length' => strlen($matches[0])
+                'length' => mb_strlen($matches[0])
             );
         }
 

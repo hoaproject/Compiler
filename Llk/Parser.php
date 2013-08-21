@@ -556,7 +556,7 @@ class Parser {
 
                     if(true === is_object($pop))
                         $handle[] = $pop;
-                    elseif(true === is_array($pop)) {
+                    elseif(true === is_array($pop) && null === $cId) {
 
                         $cId      = $pop['id'];
                         $cOptions = $pop['options'];
@@ -588,7 +588,7 @@ class Parser {
                    && true === $this->mergeTree($children, $handle, $cId, true))
                     continue;
 
-                $cTree = new TreeNode($cId);
+                $cTree = new TreeNode($id ?: $cId);
 
                 foreach($handle as $child) {
 

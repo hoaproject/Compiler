@@ -336,7 +336,7 @@ class Parser {
                 }
 
             $namespace = $this->getCurrentToken('namespace');
-            $zzeRule = clone $zeRule;
+            $zzeRule   = clone $zeRule;
             $zzeRule->setValue($value);
             $zzeRule->setNamespace($namespace);
 

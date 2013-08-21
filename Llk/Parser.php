@@ -211,20 +211,25 @@ class Parser {
 
             if(false === $this->backtrack()) {
 
-                $token   = $this->_tokenSequence[$this->_errorState];
-                $offset  = $token['offset'];
+                $token  = $this->_tokenSequence[$this->_errorState];
+                $offset = $token['offset'];
+                $line   = 1;
+                $column = 1;
 
-                if(0 === $offset)
-                    $leftnl = 0;
-                else
-                    $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
+                if(!empty($text)) {
 
-                $rightnl = strpos($text, "\n", $offset);
-                $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
-                $column  = $offset - $leftnl + (0 === $leftnl);
+                    if(0 === $offset)
+                        $leftnl = 0;
+                    else
+                        $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
 
-                if(false !== $rightnl)
-                    $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
+                    $rightnl = strpos($text, "\n", $offset);
+                    $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
+                    $column  = $offset - $leftnl + (0 === $leftnl);
+
+                    if(false !== $rightnl)
+                        $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
+                }
 
                 throw new \Hoa\Compiler\Exception\UnexpectedToken(
                     'Unexpected token "%s" (%s) at line %d and column %d:' .

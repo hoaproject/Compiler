@@ -189,8 +189,18 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
         $i = 0;
 
         foreach($compiler->getTrace() as $element)
-            if($element instanceof \Hoa\Compiler\Llk\Rule\Entry)
-                echo str_repeat('>  ', ++$i), 'enter ', $element->getRule(), "\n";
+            if($element instanceof \Hoa\Compiler\Llk\Rule\Entry) {
+
+                $ruleName = $element->getRule();
+                $rule     = $compiler->getRule($ruleName);
+
+                echo str_repeat('>  ', ++$i), 'enter ', $ruleName;
+
+                if(null !== $id = $rule->getNodeId())
+                    echo ' (', $id, ')';
+
+                echo "\n";
+            }
             elseif($element instanceof \Hoa\Compiler\Llk\Rule\Token)
                 echo str_repeat('   ', $i + 1), 'token ',$element->getTokenName(),
                     ', consumed ', $element->getValue(), "\n";

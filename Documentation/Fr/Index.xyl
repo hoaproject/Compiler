@@ -137,7 +137,7 @@ chiffre ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
   <strong>découper</strong> un mot en une <strong>séquence de lexèmes</strong>.
   Cette séquence sera ensuite utilisée par l'analyseur syntaxique afin de
   vérifier que le mot <strong>appartient</strong> au langage.</p>
-  <p>Selon la grammaire, la reconnaissance ne sera pas faite de la même manière,
+  <p>Selon la grammaire, la reconnaissance ne se fera pas de la même manière,
   mais le principe reste identique : prendre les lexèmes les uns après les
   autres dans la séquence et vérifier qu'ils permettent
   d'<strong>avancer</strong> dans la <strong>dérivation</strong> des règles de

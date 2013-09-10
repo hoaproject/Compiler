@@ -114,6 +114,26 @@ class Lexer {
         $tokenized         = array();
         $this->_lexerState = 'default';
 
+        foreach($this->_tokens as &$tokens) {
+
+            $_tokens = array();
+
+            foreach($tokens as $fullLexeme => $regex) {
+
+                if(false === strpos($fullLexeme, ':')) {
+
+                    $_tokens[$fullLexeme] = array($regex, null);
+                    continue;
+                }
+
+                list($lexeme, $namespace) = explode(':', $fullLexeme, 2);
+                unset($tokens[$fullLexeme]);
+                $_tokens[$lexeme] = array($regex, $namespace);
+            }
+
+            $tokens = $_tokens;
+        }
+
         while(0 < strlen($this->_text)) {
 
             $nextToken = $this->nextToken();
@@ -159,15 +179,12 @@ class Lexer {
 
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
-        foreach($tokenArray as $fullLexeme => $regex) {
+        foreach($tokenArray as $lexeme => $bucket) {
 
-            if(false !== strpos($fullLexeme, ':'))
-                list($lexeme, $nextState) = explode(':', $fullLexeme, 2);
-            else {
+            list($regex, $nextState) = $bucket;
 
-                $lexeme    = $fullLexeme;
+            if(null === $nextState)
                 $nextState = $this->_lexerState;
-            }
 
             $out = $this->matchLexeme($lexeme, $regex);
 

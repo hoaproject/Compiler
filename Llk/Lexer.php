@@ -109,10 +109,11 @@ class Lexer {
 
         $this->_text       = $text;
         $this->_tokens     = $tokens;
-        $this->_nsStack    = new \SplStack();
+        $this->_nsStack    = null;
         $offset            = 0;
         $tokenized         = array();
         $this->_lexerState = 'default';
+        $stack             = false;
 
         foreach($this->_tokens as &$tokens) {
 
@@ -127,12 +128,18 @@ class Lexer {
                 }
 
                 list($lexeme, $namespace) = explode(':', $fullLexeme, 2);
+
+                $stack |= ('__shift__' === substr($namespace, 0, 9));
+
                 unset($tokens[$fullLexeme]);
                 $_tokens[$lexeme] = array($regex, $namespace);
             }
 
             $tokens = $_tokens;
         }
+
+        if(true == $stack)
+            $this->_nsStack = new \SplStack();
 
         while(0 < strlen($this->_text)) {
 
@@ -190,14 +197,15 @@ class Lexer {
 
             if(null !== $out) {
 
-                $out['namespace']  = $this->_lexerState;
-                $out['keep']       = 'skip' !== $lexeme;
+                $out['namespace'] = $this->_lexerState;
+                $out['keep']      = 'skip' !== $lexeme;
 
                 if($nextState !== $this->_lexerState) {
 
                     $shift = false;
 
-                    if(0 !== preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches)) {
+                    if(   null !== $this->_nsStack
+                       &&    0 !== preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches)) {
 
                         $i = isset($matches[1]) ? intval($matches[1]) : 1;
 
@@ -221,7 +229,7 @@ class Lexer {
                             'in namespace %s.',
                             2, array($nextState, $lexeme, $this->_lexerState));
 
-                    if(false === $shift)
+                    if(null !== $this->_nsStack && false === $shift)
                         $this->_nsStack[] = $this->_lexerState;
 
                     $this->_lexerState = $nextState;

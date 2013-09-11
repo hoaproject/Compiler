@@ -158,6 +158,26 @@ class Llk {
             throw new \Hoa\Compiler\Exception($message . '.', 0);
         }
 
+        static::parsePP($pp, $tokens, $rawRules);
+
+        $ruleAnalyzer = new Rule\Analyzer($tokens);
+        $rules        = $ruleAnalyzer->analyzeRules($rawRules);
+
+        return new Parser($tokens, $rules);
+    }
+
+    /**
+     * Parse PP.
+     *
+     * @access  public
+     * @param   string  $pp        PP.
+     * @param   array   $tokens    Extracted tokens.
+     * @param   array   $rules     Extracted raw rules.
+     * @return  void
+     * @throw   \Hoa\Compiler\Exception
+     */
+    public static function parsePP ( $pp, &$tokens, &$rules ) {
+
         $lines  = explode("\n", $pp);
         $tokens = array('default' => array());
         $rules  = array();
@@ -242,10 +262,7 @@ class Llk {
             $rules[$ruleName] = $rule;
         }
 
-        $ruleAnalyzer = new Rule\Analyzer($tokens);
-        $rules        = $ruleAnalyzer->analyzeRules($rules);
-
-        return new Parser($tokens, $rules);
+        return;
     }
 }
 

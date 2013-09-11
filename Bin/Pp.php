@@ -234,7 +234,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
         echo $header, str_repeat('-', strlen($header)), "\n";
 
-        foreach($compiler->getTokenSequence() as $i => $token)
+        foreach($sequence as $i => $token)
             printf(
                 $format,
                 $i,

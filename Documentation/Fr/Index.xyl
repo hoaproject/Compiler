@@ -468,6 +468,164 @@ $ echo '[4, 2]' | hoa compiler:pp Json.pp 0 --visitor dump
   <strong>empruntée</strong> dans la règle. Le mécanisme est normalement assez
   <strong>intuitif</strong>.</p>
 
+  <h4 id="Espace_de_noms" for="main-toc">Espace de noms</h4>
+
+  <p>Détaillons un peu le fonctionnement de l'analyseur lexical vis à vis des
+  <strong>espaces de noms</strong>.</p>
+  <p>Les <strong>lexèmes</strong> sont placés dans des espaces de noms,
+  c'est à dire que seuls les lexèmes de l'espace de noms
+  <strong>courant</strong> seront utilisés par l'analyseur lexical. L'espace de
+  noms par défaut est <code>default</code>. Pour déclarer l'espace de noms d'un
+  lexème, il faut utiliser l'opérateur <code>:</code>.  Quand un lexème est
+  consommé, il peut <strong>changer</strong> l'espace courant pour la suite de
+  l'analyse lexicale, grâce à l'opérateur <code>-></code>.  Ainsi, nous allons
+  déclarer cinq lexèmes : <code>foo</code> et <code>bar</code> dans l'espace
+  <code>default</code>, <code>baz</code> dans <code>ns1</code> et
+  <code>qux</code> et <code>foo</code> dans <code>ns2</code>. Le fait de
+  déclarer deux fois <code>foo</code> n'est pas gênant car ils sont dans des
+  espaces de noms <strong>différent</strong> :</p>
+  <pre><code class="language-pp">%token      foo   fo+     -> ns1
+%token      bar   ba?r+   -> ns2
+%token  ns1:baz   ba?z+   -> default
+%token  ns2:qux   qux+
+%token  ns2:foo   FOO     -> ns1</code></pre>
+  <p>Écrire <code>default:bar</code> est strictement équivalent à
+  <code>bar</code>. Le lexème <code>foo</code> emmène dans <code>ns1</code>,
+  <code>bar</code> dans <code>ns2</code>, <code>ns1:baz</code> dans
+  <code>default</code>, <code>ns2:qux</code> reste dans <code>ns2</code> et
+  <code>ns2:foo</code> emmène dans <code>ns1</code>. Observons la séquence de
+  lexèmes produite par l'analyseur lexical avec la donnée
+  <code>fooooobzzbarrrquxFOObaz</code> :</p>
+  <pre><code class="language-php">from('Hoa')
+-> import('File.Read')
+-> import('Compiler.Llk.~')
+-> import('Compiler.Llk.Lexer');
+
+$pp = '%token      foo   fo+     -> ns1' . "\n" .
+      '%token      bar   ba?r+   -> ns2' . "\n" .
+      '%token  ns1:baz   ba?z+   -> default' . "\n" .
+      '%token  ns2:qux   qux+' . "\n" .
+      '%token  ns2:foo   FOO     -> ns1';
+
+// 1. Parse PP.
+Hoa\Compiler\Llk::parsePP($pp, $tokens, $rawRules);
+
+// 2. Run the lexical analyzer.
+$lexer    = new Hoa\Compiler\Llk\Lexer();
+$sequence = $lexer->lexMe('fooooobzzbarrrquxFOObaz', $tokens);
+
+// 3. Pretty-print the result.
+$format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
+            '%-13s %-20s  %-20s  %6s' . "\n";
+$header   = sprintf($format, '#', 'namespace', 'token name', 'token value', 'offset');
+
+echo $header, str_repeat('-', strlen($header)), "\n";
+
+foreach($sequence as $i => $token)
+    printf(
+        $format,
+        $i,
+        $token['namespace'],
+        $token['token'],
+        $token['value'],
+        $token['offset']
+    );
+
+/**
+ * Will output:
+ *      #  namespace     token name            token value           offset
+ *     ---------------------------------------------------------------------
+ *      0  default       foo                   fooooo                     0
+ *      1  ns1           baz                   bzz                        6
+ *      2  default       bar                   barrr                      9
+ *      3  ns2           qux                   qux                       14
+ *      4  ns2           foo                   FOO                       17
+ *      5  ns1           baz                   baz                       20
+ *      6  default       EOF                   EOF                       23
+ */</code></pre>
+  <p>Nous lisons les lexèmes, leur espace et leur valeur dans le tableau. La
+  donnée a pu être <strong>découpée</strong>, et nous sommes passés d'un espace
+  à un autre. Si cette fois nous essayons avec la donnée <code>foqux</code>,
+  nous aurons une erreur : <code>fo</code> correspond au lexème <code>foo</code>
+  dans l'espace <code>default</code>, nous changeons alors d'espace pour
+  <code>ns1</code>, et là, aucun lexème dans cet espace ne peut reconnaître au
+  moins <code>q</code>.  Une erreur sera levée.</p>
+  <p>Jusqu'à maintenant, nous avons vu comment passer d'un espace à l'autre avec
+  l'opérateur <code>-></code>. Aucun <strong>historique</strong> sur les espaces
+  traversés n'est conservé. Toutefois, dans certains cas rares, il peut arriver
+  qu'un espace de lexèmes soit accessible via <strong>plusieurs</strong> autres
+  et que nous aimerions qu'un lexème déclenche le retour vers l'espace de noms
+  <strong>précédent</strong>. Autrement dit, nous aimerions un historique des
+  espaces traversés et pouvoir y naviguer (en arrière uniquement). C'est le rôle
+  du mot-clé <code>__shift__ * <em>n</em></code>, à utiliser après l'opérateur
+  <code>-></code> et à la place du nom d'un espace. <code>__shift__</code> est
+  équivalent à dire : revient à l'espace précédent. <code>__shift__</code> est
+  équivalent à <code>__shift__ * 1</code>, et
+  <code>__shift__ * <em>n</em></code> à : revient <code><em>n</em></code> fois à
+  l'espace précédent.</p>
+  <p>Lorsque le mot-clé <code>__shift__</code> apparaît dans la grammaire, les
+  espaces sont gérés comme une <strong>pile</strong>, d'où le vocabulaire
+  <em lang="en">shift</em>. Il faut faire attention à bien dépiler les espaces
+  pour ne pas avoir une pile trop conséquente.</p>
+  <p>Prenons en exemple la grammaire suivante :</p>
+  <pre><code class="language-pp">%token       foo1  a    -> ns1
+%token       foo2  x    -> ns2
+%token       end   e
+
+%token   ns1:bar   b
+%token   ns1:baz   c    -> ns3
+%token   ns1:tada  t    -> __shift__
+
+%token   ns2:bar   y
+%token   ns2:baz   z    -> ns3
+%token   ns2:tada  T    -> __shift__
+
+%token   ns3:qux   =   -> __shift__
+
+#test:
+    ( &amp;lt;foo1> | &amp;lt;foo2> ) &amp;lt;bar> &amp;lt;baz> &amp;lt;qux> &amp;lt;tada> &amp;lt;end></code></pre>
+  <p>Cette grammaire reconnaît deux données : <code>abc=te</code> et
+  <code>xyz=Te</code>. Si le premier lexème <code>foo1</code> est rencontré,
+  l'analyseur syntaxique changera d'espace pour <code>ns1</code>. Quand il
+  rencontrera le lexème <code>ns1:baz</code>, il passera dans <code>ns3</code>.
+  Ensuite, quand il rencontrera <code>ns3:qux</code>, il reviendra à l'espace
+  précédent, soit <code>ns1</code>. Et ainsi de suite. Maintenant, s'il ne
+  rencontre pas <code>foo1</code> mais <code>foo2</code>, il ira dans l'espace
+  <code>ns2</code>, puis dans <code>ns3</code> puis à nouveau <code>ns2</code>.
+  Les mots-clés <code>__shift__</code> pour <code>ns1:tada</code> et
+  <code>ns2:tada</code> n'ont pas d'autres buts que de dépiler les espaces, mais
+  aucune ambiguïté n'existe : ces espaces ne sont accessibles que par un seul
+  espace, à savoir <code>default</code>.</p>
+  <p>Maintenant, enregistrons cette grammaire dans un fichier
+  <code>NamespaceStack.pp</code> et utilisons l'option
+  <code>-s/--token-sequence</code> de la commande <code>hoa
+  compiler:pp</code> :</p>
+  <pre><code class="language-shell">$ echo -n 'abc=te' | hoa compiler:pp CrazyNamespace.pp 0 --token-sequence
+ #  namespace     token name            token value                     offset
+-------------------------------------------------------------------------------
+ 0  default       foo1                  a                                    0
+ 1  ns1           bar                   b                                    1
+ 2  ns1           baz                   c                                    2
+ 3  ns3           qux                   =                                    3
+ 4  ns1           tada                  t                                    4
+ 5  default       end                   e                                    5
+ 6  default       EOF                   EOF                                  6
+
+$ echo -n 'xyz=Te' | hoa compiler:pp CrazyNamespace.pp 0 --token-sequence
+ #  namespace     token name            token value                     offset
+-------------------------------------------------------------------------------
+ 0  default       foo2                  x                                    0
+ 1  ns2           bar                   y                                    1
+ 2  ns2           baz                   z                                    2
+ 3  ns3           qux                   =                                    3
+ 4  ns2           tada                  T                                    4
+ 5  default       end                   e                                    5
+ 6  default       EOF                   EOF                                  6</code></pre>
+  <p>Nous voyons que l'analyse lexicale à réussi à jongler avec les espaces de
+  noms, comme attendu. Nous avions deux façons d'accéder à l'espace
+  <code>ns3</code> : soit depuis <code>ns1</code>, soit depuis <code>ns2</code>.
+  L'analyseur a réussi à créer un historique des espaces et à y naviguer.</p>
+
   <h4 id="Unification" for="main-toc">Unification</h4>
 
   <p>Une caractéristique qu'apporte le langage PP par rapport à d'autres

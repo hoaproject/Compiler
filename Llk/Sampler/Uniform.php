@@ -256,7 +256,12 @@ class Uniform extends Sampler {
             $handle = &$this->_data[$ruleName][$n]['xy'];
             $child  =  $this->_rules[$rule->getContent()];
             $x      =  $rule->getMin();
-            $y      =  (-1 === $rule->getMax() ? $n : $rule->getMax());
+            $y      =  $rule->getMax();
+
+            if(-1 === $y)
+                $y = $n;
+            else
+                $y = min($n, $y);
 
             if(0 === $x && $x === $y)
                 $out = 1;

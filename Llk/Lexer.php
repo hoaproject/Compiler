@@ -149,10 +149,13 @@ class Lexer {
             if(null === $nextToken)
                 throw new \Hoa\Compiler\Exception\UnrecognizedToken(
                     'Unrecognized token "%s" at line 1 and column %d:' .
-                    "\n" . '%s' . "\n" . str_repeat(' ', $offset) . '↑',
-                    0, array(mb_substr($this->_text, 0, 1), $offset + 1, $text),
-                    1, $offset
-                );
+                    "\n" . '%s' . "\n" .
+                    str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑',
+                    0, array(
+                        mb_substr(substr($text, $offset), 0, 1),
+                        $offset + 1,
+                        $text
+                    ), 1, $offset);
 
             if(true === $nextToken['keep']) {
 

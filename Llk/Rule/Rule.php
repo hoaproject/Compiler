@@ -310,3 +310,12 @@ abstract class Rule {
 }
 
 }
+
+namespace {
+
+/**
+ * Flex entity.
+ */
+Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');
+
+}

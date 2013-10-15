@@ -267,3 +267,12 @@ class Llk {
 }
 
 }
+
+namespace {
+
+/**
+ * Flex entity.
+ */
+Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Llk');
+
+}

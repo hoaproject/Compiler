@@ -201,3 +201,12 @@ abstract class Sampler {
 }
 
 }
+
+namespace {
+
+/**
+ * Flex entity.
+ */
+Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Sampler\Sampler');
+
+}

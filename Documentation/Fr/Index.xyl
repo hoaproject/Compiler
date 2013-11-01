@@ -357,10 +357,10 @@ echo $dump->visit($ast);
  * Will output:
  *     >  #object
  *     >  >  #pair
- *     >  >  >  token(string, foo)
+ *     >  >  >  token(string:string, foo)
  *     >  >  >  token(true, true)
  *     >  >  #pair
- *     >  >  >  token(string, bar)
+ *     >  >  >  token(string:string, bar)
  *     >  >  >  #array
  *     >  >  >  >  token(null, null)
  *     >  >  >  >  token(number, 42)

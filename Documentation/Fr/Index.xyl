@@ -193,8 +193,8 @@ rule4 ::= e f</code></pre>
   autrement dit, des générateurs de compilateurs. La plupart du temps, ces
   compilateurs de compilateurs utilisent un langage
   <strong>intermédiaire</strong> pour écrire une grammaire. La bibliothèque
-  <code>Hoa\Compiler</code> propose la classe <code>Hoa\Compiler\Llk</code> qui
-  permet l'écriture de compilateurs de compilateurs à travers un langage
+  <code>Hoa\Compiler</code> propose la classe <code>Hoa\Compiler\Llk\Llk</code>
+  qui permet l'écriture de compilateurs de compilateurs à travers un langage
   <strong>dédié</strong>.</p>
 
   <h3 id="Langage_PP" for="main-toc">Langage PP</h3>
@@ -320,13 +320,13 @@ number:
       annot.push(paper.rect(0, 0, 45, 45, 22.5, '4'));
   });
   </script>
-  <p>Le processus de compilation qu'utilise <code>Hoa\Compiler\Llk</code> est
-  classique. Il commence par analyser <strong>lexicalement</strong> la donnée
-  textuelle, le mot, <em>i.e.</em> à transformer notre donnée en une séquence de
-  lexèmes. L'<strong>ordre</strong> de déclaration des lexèmes est primordial
-  car l'analyseur lexical va les prendre les uns après les autres. Ensuite,
-  c'est l'analyseur <strong>syntaxique</strong> qui entre en jeu afin de
-  <strong>reconnaître</strong> notre donnée.</p>
+  <p>Le processus de compilation qu'utilise <code>Hoa\Compiler\Llk\Llk</code>
+  est classique. Il commence par analyser <strong>lexicalement</strong> la
+  donnée textuelle, le mot, <em>i.e.</em> à transformer notre donnée en une
+  séquence de lexèmes. L'<strong>ordre</strong> de déclaration des lexèmes est
+  primordial car l'analyseur lexical va les prendre les uns après les autres.
+  Ensuite, c'est l'analyseur <strong>syntaxique</strong> qui entre en jeu afin
+  de <strong>reconnaître</strong> notre donnée.</p>
   <p>Si l'analyse syntaxique est un succès, nous obtenons une
   <strong>trace</strong>. Cette trace peut être transformée en AST, pour
   <em lang="en">Abstract Syntax Tree</em>. Cet arbre représente notre donnée
@@ -334,7 +334,7 @@ number:
   détaillerons plus loin), ce qui permet par exemple d'ajouter de nouvelles
   <strong>contraintes</strong> qui ne peuvent pas être exprimées dans la
   grammaire, comme une vérification de type.</p>
-  <p>Manipulons un peu <code>Hoa\Compiler\Llk</code>. Cette classe est un
+  <p>Manipulons un peu <code>Hoa\Compiler\Llk\Llk</code>. Cette classe est un
   <strong>assistant</strong> pour lire une grammaire au format PP facilement.
   Elle prend en seul argument un flux en lecture vers la grammaire et retourne
   un compilateur <code>Hoa\Compiler\Llk\Parser</code> prêt à l'emploi. Sur ce
@@ -343,13 +343,8 @@ number:
   la donnée est correcte, nous aurons en retour un AST, sinon une exception sera
   levée. Enfin, nous allons utiliser le visiteur
   <code>Hoa\Compiler\Visitor\Dump</code> pour afficher notre AST :</p>
-  <pre><code class="language-php">from('Hoa')
--> import('File.Read')
--> import('Compiler.Llk.~')
--> import('Compiler.Visitor.Dump');
-
-// 1. Load grammar.
-$compiler = Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp'));
+  <pre><code class="language-php">// 1. Load grammar.
+$compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 
 // 2. Parse a data.
 $ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
@@ -431,7 +426,7 @@ in hoa://Library/Compiler/Llk/Parser.php at line 1</code></pre>
     pas attendu, <em>i.e.</em> qu'il ne permet plus de dériver les règles de la
     grammaire.</li>
   </ul>
-  <p>L'exception parente est <code>Hoa\Compiler\Exception</code>.</p>
+  <p>L'exception parente est <code>Hoa\Compiler\Exception\Exception</code>.</p>
 
   <h4 id="Nœuds" for="main-toc">Nœuds</h4>
 
@@ -496,19 +491,14 @@ $ echo '[4, 2]' | hoa compiler:pp Json.pp 0 --visitor dump
   <code>ns2:foo</code> emmène dans <code>ns1</code>. Observons la séquence de
   lexèmes produite par l'analyseur lexical avec la donnée
   <code>fooooobzzbarrrquxFOObaz</code> :</p>
-  <pre><code class="language-php">from('Hoa')
--> import('File.Read')
--> import('Compiler.Llk.~')
--> import('Compiler.Llk.Lexer');
-
-$pp = '%token      foo   fo+     -> ns1' . "\n" .
-      '%token      bar   ba?r+   -> ns2' . "\n" .
+  <pre><code class="language-php">$pp = '%token      foo   fo+     -> ns1'     . "\n" .
+      '%token      bar   ba?r+   -> ns2'     . "\n" .
       '%token  ns1:baz   ba?z+   -> default' . "\n" .
-      '%token  ns2:qux   qux+' . "\n" .
+      '%token  ns2:qux   qux+'               . "\n" .
       '%token  ns2:foo   FOO     -> ns1';
 
 // 1. Parse PP.
-Hoa\Compiler\Llk::parsePP($pp, $tokens, $rawRules);
+Hoa\Compiler\Llk\Llk::parsePP($pp, $tokens, $rawRules);
 
 // 2. Run the lexical analyzer.
 $lexer    = new Hoa\Compiler\Llk\Lexer();
@@ -783,7 +773,7 @@ rule:
     }
 }</code></pre>
   <p>Nous allons voir tout de suite un exemple d'utilisation :</p>
-  <pre><code class="language-php">$compiler    = Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp'));
+  <pre><code class="language-php">$compiler    = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 $ast         = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 $prettyPrint = new PrettyPrinter();
 echo $prettyPrint->visit($ast);
@@ -854,7 +844,7 @@ $previous = $data['previousComputing'];</code></pre>
   <p>Nous pouvons l'obtenir grâce à la méthode
   <code>Hoa\Compiler\Llk\Parser::getTrace</code>. Pour bien comprendre cette
   trace, nous allons commencer par un exemple :</p>
-  <pre><code class="language-php">$compiler = Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp'));
+  <pre><code class="language-php">$compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 $ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 $i        = 0;
 
@@ -948,7 +938,7 @@ foreach($compiler->getTrace() as $element)
   <code>Hoa\Compiler\Llk\Parser::getRules</code> sous la forme d'un tableau.
   Nous allons afficher toutes les règles <strong>accessibles</strong> depuis la
   règle racine pour mieux comprendre :</p>
-  <pre><code class="language-php">$compiler = Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp'));
+  <pre><code class="language-php">$compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 $ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 
 // 1. Get all rules.
@@ -1100,16 +1090,9 @@ while(false !== current($stack)) {
   <code>Hoa\Compiler\Llk\Sampler\Uniform</code> qui prend en premier argument
   notre grammaire, en deuxième le générateur de valeurs de lexèmes (ici
   <code>Hoa\Regex\Visitor\Isototropic</code>) et enfin la taille :</p>
-  <pre><code class="language-php">from('Hoa')
--> import('File.Read')
--> import('Compiler.Llk.~')
--> import('Compiler.Llk.Sampler.Uniform')
--> import('Math.Sampler.Random')
--> import('Regex.Visitor.Isotropic');
-
-$sampler = new Hoa\Compiler\Llk\Sampler\Uniform(
+  <pre><code class="language-php">$sampler = new Hoa\Compiler\Llk\Sampler\Uniform(
     // Grammar.
-    Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp')),
+    Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp')),
     // Token sampler.
     new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random()),
     // Length.
@@ -1147,12 +1130,9 @@ for($i = 0; $i &amp;lt; 10; ++$i)
   <em>n</em> (c'est le caractère borné). Un aspect très intéressant de cet
   algorithme est que l'exhaustivité est une forme de <strong>preuve</strong> !
   L'algorithme fonctionne comme un itérateur et est très simple à utiliser :</p>
-  <pre><code class="language-php">from('Hoa')
--> import('Compiler.Llk.Sampler.BoundedExhaustive');
-
-$sampler = new Hoa\Compiler\Llk\Sampler\BoundedExhaustive(
+  <pre><code class="language-php">$sampler = new Hoa\Compiler\Llk\Sampler\BoundedExhaustive(
     // Grammar.
-    Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp')),
+    Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp')),
     // Token sampler.
     new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random()),
     // Length.
@@ -1209,12 +1189,9 @@ foreach($sampler as $i => $data)
   les séquences produites, les points de choix entre des sous-règles non
   couvertes sont résolus par tirages <strong>aléatoires</strong>. L'algorithme
   fonctionne également comme un itérateur :</p>
-  <pre><code class="language-php">from('Hoa')
--> import('Compiler.Llk.Sampler.Coverage');
-
-$sampler = new Hoa\Compiler\Llk\Sampler\Coverage(
+  <pre><code class="language-php">$sampler = new Hoa\Compiler\Llk\Sampler\Coverage(
     // Grammar.
-    Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp')),
+    Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp')),
     // Token sampler.
     new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random())
 );

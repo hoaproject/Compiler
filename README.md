@@ -99,13 +99,13 @@ is the unification of XML tags name.
 
 ### LL(k) compiler compiler
 
-The `Hoa\Compiler\Llk` class will transform a grammar into a compiler. The
+The `Hoa\Compiler\Llk\Llk` class will transform a grammar into a compiler. The
 following code will use the previous grammar to create a compiler, and we will
 parse a JSON string. If the parsing succeed, it will produce an AST (stands for
 Abstract Syntax Tree) we can visit, for example to dump the AST:
 
     // 1. Load grammar.
-    $compiler = Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp'));
+    $compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 
     // 2. Parse a data.
     $ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
@@ -168,7 +168,7 @@ all branches and tokens in the grammar:
 
     $sampler = new Hoa\Compiler\Llk\Sampler\Coverage(
         // Grammar.
-        Hoa\Compiler\Llk::load(new Hoa\File\Read('Json.pp')),
+        Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp')),
         // Token sampler.
         new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random())
     );

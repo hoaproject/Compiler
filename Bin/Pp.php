@@ -221,14 +221,14 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
         $sequence = $compiler->getTokenSequence();
         $format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
-                    '%-13s %-20s  %-30s  %6s' . "\n";
+                    '%-13s %-20s  %s  %6s' . "\n";
 
         $header = sprintf(
             $format,
             '#',
             'namespace',
             'token name',
-            'token value',
+            'token value                   ',
             'offset'
         );
 
@@ -240,9 +240,12 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
                 $i,
                 $token['namespace'],
                 $token['token'],
-                35 < strlen($token['value'])
-                    ? substr($token['value'], 0, 34) . '…'
-                    : $token['value'],
+                30 < $token['length']
+                    ? mb_substr($token['value'], 0, 29) . '…'
+                    : 'EOF' === $token['token']
+                           ? str_repeat(' ', 30)
+                           : $token['value'] .
+                             str_repeat(' ', 30 - $token['length']),
                 $token['offset']
             );
 

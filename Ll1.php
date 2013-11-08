@@ -995,9 +995,8 @@ abstract class Ll1 {
 
             foreach($this->_states[$e] as $i => $state) {
 
-                $_states = array_flip($this->_states[$e]);
-                $name    = array();
-                $label   = $state;
+                $name  = array();
+                $label = $state;
 
                 if(__ != $state) {
 

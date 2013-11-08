@@ -193,15 +193,8 @@ class Analyzer {
 
             if('#' === $key[0]) {
 
-                $nodeName  = $key;
-                $buildNode = true;
-                $nodeId    = $key;
-                $key       = substr($key, 1);
-            }
-            else {
-
-                $nodeName  = null;
-                $buildNode = false;
+                $nodeId = $key;
+                $key    = substr($key, 1);
             }
 
             $pNodeId = $nodeId;

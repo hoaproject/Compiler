@@ -304,7 +304,7 @@ class TreeNode implements \Hoa\Visitor\Element {
         $old           = $this->_parent;
         $this->_parent = $parent;
 
-        return $parent;
+        return $old;
     }
 
     /**

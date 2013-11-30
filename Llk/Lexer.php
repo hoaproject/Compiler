@@ -260,14 +260,14 @@ class Lexer {
 
         $_regex = str_replace('#', '\#', $regex);
         $preg   = preg_match(
-            '#(?|' . $_regex . ')#u',
+            '#\G(?|' . $_regex . ')#u',
             $this->_text,
             $matches,
-            PREG_OFFSET_CAPTURE,
+            0,
             $offset
         );
 
-        if(0 === $preg || $offset !== $matches[0][1])
+        if(0 === $preg)
             return null;
 
         if('' === $matches[0])
@@ -277,8 +277,8 @@ class Lexer {
 
         return array(
             'token'  => $lexeme,
-            'value'  => $matches[0][0],
-            'length' => mb_strlen($matches[0][0])
+            'value'  => $matches[0],
+            'length' => mb_strlen($matches[0])
         );
     }
 }

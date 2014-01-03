@@ -32,10 +32,6 @@
         "hoa/visitor" : "dev-master"
     },
     "minimum-stability": "dev",
-    "target-dir": "Hoa/Compiler",
-    "autoload": {
-        "psr-0": {
-            "Hoa\\Compiler": "."
-        }
-    }
+    "target-dir"       : "Hoa/Compiler",
+    "autoload"         : { "psr-0": { "Hoa\\Compiler": "." } }
 }

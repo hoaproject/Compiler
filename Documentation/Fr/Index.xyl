@@ -939,7 +939,6 @@ foreach($compiler->getTrace() as $element)
   Nous allons afficher toutes les règles <strong>accessibles</strong> depuis la
   règle racine pour mieux comprendre :</p>
   <pre><code class="language-php">$compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
-$ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 
 // 1. Get all rules.
 $rules    = $compiler->getRules();

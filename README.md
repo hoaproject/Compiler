@@ -3,7 +3,7 @@
 Hoa is a **modular**, **extensible** and **structured** set of PHP libraries.
 Moreover, Hoa aims at being a bridge between industrial and research worlds.
 
-# Hoa\Compiler
+# Hoa\Compiler ![state](http://central.hoa-project.net/State/Compiler)
 
 This library allows to manipulate LL(1) and LL(k) compiler compilers. A
 dedicated grammar language is proposed for the last one: the PP language.

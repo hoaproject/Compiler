@@ -180,7 +180,7 @@ class Parser {
      *
      * @access  public
      * @param   string  $text    Text to parse.
-     * @param   string  $rule    Root rule.
+     * @param   string  $rule    The axiom, i.e. root rule.
      * @param   bool    $tree    Whether build tree or not.
      * @return  mixed
      * @throw   \Hoa\Compiler\Exception\UnexpectedToken

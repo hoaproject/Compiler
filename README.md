@@ -143,7 +143,9 @@ Pretty simple.
 
 This library proposes a script to parse and apply a visitor on a data with a
 specific grammar. Very useful. Moreover, we can use pipe (because
-`Hoa\File\Read` supports `0` as `stdin`), thus:
+`Hoa\File\Read` —please, see the [`Hoa\File`
+library](http://central.hoa-project.net/Resource/Library/File/)— supports `0` as
+`stdin`), thus:
 
 ```sh
 $ echo '[1, [1, [2, 3], 5], 8]' | hoa compiler:pp Json.pp 0 --visitor dump

@@ -76,9 +76,9 @@ namespace Hoa\Compiler\Llk\Sampler {
  * which guide the exploration.
  * Repetition unfolding: upper bound of + and * is set to n.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
  * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2014 Frédéric Dadeau, Ivan Enderlin.
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @copyright  Copyright © 2007-2014 Ivan Enderlin, Frédéric Dadeau.
  * @license    New BSD License
  */
 class Uniform extends Sampler {

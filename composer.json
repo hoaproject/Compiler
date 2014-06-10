@@ -24,6 +24,9 @@
         "irc"   : "irc://irc.freenode.org/hoaproject",
         "source": "http://git.hoa-project.net/"
     },
+    "require-dev": {
+        "atoum/atoum" : "dev-master"
+    },
     "require": {
         "hoa/core"    : "dev-master",
         "hoa/file"    : "dev-master",

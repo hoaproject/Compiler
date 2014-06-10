@@ -801,6 +801,209 @@ class Parser {
 
         return $rule;
     }
+
+    /**
+     * Seeding function to find the paths from the root rule.
+     *
+     * @return array[] Array of paths, made out of rule indexes or false for a circular reference.
+     */
+    public function getRulePaths() {
+        // Find out where to start
+        foreach ($this->_rules as $k => $v) {
+            if (!is_int($k)) {
+                $rootRuleKey = $k;
+                $rootRuleValue = $v;
+                break;
+            }
+        }
+
+        return $this->findPaths($rootRuleValue, [$rootRuleKey]);
+    }
+
+    /**
+     * Merges generic format from child nodes while applying concatenation rules.
+     *
+     * @param array[] $children Data structure: Root -> Child -> Choice -> Path
+     * @return array[] Data structure: Root -> Choice -> Path
+     */
+    private function findPathsForConcatenation($children) {
+        if (count($children) === 1) {
+            $choices = reset($children);
+        } else {
+            $choices = array_shift($children);
+            while (count($children) > 0) {
+                $second = array_shift($children);
+                $product = [];
+                foreach ($choices as $choice_i) {
+                    foreach ($second as $choice_j) {
+                        $product[] = array_merge($choice_i, $choice_j);
+                    }
+                }
+                $choices = $product;
+            }
+        }
+
+        return $choices;
+    }
+
+    /**
+     * Merges child generic format from child nodes while applying choice rules.
+     *
+     * @param array[] $paths Data structure: Root -> Child -> Choice -> Path
+     * @return array[] Data structure: Root -> Choice -> Path
+     */
+    private function findPathsForChoice($paths) {
+        $processedPaths = [];
+        foreach ($paths as $path) {
+            $processedPaths = array_merge($processedPaths, $path);
+        }
+        return $processedPaths;
+    }
+
+
+    /**
+     * Recursive function to get the paths from the grammar.
+     *
+     * @param Hoa\Compiler\Llk\Rule\Rule $node
+     * @param mixed[] $currentPath Array of path indexes.
+     * @return array[] Array of paths, made out of rule indexes or false for a circular reference.
+     * @throws \RuntimeException When unsupported node type is used
+     */
+    private function findPaths(Rule\Rule $node, $currentPath) {
+        // 1. Normalize node content
+        $content = $node->getContent();
+        if (!is_array($content)) {
+            $content = [$content];
+        }
+
+        // 1. Convert child node into paths
+        if ($node instanceof Rule\Token) {
+            $paths[] = [end($currentPath)];
+        } elseif ($node instanceof Rule\Repetition) {
+            // Returning a format where the Repetition precedes the Token
+            $paths[] = array_merge([end($currentPath)], $content);
+        } else {
+            $paths = [];
+            foreach ($content as $v) {
+                // Circular reference detection, using false as signal
+                // Array keys can only be int or string so this never conflicts
+                if (($pos = array_search($v, $currentPath)) !== false) {
+                    $pathCopy = $currentPath;
+                    array_splice($pathCopy, $pos + 1, 0, false);
+                    $paths[] = [$pathCopy];
+                } else {
+                    // get child node
+                    $child = $this->_rules[$v];
+
+                    $paths[] = $this->findPaths($child, array_merge($currentPath, [$v]));
+                }
+            }
+        }
+
+        // 2. process return value
+        if ($node instanceof Rule\Concatenation) {
+            $processedPaths = $this->findPathsForConcatenation($paths);
+        } elseif ($node instanceof Rule\Choice) {
+            $processedPaths = $this->findPathsForChoice($paths);
+        } elseif ($node instanceof Rule\Token) {
+            $processedPaths = $paths;
+        } elseif ($node instanceof Rule\Repetition) {
+            $processedPaths = $paths;
+        } else {
+            throw new \RuntimeException('Unexpected node of type '.get_class($node));
+        }
+
+        // 3. return or add to final result
+        return $processedPaths;
+    }
+
+    /**
+     * Generates strings for displaying of $paths.
+     *
+     * @param array[] $paths
+     * @return string[]
+     * @uses Hoa\Compiler\Llk\Parser::getQuantifierSymbol()
+     * @uses Hoa\Compiler\Llk\Parser::resolveNameSpace()
+     */
+    public function getTokenPaths(array $paths) {
+        $foundTokenPaths = [];
+
+        foreach ($paths as $path) {
+            $tempTokenPath = [];
+            $previousTokens = []; // Keeps track of previous tokens before a Rule\Token
+
+            foreach ($path as $index) {
+                if ($index === false) {
+                    if (is_string($previous)) {
+                        $previous = '"' . $previous . '"';
+                    }
+                    $tempTokenPath[] = '* Circular Reference for index ' . $previous . ' *';
+                } else {
+                    $rule = $this->_rules[$index];
+
+                    if ($rule instanceof Rule\Token) {
+                        $token = $this->_tokens[$this->resolveNameSpace($rule)][$rule->getTokenName()];
+
+                        $quantifier = '';
+                        foreach ($previousTokens as $prev) {
+                            $rule = $this->_rules[$prev];
+                            if ($rule instanceof Rule\Repetition) {
+                                $quantifier = ' ' . $this->getQuantifierSymbol($rule);
+                            }
+                        }
+
+                        $tempTokenPath[] = $token . $quantifier;
+
+                        $previousTokens = [];
+                    } else {
+                        // We want to reverse traverse this later on, so not using array_push
+                        array_unshift($previousTokens, $index);
+                    }
+                }
+
+                $previous = $index;
+            }
+
+            $foundTokenPaths[] = $tempTokenPath;
+        }
+
+        return $foundTokenPaths;
+    }
+
+    /**
+     * Helper function to format the quantifier symbol.
+     *
+     * @param \Hoa\Compiler\Llk\Rule\Repetition $rule
+     * @return string
+     */
+    private function getQuantifierSymbol(Rule\Repetition $rule) {
+        $min = $rule->getMin();
+        $max = $rule->getMax();
+
+        if ($min === 1 and $max === -1) {
+            return '+';
+        } elseif ($min === 0 and $max === -1) {
+            return '*';
+        } elseif ($min === 0 and $max === 1) {
+            return '?';
+        } else {
+            return '{' . $min . ', ' . $max . '}';
+        }
+    }
+
+    /**
+     * Helper function to format the rule's namespace.
+     *
+     * @param \Hoa\Compiler\Llk\Hoa\Compiler\Llk\Rule\Rule $rule
+     * @return string
+     */
+    private function resolveNameSpace($rule) {
+        if ($rule->getNamespace() !== null) {
+            return $rule->getNamespace();
+        } else {
+            return 'default';
+        }
+    }
 }
 
 }

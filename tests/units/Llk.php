@@ -9,13 +9,13 @@ class Llk extends atoum\test {
 	private function pathsFromFile($pp) {
 		$compiler = LlkTest::load(new Read($pp));
 
-		$compiler->getRulePaths();
-		$paths = $compiler->getTokenPaths();
+		$paths = $compiler->getRulePaths();
+		$pathStrings = $compiler->getTokenPaths($paths);
 
 		$i = 0;
 		$output = [];
-		foreach ($paths as $path) {
-			$output[] = ++$i . ': ' .  implode(' > ', $path) .  PHP_EOL;
+		foreach ($pathStrings as $strings) {
+			$output[] = ++$i . ': ' .  implode(' > ', $strings) .  PHP_EOL;
 		}
 		return $output;
 	}

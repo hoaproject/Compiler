@@ -63,4 +63,9 @@ class Llk extends atoum\test {
 		$this->string($output[0])->isEqualTo('1: * Circular Reference for index "greeting" * > world!'.PHP_EOL);
 		$this->string($output[1])->isEqualTo('2: Goodbye > world!'.PHP_EOL);
 	}
+
+	public function testRuleRepetition() {
+		$output = $this->pathsFromFile(__DIR__.'/../pp/ruleRepetition.pp');
+		$this->string($output[0])->isEqualTo('1: Hello {2, 3}'.PHP_EOL);
+	}
 }

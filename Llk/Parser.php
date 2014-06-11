@@ -880,8 +880,24 @@ class Parser {
         if ($node instanceof Rule\Token) {
             $paths[] = [end($currentPath)];
         } elseif ($node instanceof Rule\Repetition) {
+            // Assumed: Repetition can only have one child
+            $child = $this->_rules[$content[0]];
+
             // Returning a format where the Repetition precedes the Token
-            $paths[] = array_merge([end($currentPath)], $content);
+            if ($child instanceof Rule\Token) {
+                $paths[] = [array_merge([end($currentPath)], $content)];
+            } elseif ($child instanceof Rule\Concatenation) {
+
+                $tempPaths = $this->findPaths($child, $currentPath);
+                foreach ($tempPaths as $k => $v) {
+
+                    array_unshift($tempPaths[$k], end($currentPath));
+                }
+
+                $paths[] = $tempPaths;
+            } else {
+                throw new \RuntimeException('Unexpected node of type ' . get_class($child));
+            }
         } else {
             $paths = [];
             foreach ($content as $v) {
@@ -908,7 +924,7 @@ class Parser {
         } elseif ($node instanceof Rule\Token) {
             $processedPaths = $paths;
         } elseif ($node instanceof Rule\Repetition) {
-            $processedPaths = $paths;
+            $processedPaths = reset($paths);
         } else {
             throw new \RuntimeException('Unexpected node of type '.get_class($node));
         }

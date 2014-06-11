@@ -9,7 +9,7 @@ class Llk extends atoum\test {
 	private function pathsFromFile($pp) {
 		$compiler = LlkTest::load(new Read($pp));
 
-		$paths = $compiler->getRulePaths();
+		$paths = $compiler->getRulePathsFromRoot();
 		$pathStrings = $compiler->getTokenPaths($paths);
 
 		$i = 0;

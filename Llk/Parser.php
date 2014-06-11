@@ -156,6 +156,32 @@ class Parser {
      */
     protected $_depth         = -1;
 
+    /**
+     * Setting to prevent the rule paths algorithm from running out of memory.
+     *
+     * # Usage #
+     * This variable will prevent the algorithm from finding too many
+     * possibilities. Please note that while working on a possibility it does
+     * not suddenly abort. Instead it will finish up the current path
+     * without traversing more nodes on that path. After this it will continue
+     * to work on the remaining paths.
+     *
+     * It's important to note that you should not set this setting to the
+     * limit if your PHP configuration. Because the algorithm need memory to
+     * continue (see previous paragraph). While testing with the default PHP
+     * setting `memory_limit = 128M;`, it turned out that 9MB worked and it
+     * crashed at 10MB. Therfor it's advised to set the memory value at about
+     * 7% of your max memory limit. Also note that this recommendation was
+     * tested on one specific grammar. The actual value depends on your
+     * grammar and with that the variables created in memory.
+     *
+     * In case you need to inspect a part of your grammar that was not included
+     * in the output because of the memory limit, use `getRulePaths()` and seed
+     * it with the proper start node for that part of your grammar.
+     *
+     * @var int in bytes
+     */
+    protected $pathFindingMemoryLimit;
 
 
     /**
@@ -807,7 +833,7 @@ class Parser {
      *
      * @return array[] Array of paths, made out of rule indexes or false for a circular reference.
      */
-    public function getRulePaths() {
+    public function getRulePathsFromRoot() {
         // Find out where to start
         foreach ($this->_rules as $k => $v) {
             if (!is_int($k)) {
@@ -817,7 +843,7 @@ class Parser {
             }
         }
 
-        return $this->findPaths($rootRuleValue, [$rootRuleKey]);
+        return $this->getRulePaths($rootRuleValue, [$rootRuleKey]);
     }
 
     /**
@@ -826,7 +852,7 @@ class Parser {
      * @param array[] $children Data structure: Root -> Child -> Choice -> Path
      * @return array[] Data structure: Root -> Choice -> Path
      */
-    private function findPathsForConcatenation($children) {
+    private function getRulePathsForConcatenation($children) {
         if (count($children) === 1) {
             $choices = reset($children);
         } else {
@@ -852,7 +878,7 @@ class Parser {
      * @param array[] $paths Data structure: Root -> Child -> Choice -> Path
      * @return array[] Data structure: Root -> Choice -> Path
      */
-    private function findPathsForChoice($paths) {
+    private function getRulePathsForChoice($paths) {
         $processedPaths = [];
         foreach ($paths as $path) {
             $processedPaths = array_merge($processedPaths, $path);
@@ -860,16 +886,30 @@ class Parser {
         return $processedPaths;
     }
 
+    /**
+     * @param int $bytes
+     * @see \Hoa\Compiler\Llk\Parser::$pathFindingMemoryLimit
+     */
+    public function setPathFindingMemoryLimit($bytes) {
+        $this->pathFindingMemoryLimit = (int) $bytes;
+    }
 
     /**
      * Recursive function to get the paths from the grammar.
      *
+     * # Usage #
+     * When not being called by `getRulePathsFromRoot()` but instead manually
+     * invoked. Seed it with a node (rule) of your choosing. As second parameter
+     * you should pass an array with one element that holds an int or string of
+     * where your node (rule) can be found in the rules array (which you can get
+     * with `getRules()`.
+     *
      * @param Hoa\Compiler\Llk\Rule\Rule $node
-     * @param mixed[] $currentPath Array of path indexes.
+     * @param mixed[] $currentPath Array of path indexes from $_rules.
      * @return array[] Array of paths, made out of rule indexes or false for a circular reference.
      * @throws \RuntimeException When unsupported node type is used
      */
-    private function findPaths(Rule\Rule $node, $currentPath) {
+    public function getRulePaths(Rule\Rule $node, $currentPath) {
         // 1. Normalize node content
         $content = $node->getContent();
         if (!is_array($content)) {
@@ -884,19 +924,27 @@ class Parser {
             $child = $this->_rules[$content[0]];
 
             // Returning a format where the Repetition precedes the Token
-            if ($child instanceof Rule\Token) {
-                $paths[] = [array_merge([end($currentPath)], $content)];
-            } elseif ($child instanceof Rule\Concatenation) {
+            switch (substr(get_class($child), strlen(__NAMESPACE__)+1)) {
+                case 'Rule\\Token':
+                    $paths[] = [array_merge([end($currentPath)], $content)];
+                    break;
+                case 'Rule\\Concatenation':
+                case 'Rule\\Choice':
+                    if ($this->pathFindingMemoryLimit !== null AND
+                      memory_get_usage() > $this->pathFindingMemoryLimit) {
+                        $tempPaths = [[]];
+                    } else {
+                        $tempPaths = $this->getRulePaths($child, $currentPath);
+                    }
 
-                $tempPaths = $this->findPaths($child, $currentPath);
-                foreach ($tempPaths as $k => $v) {
+                    foreach ($tempPaths as $k => $v) {
+                        array_unshift($tempPaths[$k], end($currentPath));
+                    }
 
-                    array_unshift($tempPaths[$k], end($currentPath));
-                }
-
-                $paths[] = $tempPaths;
-            } else {
-                throw new \RuntimeException('Unexpected node of type ' . get_class($child));
+                    $paths[] = $tempPaths;
+                    break;
+                default:
+                    throw new \RuntimeException('Unexpected node of type ' . get_class($child));
             }
         } else {
             $paths = [];
@@ -911,16 +959,21 @@ class Parser {
                     // get child node
                     $child = $this->_rules[$v];
 
-                    $paths[] = $this->findPaths($child, array_merge($currentPath, [$v]));
+                    if ($this->pathFindingMemoryLimit !== null AND
+                      memory_get_usage() > $this->pathFindingMemoryLimit) {
+                        $paths[] = [];
+                    } else {
+                        $paths[] = $this->getRulePaths($child, array_merge($currentPath, [$v]));
+                    }
                 }
             }
         }
 
         // 2. process return value
         if ($node instanceof Rule\Concatenation) {
-            $processedPaths = $this->findPathsForConcatenation($paths);
+            $processedPaths = $this->getRulePathsForConcatenation($paths);
         } elseif ($node instanceof Rule\Choice) {
-            $processedPaths = $this->findPathsForChoice($paths);
+            $processedPaths = $this->getRulePathsForChoice($paths);
         } elseif ($node instanceof Rule\Token) {
             $processedPaths = $paths;
         } elseif ($node instanceof Rule\Repetition) {

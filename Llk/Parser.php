@@ -989,29 +989,61 @@ class Parser {
     /**
      * Generates strings for displaying of $paths.
      *
+     * Will print `#CR:4#` when a Circular Reference has been detected for rule
+     * with index 4. This is kept short to prevent cluttering the output.
+     *
      * @param array[] $paths
+     * @param boolean $asTokenNames set to true to print token names instead of token values.
      * @return string[]
      * @uses Hoa\Compiler\Llk\Parser::getQuantifierSymbol()
      * @uses Hoa\Compiler\Llk\Parser::resolveNameSpace()
      */
-    public function getTokenPaths(array $paths) {
+    public function getTokenPaths(array $paths, $asTokenNames = false) {
         $foundTokenPaths = [];
+
+        // Preprocess all tokens so they can be easily found
+        foreach ($this->_tokens as $namespace => $tokens) {
+            foreach ($tokens as $nameNamespace => $regex) {
+                unset($token);
+                $tokenInfo = preg_split('/:/', $nameNamespace);
+                $token['regex'] = $regex;
+                if (isset($tokenInfo[1])) {
+                    $token['nextNamespace'] = $tokenInfo[1];
+                }
+                $processedTokens[$namespace][$tokenInfo[0]] = $token;
+            }
+        }
 
         foreach ($paths as $path) {
             $tempTokenPath = [];
-            $previousTokens = []; // Keeps track of previous tokens before a Rule\Token
 
-            foreach ($path as $index) {
+            /*
+             * Keeps track of previous tokens before a Rule\Token
+             * To assist in finding a possible Repetition
+             */
+            $previousTokens = [];
+
+            /*
+             * Reset the namespace to default before each iteration
+             * At the moment the algorithm has trouble with starting from a rule
+             * that is not in the default namespace, because it doesn't have a
+             * backtracking mechanism to find out which namespace applies.
+             */
+            $namespace = 'default';
+
+            foreach ($path as $k => $index) {
                 if ($index === false) {
-                    if (is_string($previous)) {
-                        $previous = '"' . $previous . '"';
-                    }
-                    $tempTokenPath[] = '* Circular Reference for index ' . $previous . ' *';
+                    $tempTokenPath[] = '#CR:' . $previous . '#';
                 } else {
                     $rule = $this->_rules[$index];
 
                     if ($rule instanceof Rule\Token) {
-                        $token = $this->_tokens[$this->resolveNameSpace($rule)][$rule->getTokenName()];
+                        $tokenName = $rule->getTokenName();
+                        $token = $processedTokens[$namespace][$tokenName];
+
+                        if (isset($token['nextNamespace'])) {
+                            $namespace = $token['nextNamespace'];
+                        }
 
                         $quantifier = '';
                         foreach ($previousTokens as $prev) {
@@ -1021,7 +1053,11 @@ class Parser {
                             }
                         }
 
-                        $tempTokenPath[] = $token . $quantifier;
+                        if ($asTokenNames) {
+                            $tempTokenPath[] = $tokenName . $quantifier;
+                        } else {
+                            $tempTokenPath[] = $token['regex'] . $quantifier;
+                        }
 
                         $previousTokens = [];
                     } else {
@@ -1057,20 +1093,6 @@ class Parser {
             return '?';
         } else {
             return '{' . $min . ', ' . $max . '}';
-        }
-    }
-
-    /**
-     * Helper function to format the rule's namespace.
-     *
-     * @param \Hoa\Compiler\Llk\Hoa\Compiler\Llk\Rule\Rule $rule
-     * @return string
-     */
-    private function resolveNameSpace($rule) {
-        if ($rule->getNamespace() !== null) {
-            return $rule->getNamespace();
-        } else {
-            return 'default';
         }
     }
 }

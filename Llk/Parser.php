@@ -183,6 +183,23 @@ class Parser {
      */
     protected $pathFindingMemoryLimit;
 
+    /**
+     * Displays the tokens by their name in the getTokenPaths() output.
+     */
+    const TOKEN_NAME = 1;
+
+    /**
+     * Displays the tokens by their regular expression in the getTokenPaths()
+     * output.
+     */
+    const TOKEN_REGEX = 2;
+
+    /**
+     * Displays the tokens by an example value based on the regular expression
+     * in the getTokenPaths() output.
+     */
+    const TOKEN_VALUE = 3;
+
 
     /**
      * Construct the parser.
@@ -895,6 +912,22 @@ class Parser {
     }
 
     /**
+     * Injects repetition into the current path.
+     *
+     * Uses true to signal parentheses open and the repetition node to signal
+     * parentheses close.
+     *
+     * @param mixed[] $path
+     * @param mixed $repetition the node index of the Rule\Repetition
+     * @return mixed[] the modified path
+     */
+    private function addRepetition($path, $repetition) {
+        array_splice($path, count($path) - 1, 0, [$repetition]);
+        array_unshift($path, true);
+        return $path;
+    }
+
+    /**
      * Recursive function to get the paths from the grammar.
      *
      * # Usage #
@@ -926,7 +959,7 @@ class Parser {
             // Returning a format where the Repetition precedes the Token
             switch (substr(get_class($child), strlen(__NAMESPACE__)+1)) {
                 case 'Rule\\Token':
-                    $paths[] = [array_merge([end($currentPath)], $content)];
+                    $paths[] = [$this->addRepetition($content, end($currentPath))];
                     break;
                 case 'Rule\\Concatenation':
                 case 'Rule\\Choice':
@@ -938,7 +971,7 @@ class Parser {
                     }
 
                     foreach ($tempPaths as $k => $v) {
-                        array_unshift($tempPaths[$k], end($currentPath));
+                        $tempPaths[$k] = $this->addRepetition($tempPaths[$k], end($currentPath));
                     }
 
                     $paths[] = $tempPaths;
@@ -998,7 +1031,7 @@ class Parser {
      * @uses Hoa\Compiler\Llk\Parser::getQuantifierSymbol()
      * @uses Hoa\Compiler\Llk\Parser::resolveNameSpace()
      */
-    public function getTokenPaths(array $paths, $asTokenNames = false) {
+    public function getTokenPaths(array $paths, $displayType = self::TOKEN_NAME, $repetitionAsNode = false) {
         $foundTokenPaths = [];
 
         // Preprocess all tokens so they can be easily found
@@ -1031,9 +1064,31 @@ class Parser {
              */
             $namespace = 'default';
 
+            /*
+             * Signal a parentheses needs to be opened before the next node.
+             */
+            $openParentheses = false;
+
+            /*
+             * Amount of parentheses opened at a time.
+             */
+            $ParenthesesOpen = 0;
+
             foreach ($path as $k => $index) {
                 if ($index === false) {
                     $tempTokenPath[] = '#CR:' . $previous . '#';
+                } elseif ($index === true) {
+                    // Look ahead by one node, skip parenthesis when there is
+                    // just a single node in it
+                    if (! ($this->_rules[$path[$k+1]] instanceof Rule\Repetition)) {
+                        if ($repetitionAsNode) {
+                            $tempTokenPath[] = '(';
+                            $ParenthesesOpen++;
+                        } else {
+                            $openParentheses = true;
+                            $ParenthesesOpen++;
+                        }
+                    }
                 } else {
                     $rule = $this->_rules[$index];
 
@@ -1049,14 +1104,44 @@ class Parser {
                         foreach ($previousTokens as $prev) {
                             $rule = $this->_rules[$prev];
                             if ($rule instanceof Rule\Repetition) {
-                                $quantifier = ' ' . $this->getQuantifierSymbol($rule);
+                                $quantifier = $this->getQuantifierSymbol($rule);
                             }
                         }
 
-                        if ($asTokenNames) {
-                            $tempTokenPath[] = $tokenName . $quantifier;
+                        $tmpPath = '';
+                        if (! $repetitionAsNode AND $openParentheses) {
+                            $tmpPath = '( ';
+                            $openParentheses = false;
+                        }
+
+                        if ($displayType === self::TOKEN_NAME) {
+                            $tmpPath .= $tokenName;
+                        } elseif ($displayType === self::TOKEN_REGEX) {
+                            $tmpPath .= $token['regex'];
+                        } elseif ($displayType === self::TOKEN_VALUE) {
+                            throw new \Exception('not yet implemented');
                         } else {
-                            $tempTokenPath[] = $token['regex'] . $quantifier;
+                            throw new \RuntimeException('An unsupported option was passed for $displayType.');
+                        }
+
+                        if ($repetitionAsNode) {
+                            $tempTokenPath[] = $tmpPath;
+                            if ($quantifier !== '') {
+                                if ($ParenthesesOpen > 0) {
+                                    $tempTokenPath[] = ')';
+                                    $ParenthesesOpen--;
+                                }
+                                $tempTokenPath[] = $quantifier;
+                            }
+                        } else {
+                            if ($ParenthesesOpen > 0 AND $quantifier !== '') {
+                                $tmpPath .= ' )';
+                                $ParenthesesOpen--;
+                            }
+                            if ($quantifier !== '') {
+                                $tmpPath .= ' ' . $quantifier;
+                            }
+                            $tempTokenPath[] = $tmpPath;
                         }
 
                         $previousTokens = [];

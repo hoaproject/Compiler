@@ -263,7 +263,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
         echo 'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",
              'Options :', "\n",
              $this->makeUsageOptionsList(array(
-                 'v'    => 'Visitor name (only “dump” is supported).',
+                 'v'    => 'Visitor name (only "dump" is supported).',
                  'c'    => 'Visitor classname (using . instead of \ works).',
                  's'    => 'Print token sequence.',
                  't'    => 'Print trace.',

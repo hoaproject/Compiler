@@ -169,17 +169,17 @@ rule4 ::= e f</code></pre>
   <p>The <code>rule2</code> rule is ambiguous, which can lead to a bad
   derivation and consequently a backtrack.</p>
 
-  <h2 id="LLk_compilers_compiler" for="main-toc">LL(<em>k</em>) compilers
-  compiler</h2>
+  <h2 id="LLk_compiler-compiler" for="main-toc">LL(<em>k</em>)
+  compiler-compiler</h2>
 
   <p>Writing compilers is a <strong>laborious</strong> task. It is not always
   difficult but most of the time, it is repetitive and it takes time. This is
-  why there is <strong>compilers of compilers</strong>, or in other words,
-  generators of compilers. Most of the time, these compilers of compilers use an
+  why there exists <strong>compilers of compilers</strong>, or in other words,
+  compilers generators. Most of the time, these compiler-compilers use an
   <strong>intermediary</strong> language to write a grammar. The
   <code>Hoa\Compiler</code> library provides the
-  <code>Hoa\Compiler\Llk\Llk</code> class that allows the writing of compilers
-  of compilers through a <strong>dedicated</strong> language.</p>
+  <code>Hoa\Compiler\Llk\Llk</code> class that allows the writing of
+  compiler-compilers through a <strong>dedicated</strong> language.</p>
 
   <h3 id="PP_language" for="main-toc">PP language</h3>
 
@@ -1196,7 +1196,7 @@ foreach($sampler as $i => $data)
     </ul></dd>
   </dl>
 
-  <h2 id="LL1_compilers_compiler" for="main-toc">LL1 compilers compiler</h2>
+  <h2 id="LL1_compiler-compiler" for="main-toc">LL(1) compiler-compiler</h2>
 
   <p>The documentation of the LL(1) compiler, through the
   <code>Hoa\Compiler\Ll1</code> class, is not written yet. The goal is different
@@ -1207,11 +1207,11 @@ foreach($sampler as $i => $data)
 
   <h2 id="Conclusion" for="main-toc">Conclusion</h2>
 
-  <p><code>Hoa\Compiler</code> provides two <strong>compilers compiler</strong>:
+  <p><code>Hoa\Compiler</code> provides two <strong>compiler-compilers</strong>:
   <code>Hoa\Compiler\Llk</code> and <code>Hoa\Compiler\Ll1</code>, in order to
   <strong>validate</strong> data. The <strong>PP language</strong> allows to
   write <strong>algebraic grammars</strong> in a <strong>simple</strong> and
-  <strong>natural</strong> way. The LL(<em>k</em>) compilers compiler is split
+  <strong>natural</strong> way. The LL(<em>k</em>) compiler-compiler is split
   in <strong>distinct processus</strong>, which encourages hackability. Finally,
   several algorithms allows to <strong>generate</strong> data based on a grammar
   according to specific usages.</p>

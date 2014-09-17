@@ -6,7 +6,24 @@ Moreover, Hoa aims at being a bridge between industrial and research worlds.
 # Hoa\Compiler ![state](http://central.hoa-project.net/State/Compiler)
 
 This library allows to manipulate LL(1) and LL(k) compiler compilers. A
-dedicated grammar language is proposed for the last one: the PP language.
+dedicated grammar language is provided for the last one: the PP language.
+
+## Installation
+
+With [Composer](http://getcomposer.org/), to include this library into your
+dependencies, you need to require
+[`hoa/compiler`](https://packagist.org/packages/hoa/compiler):
+
+```json
+{
+    "require": {
+        "hoa/compiler": "~2.0"
+    }
+}
+```
+
+Please, read the website to [get more informations about how to
+install](http://hoa-project.net/Source.html).
 
 ## Quick usage
 

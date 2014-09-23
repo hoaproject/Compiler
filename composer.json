@@ -32,5 +32,10 @@
         "hoa/visitor" : "~0.0"
     },
     "target-dir": "Hoa/Compiler",
-    "autoload"  : { "psr-0": { "Hoa\\Compiler": "." } }
+    "autoload"  : { "psr-0": { "Hoa\\Compiler": "." } },
+    "extra"     : {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        }
+    }
 }

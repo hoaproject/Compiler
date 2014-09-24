@@ -34,18 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Rule
- */
--> import('Compiler.Llk.Rule.~');
-
-}
-
-namespace Hoa\Compiler\Llk\Rule {
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Choice.
@@ -59,5 +48,3 @@ namespace Hoa\Compiler\Llk\Rule {
  */
 
 class Choice extends Rule { }
-
-}

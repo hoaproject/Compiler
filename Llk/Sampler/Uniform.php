@@ -34,38 +34,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Sampler;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Sampler
- */
--> import('Compiler.Llk.Sampler.~')
-
-/**
- * \Hoa\Compiler\Llk\Sampler\Exception
- */
--> import('Compiler.Llk.Sampler.Exception')
-
-/**
- * \Hoa\Math\Sampler\Random
- */
--> import('Math.Sampler.Random')
-
-/**
- * \Hoa\Math\Combinatorics\Combination\Gamma
- */
--> import('Math.Combinatorics.Combination.Gamma')
-
-/**
- * \Hoa\Math\Util
- */
--> import('Math.Util');
-
-}
-
-namespace Hoa\Compiler\Llk\Sampler {
+use Hoa\Compiler;
+use Hoa\Math;
+use Hoa\Visitor;
 
 /**
  * Class \Hoa\Compiler\Llk\Sampler\Uniform.
@@ -88,7 +61,7 @@ class Uniform extends Sampler {
      *
      * @var \Hoa\Compiler\Llk\Sampler\Uniform array
      */
-    protected $_data   = array();
+    protected $_data   = [];
 
     /**
      * Bound.
@@ -107,17 +80,17 @@ class Uniform extends Sampler {
      * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk\Parser $compiler,
-                                  \Hoa\Visitor\Visit       $tokenSampler,
+    public function __construct ( Compiler\Llk\Parser $compiler,
+                                  Visitor\Visit       $tokenSampler,
                                   $length = 5 ) {
 
         parent::__construct($compiler, $tokenSampler);
 
         foreach($this->_rules as $name => $_)
-            $this->_data[$name] = array();
+            $this->_data[$name] = [];
 
         $this->setLength($length);
-        $this->_sampler = new \Hoa\Math\Sampler\Random();
+        $this->_sampler = new Math\Sampler\Random();
 
         return;
     }
@@ -130,7 +103,7 @@ class Uniform extends Sampler {
      * @param   int                     $n       Size.
      * @return  string
      */
-    public function uniform ( \Hoa\Compiler\Llk\Rule $rule = null, $n = -1 ) {
+    public function uniform ( Compiler\Llk\Rule $rule = null, $n = -1 ) {
 
         if(null === $rule && -1 === $n) {
 
@@ -144,10 +117,10 @@ class Uniform extends Sampler {
         if(0 === $n || 0 === $computed)
             return null;
 
-        if($rule instanceof \Hoa\Compiler\Llk\Rule\Choice) {
+        if($rule instanceof Compiler\Llk\Rule\Choice) {
 
             $children = $rule->getContent();
-            $stat     = array();
+            $stat     = [];
 
             foreach($children as $c => $child)
                 $stat[$c] = $this->_data[$child][$n]['n'];
@@ -160,7 +133,7 @@ class Uniform extends Sampler {
 
             return $this->uniform($this->_rules[$children[$e]], $n);
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
+        elseif($rule instanceof Compiler\Llk\Rule\Concatenation) {
 
             $children = $rule->getContent();
             $out      = null;
@@ -172,7 +145,7 @@ class Uniform extends Sampler {
 
             return $out;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition){
+        elseif($rule instanceof Compiler\Llk\Rule\Repetition){
 
             $out   =  null;
             $stat  = &$data['xy'];
@@ -192,7 +165,7 @@ class Uniform extends Sampler {
 
             return $out;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Token) {
+        elseif($rule instanceof Compiler\Llk\Rule\Token) {
 
             return $this->generateToken($rule);
         }
@@ -208,7 +181,7 @@ class Uniform extends Sampler {
      * @param   int                     $n       Size.
      * @return  int
      */
-    public function count ( \Hoa\Compiler\Llk\Rule $rule = null, $n = -1 ) {
+    public function count ( Compiler\Llk\Rule $rule = null, $n = -1 ) {
 
         if(null === $rule || -1 === $n)
             return 0;
@@ -218,23 +191,23 @@ class Uniform extends Sampler {
         if(isset($this->_data[$ruleName][$n]))
             return $this->_data[$ruleName][$n]['n'];
 
-        $this->_data[$ruleName][$n] =  array('n' => 0);
+        $this->_data[$ruleName][$n] =  ['n' => 0];
         $out                        = &$this->_data[$ruleName][$n]['n'];
         $rule                       =  $this->_rules[$ruleName];
 
-        if($rule instanceof \Hoa\Compiler\Llk\Rule\Choice) {
+        if($rule instanceof Compiler\Llk\Rule\Choice) {
 
             foreach($rule->getContent() as $child)
                 $out += $this->count($this->_rules[$child], $n);
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
+        elseif($rule instanceof Compiler\Llk\Rule\Concatenation) {
 
             $children = $rule->getContent();
-            $Γ        = new \Hoa\Math\Combinatorics\Combination\Gamma(
+            $Γ        = new Math\Combinatorics\Combination\Gamma(
                 count($children),
                 $n
             );
-            $this->_data[$ruleName][$n]['Γ'] = array();
+            $this->_data[$ruleName][$n]['Γ'] = [];
             $handle = &$this->_data[$ruleName][$n]['Γ'];
 
             foreach($Γ as $γ) {
@@ -250,9 +223,9 @@ class Uniform extends Sampler {
                 $out += $oout;
             }
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition) {
+        elseif($rule instanceof Compiler\Llk\Rule\Repetition) {
 
-            $this->_data[$ruleName][$n]['xy'] = array();
+            $this->_data[$ruleName][$n]['xy'] = [];
             $handle = &$this->_data[$ruleName][$n]['xy'];
             $child  =  $this->_rules[$rule->getContent()];
             $x      =  $rule->getMin();
@@ -269,8 +242,8 @@ class Uniform extends Sampler {
                 for($α = $x; $α <= $y; ++$α) {
 
                     $ut         = 0;
-                    $handle[$α] = array('n' => 0, 'Γ' => array());
-                    $Γ          = new \Hoa\Math\Combinatorics\Combination\Gamma(
+                    $handle[$α] = ['n' => 0, 'Γ' => []];
+                    $Γ          = new Math\Combinatorics\Combination\Gamma(
                         $α,
                         $n
                     );
@@ -292,10 +265,8 @@ class Uniform extends Sampler {
                     $out             += $ut;
                 }
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Token) {
-
-            $out = \Hoa\Math\Util::δ($n, 1);
-        }
+        elseif($rule instanceof Compiler\Llk\Rule\Token)
+            $out = Math\Util::δ($n, 1);
 
         return $out;
     }
@@ -333,6 +304,4 @@ class Uniform extends Sampler {
 
         return $this->_length;
     }
-}
-
 }

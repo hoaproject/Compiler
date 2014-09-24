@@ -34,23 +34,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Bin;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\LLk
- */
--> import('Compiler.Llk.~')
-
-/**
- * \Hoa\File\Read
- */
--> import('File.Read');
-
-}
-
-namespace Hoa\Compiler\Bin {
+use Hoa\Compiler;
+use Hoa\Console;
+use Hoa\File;
 
 /**
  * Class Hoa\Compiler\Bin\Pp.
@@ -62,21 +50,21 @@ namespace Hoa\Compiler\Bin {
  * @license    New BSD License
  */
 
-class Pp extends \Hoa\Console\Dispatcher\Kit {
+class Pp extends Console\Dispatcher\Kit {
 
     /**
      * Options description.
      *
      * @var \Hoa\Compiler\Bin\Pp array
      */
-    protected $options = array(
-        array('visitor',        \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),
-        array('visitor-class',  \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'c'),
-        array('token-sequence', \Hoa\Console\GetOption::NO_ARGUMENT,       's'),
-        array('trace',          \Hoa\Console\GetOption::NO_ARGUMENT,       't'),
-        array('help',           \Hoa\Console\GetOption::NO_ARGUMENT,       'h'),
-        array('help',           \Hoa\Console\GetOption::NO_ARGUMENT,       '?')
-    );
+    protected $options = [
+        ['visitor',        Console\GetOption::REQUIRED_ARGUMENT, 'v'],
+        ['visitor-class',  Console\GetOption::REQUIRED_ARGUMENT, 'c'],
+        ['token-sequence', Console\GetOption::NO_ARGUMENT,       's'],
+        ['trace',          Console\GetOption::NO_ARGUMENT,       't'],
+        ['help',           Console\GetOption::NO_ARGUMENT,       'h'],
+        ['help',           Console\GetOption::NO_ARGUMENT,       '?']
+    ];
 
 
 
@@ -134,16 +122,14 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
         if(empty($grammar) || (empty($language) && '0' !== $language))
             return $this->usage();
 
-        $compiler = \Hoa\Compiler\Llk::load(
-            new \Hoa\File\Read($grammar)
-        );
-        $data     = new \Hoa\File\Read($language);
+        $compiler = Compiler\Llk::load(new File\Read($grammar));
+        $data     = new File\Read($language);
 
         try {
 
             $ast = $compiler->parse($data->readAll());
         }
-        catch ( \Hoa\Compiler\Exception $e ) {
+        catch ( Compiler\Exception $e ) {
 
             if(true === $tokenSequence) {
 
@@ -184,12 +170,12 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
      * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
      * @return  void
      */
-    protected function printTrace ( \Hoa\Compiler\Llk\Parser $compiler ) {
+    protected function printTrace ( Compiler\Llk\Parser $compiler ) {
 
         $i = 0;
 
         foreach($compiler->getTrace() as $element)
-            if($element instanceof \Hoa\Compiler\Llk\Rule\Entry) {
+            if($element instanceof Compiler\Llk\Rule\Entry) {
 
                 $ruleName = $element->getRule();
                 $rule     = $compiler->getRule($ruleName);
@@ -201,7 +187,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
                 echo "\n";
             }
-            elseif($element instanceof \Hoa\Compiler\Llk\Rule\Token)
+            elseif($element instanceof Compiler\Llk\Rule\Token)
                 echo str_repeat('   ', $i + 1), 'token ',$element->getTokenName(),
                     ', consumed ', $element->getValue(), "\n";
             else
@@ -217,7 +203,7 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
      * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
      * @return  void
      */
-    protected function printTokenSequence ( \Hoa\Compiler\Llk\Parser $compiler ) {
+    protected function printTokenSequence ( Compiler\Llk\Parser $compiler ) {
 
         $sequence = $compiler->getTokenSequence();
         $format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
@@ -262,18 +248,16 @@ class Pp extends \Hoa\Console\Dispatcher\Kit {
 
         echo 'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",
              'Options :', "\n",
-             $this->makeUsageOptionsList(array(
+             $this->makeUsageOptionsList([
                  'v'    => 'Visitor name (only “dump” is supported).',
                  'c'    => 'Visitor classname (using . instead of \ works).',
                  's'    => 'Print token sequence.',
                  't'    => 'Print trace.',
                  'help' => 'This help.'
-             )), "\n";
+             ]), "\n";
 
         return;
     }
-}
-
 }
 
 __halt_compiler();

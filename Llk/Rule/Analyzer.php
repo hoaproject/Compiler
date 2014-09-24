@@ -34,43 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Rule;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception\Rule
- */
--> import('Compiler.Exception.Rule')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Choice
- */
--> import('Compiler.Llk.Rule.Choice')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Concatenation
- */
--> import('Compiler.Llk.Rule.Concatenation')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Repetition
- */
--> import('Compiler.Llk.Rule.Repetition')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Token
- */
--> import('Compiler.Llk.Rule.Token')
-
-/**
- * \Hoa\Compiler\Llk\Lexer
- */
--> import('Compiler.Llk.Lexer');
-
-}
-
-namespace Hoa\Compiler\Llk\Rule {
+use Hoa\Compiler;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Analyzer.
@@ -158,10 +124,10 @@ class Analyzer {
     public function analyzeRules ( Array $rules ) {
 
         if(empty($rules))
-            throw new \Hoa\Compiler\Exception\Rule('No rules specified!', 0);
+            throw new Compiler\Exception\Rule('No rules specified!', 0);
 
-        $tokens = array('default' =>
-            array(
+        $tokens = ['default' =>
+            [
                 'skip'          => '\s',
                 'or'            => '\|',
                 'zero_or_one'   => '\?',
@@ -177,15 +143,15 @@ class Analyzer {
                 'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
                 'capturing_'    => '\(',
                 '_capturing'    => '\)'
-            )
-        );
+            ]
+        ];
 
-        $this->_createdRules = array();
+        $this->_createdRules = [];
         $this->_rules        = $rules;
 
         foreach($rules as $key => $value) {
 
-            $lexer                = new \Hoa\Compiler\Llk\Lexer();
+            $lexer                = new Compiler\Llk\Lexer();
             $this->_tokenSequence = $lexer->lexMe($value, $tokens);
             $this->_rule          = $value;
             $this->_currentState  = 0;
@@ -201,7 +167,7 @@ class Analyzer {
             $rule    = $this->rule($pNodeId);
 
             if(null === $rule)
-                throw new \Hoa\Compiler\Exception(
+                throw new Compiler\Exception(
                     'Error while parsing rule %s.', 1, $key);
 
             $zeRule = $this->_createdRules[$rule];
@@ -237,7 +203,7 @@ class Analyzer {
      */
     protected function choice ( &$pNodeId ) {
 
-        $content = array();
+        $content = [];
 
         // concatenation() …
         $nNodeId = $pNodeId;
@@ -288,7 +254,7 @@ class Analyzer {
      */
     protected function concatenation ( &$pNodeId ) {
 
-        $content = array();
+        $content = [];
 
         // repetition() …
         $rule    = $this->repetition($pNodeId);
@@ -394,7 +360,7 @@ class Analyzer {
             return $content;
 
         if(-1 != $max && $max < $min)
-            throw new \Hoa\Compiler\Exception(
+            throw new Compiler\Exception(
                 'Upper bound of iteration must be greater of ' .
                 'equal to lower bound', 2);
 
@@ -460,9 +426,9 @@ class Analyzer {
                     }
 
             if(false == $exists)
-                throw new \Hoa\Compiler\Exception(
+                throw new Compiler\Exception(
                     'Token ::%s:: does not exist in%s.',
-                    3, array($tokenName, $this->_rule));
+                    3, [$tokenName, $this->_rule]);
 
             $name                       = count($this->_createdRules) + 1;
             $this->_createdRules[$name] = new Token(
@@ -500,9 +466,9 @@ class Analyzer {
                     }
 
             if(false == $exists)
-                throw new \Hoa\Compiler\Exception(
+                throw new Compiler\Exception(
                     'Token <%s> does not exist in%s.',
-                    4, array($tokenName, $this->_rule));
+                    4, [$tokenName, $this->_rule]);
 
             $name  = count($this->_createdRules) + 1;
             $token = new Token(
@@ -524,7 +490,7 @@ class Analyzer {
 
             if(   false === array_key_exists(      $tokenName, $this->_rules)
                && false === array_key_exists('#' . $tokenName, $this->_rules))
-                throw new \Hoa\Compiler\Exception\Rule(
+                throw new Compiler\Exception\Rule(
                     'Rule %s() does not exist.',
                     5, $tokenName);
 
@@ -534,7 +500,7 @@ class Analyzer {
                 $name                       = count($this->_createdRules) + 1;
                 $this->_createdRules[$name] = new Concatenation(
                     $name,
-                    array($tokenName),
+                    [$tokenName],
                     null
                 );
             }
@@ -583,6 +549,4 @@ class Analyzer {
 
         return ++$this->_currentState;
     }
-}
-
 }

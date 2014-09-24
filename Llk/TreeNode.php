@@ -34,18 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk;
 
-from('Hoa')
-
-/**
- * \Hoa\Visitor\Element
- */
--> import('Visitor.Element');
-
-}
-
-namespace Hoa\Compiler\Llk {
+use Hoa\Visitor;
 
 /**
  * Class \Hoa\Compiler\Llk\TreeNode.
@@ -58,7 +49,7 @@ namespace Hoa\Compiler\Llk {
  * @license    New BSD License
  */
 
-class TreeNode implements \Hoa\Visitor\Element {
+class TreeNode implements Visitor\Element {
 
     /**
      * ID (should be something like #ruleName or token).
@@ -93,7 +84,7 @@ class TreeNode implements \Hoa\Visitor\Element {
      *
      * @var \Hoa\Compiler\Llk\TreeNode array
      */
-    protected $_data     = array();
+    protected $_data     = [];
 
 
 
@@ -101,13 +92,14 @@ class TreeNode implements \Hoa\Visitor\Element {
      * Constructor.
      *
      * @access  public
-     * @param   string  $id          ID.
-     * @param   array   $value       Value.
-     * @param   array   $children    Children.
+     * @param   string                      $id          ID.
+     * @param   string                      $value       Value.
+     * @param   array                       $children    Children.
+     * @param   \Hoa\Compiler\Llk\TreeNode  $parent    Parent.
      * @return  void
      */
     public function __construct ( $id, $value = null,
-                                  Array    $children = array(),
+                                  Array    $children = [],
                                   TreeNode $parent   = null ) {
 
         $this->setId($id);
@@ -338,7 +330,7 @@ class TreeNode implements \Hoa\Visitor\Element {
      * @param   mixed               $eldnah     Handle (no reference).
      * @return  mixed
      */
-    public function accept ( \Hoa\Visitor\Visit $visitor,
+    public function accept ( Visitor\Visit $visitor,
                              &$handle = null, $eldnah = null ) {
 
         return $visitor->visit($this, $handle, $eldnah);
@@ -356,6 +348,4 @@ class TreeNode implements \Hoa\Visitor\Element {
 
         return;
     }
-}
-
 }

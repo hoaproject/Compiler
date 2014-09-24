@@ -34,7 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule {
+namespace Hoa\Compiler\Llk\Rule;
+
+use Hoa\Core;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule.
@@ -75,7 +77,7 @@ abstract class Rule {
      *
      * @var \Hoa\Compiler\Llk\Rule array
      */
-    protected $_nodeOptions    = array();
+    protected $_nodeOptions    = [];
 
     /**
      * Default ID.
@@ -89,7 +91,7 @@ abstract class Rule {
      *
      * @var \Hoa\Compiler\Llk\Rule array
      */
-    protected $_defaultOptions = array();
+    protected $_defaultOptions = [];
 
     /**
      * For non-transitional rule: PP representation.
@@ -195,7 +197,7 @@ abstract class Rule {
         else {
 
             $this->_nodeId      = $nodeId;
-            $this->_nodeOptions = array();
+            $this->_nodeOptions = [];
         }
 
         return $old;
@@ -242,7 +244,7 @@ abstract class Rule {
         else {
 
             $this->_defaultId      = $defaultId;
-            $this->_defaultOptions = array();
+            $this->_defaultOptions = [];
         }
 
         return $old;
@@ -309,13 +311,7 @@ abstract class Rule {
     }
 }
 
-}
-
-namespace {
-
 /**
  * Flex entity.
  */
-Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');
-
-}
+Core\Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');

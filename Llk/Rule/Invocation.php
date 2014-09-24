@@ -34,7 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule {
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Invocation.
@@ -178,6 +178,4 @@ abstract class Invocation {
 
         return $this->_transitional;
     }
-}
-
 }

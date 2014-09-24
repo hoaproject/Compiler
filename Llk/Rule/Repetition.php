@@ -34,18 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Rule
- */
--> import('Compiler.Llk.Rule.~');
-
-}
-
-namespace Hoa\Compiler\Llk\Rule {
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Repetition.
@@ -117,6 +106,4 @@ class Repetition extends Rule {
 
         return $this->_max;
     }
-}
-
 }

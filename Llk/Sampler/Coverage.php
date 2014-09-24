@@ -34,28 +34,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Sampler;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Sampler
- */
--> import('Compiler.Llk.Sampler.~')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Entry
- */
--> import('Compiler.Llk.Rule.Entry')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Ekzit
- */
--> import('Compiler.Llk.Rule.Ekzit');
-
-}
-
-namespace Hoa\Compiler\Llk\Sampler {
+use Hoa\Compiler;
+use Hoa\Iterator;
 
 /**
  * Class \Hoa\Compiler\Llk\Sampler\Coverage.
@@ -79,7 +61,9 @@ namespace Hoa\Compiler\Llk\Sampler {
  * @copyright  Copyright © 2007-2014 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-class Coverage extends Sampler implements \Hoa\Iterator {
+class          Coverage
+    extends    Sampler
+    implements Iterator {
 
     /**
      * Stack of rules to explore.
@@ -169,14 +153,14 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
         $this->_key          = -1;
         $this->_current      = null;
-        $this->_tests        = array();
-        $this->_coveredRules = array();
+        $this->_tests        = [];
+        $this->_coveredRules = [];
 
         foreach($this->_rules as $name => $rule) {
 
-            $this->_coveredRules[$name] = array();
+            $this->_coveredRules[$name] = [];
 
-            if($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition) {
+            if($rule instanceof Compiler\Llk\Rule\Repetition) {
 
                 $min  = $rule->getMin();
                 $min1 = $min + 1;
@@ -193,7 +177,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
                     $this->_coveredRules[$name][$max]  = 0;
                 }
             }
-            elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Choice)
+            elseif($rule instanceof Compiler\Llk\Rule\Choice)
                 for($i = 0, $max = count($rule->getContent()); $i < $max; ++$i)
                     $this->_coveredRules[$name][$i] = 0;
             else
@@ -217,11 +201,11 @@ class Coverage extends Sampler implements \Hoa\Iterator {
            && true !== in_array(.5, $this->_coveredRules[$ruleName]))
             return false;
 
-        $this->_trace = array();
-        $this->_todo  = array(new \Hoa\Compiler\Llk\Rule\Entry(
+        $this->_trace = [];
+        $this->_todo  = [new Compiler\Llk\Rule\Entry(
             $ruleName,
             $this->_coveredRules
-        ));
+        )];
 
         $result = $this->unfold();
 
@@ -231,7 +215,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
         $handle = null;
 
         foreach($this->_trace as $trace)
-            if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
+            if($trace instanceof Compiler\Llk\Rule\Token)
                 $handle .= $this->generateToken($trace);
 
         ++$this->_key;
@@ -258,7 +242,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             $pop = array_pop($this->_todo);
 
-            if($pop instanceof \Hoa\Compiler\Llk\Rule\Ekzit) {
+            if($pop instanceof Compiler\Llk\Rule\Ekzit) {
 
                 $this->_trace[] = $pop;
                 $this->updateCoverage($pop);
@@ -282,15 +266,15 @@ class Coverage extends Sampler implements \Hoa\Iterator {
      * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to cover.
      * @return  bool
      */
-    protected function coverage ( \Hoa\Compiler\Llk\Rule $rule ) {
+    protected function coverage ( Compiler\Llk\Rule $rule ) {
 
         $content = $rule->getContent();
 
-        if($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition) {
+        if($rule instanceof Compiler\Llk\Rule\Repetition) {
 
-            $uncovered  = array();
-            $inprogress = array();
-            $already    = array();
+            $uncovered  = [];
+            $inprogress = [];
+            $already    = [];
 
             foreach($this->_coveredRules[$rule->getName()] as $child => $value)
                 if(0 == $value || .5 == $value)
@@ -313,26 +297,26 @@ class Coverage extends Sampler implements \Hoa\Iterator {
                         count($already) - 1
                     )];
 
-                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_trace[] = new Compiler\Llk\Rule\Entry(
                     $rule->getName(),
                     $this->_coveredRules,
                     $this->_todo
                 );
-                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $rand
                 );
 
-                if($this->_rules[$content] instanceof \Hoa\Compiler\Llk\Rule\Token)
+                if($this->_rules[$content] instanceof Compiler\Llk\Rule\Token)
                     for($i = 0; $i < $rand; ++$i)
-                        $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $this->_todo[] = new Compiler\Llk\Rule\Entry(
                             $content,
                             $this->_coveredRules,
                             $this->_todo
                         );
                 else {
 
-                    $sequence = $this->extract(array($content));
+                    $sequence = $this->extract([$content]);
 
                     if(null === $sequence)
                         return null;
@@ -342,7 +326,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                             $this->_trace[] = $seq;
 
-                            if($seq instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
+                            if($seq instanceof Compiler\Llk\Rule\Ekzit)
                                 $this->updateCoverage($seq);
                         }
                 }
@@ -351,18 +335,18 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                 $rand = $uncovered[rand(0, count($uncovered) - 1)];
                 $this->_coveredRules[$rule->getName()][$rand] = -1;
-                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_trace[] = new Compiler\Llk\Rule\Entry(
                     $rule->getName(),
                     $this->_coveredRules,
                     $this->_todo
                 );
-                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $rand
                 );
 
                 for($i= 0 ; $i < $rand; ++$i)
-                    $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $this->_todo[] = new Compiler\Llk\Rule\Entry(
                         $content,
                         $this->_coveredRules,
                         $this->_todo
@@ -371,11 +355,11 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             return true;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Choice) {
+        elseif($rule instanceof Compiler\Llk\Rule\Choice) {
 
-            $uncovered  = array();
-            $inprogress = array();
-            $already    = array();
+            $uncovered  = [];
+            $inprogress = [];
+            $already    = [];
 
             foreach($this->_coveredRules[$rule->getName()] as $child => $value)
                 if(0 == $value || .5 == $value)
@@ -387,7 +371,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             if(empty($uncovered)) {
 
-                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_trace[] = new Compiler\Llk\Rule\Entry(
                     $rule->getName(),
                     $this->_coveredRules,
                     $this->_todo
@@ -401,7 +385,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                     $this->_trace[] = $seq;
 
-                    if($seq instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
+                    if($seq instanceof Compiler\Llk\Rule\Ekzit)
                         $this->updateCoverage($seq);
                 }
 
@@ -416,7 +400,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
                         count($already) - 1
                     )];
 
-                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $rand
                 );
@@ -424,17 +408,17 @@ class Coverage extends Sampler implements \Hoa\Iterator {
             else {
 
                 $rand           = $uncovered[rand(0, count($uncovered) - 1)];
-                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_trace[] = new Compiler\Llk\Rule\Entry(
                     $rule->getName(),
                     $this->_coveredRules,
                     $this->_todo
                 );
                 $this->_coveredRules[$rule->getName()][$rand] = -1;
-                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $rand
                 );
-                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_todo[]  = new Compiler\Llk\Rule\Entry(
                     $content[$rand],
                     $this->_coveredRules,
                     $this->_todo
@@ -443,20 +427,20 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             return true;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
+        elseif($rule instanceof Compiler\Llk\Rule\Concatenation) {
 
             $this->_coveredRules[$rule->getName()][0] = -1;
-            $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+            $this->_trace[] = new Compiler\Llk\Rule\Entry(
                 $rule->getName(),
                 false
             );
-            $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+            $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
                 $rule->getName(),
                 false
             );
 
             for($i = count($content) - 1; $i >= 0; --$i)
-                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                $this->_todo[] = new Compiler\Llk\Rule\Entry(
                     $content[$i],
                     false,
                     $this->_todo
@@ -464,14 +448,14 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             return true;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Token) {
+        elseif($rule instanceof Compiler\Llk\Rule\Token) {
 
-            $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
+            $this->_trace[] = new Compiler\Llk\Rule\Entry(
                 $rule->getName(),
                 false
             );
             $this->_trace[] = $rule;
-            $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+            $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
                 $rule->getName(),
                 false
             );
@@ -491,7 +475,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
      */
     protected function extract ( Array $rules ) {
 
-        $out = array();
+        $out = [];
 
         foreach($rules as $rule)
             foreach($this->_tests as $test) {
@@ -500,7 +484,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                 foreach($test as $t) {
 
-                    if(   $t instanceof \Hoa\Compiler\Llk\Rule\Entry
+                    if(   $t instanceof Compiler\Llk\Rule\Entry
                        && $t->getRule() == $rule)
                         ++$opened;
 
@@ -508,7 +492,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                         $out[] = $t;
 
-                        if(   $t instanceof \Hoa\Compiler\Llk\Rule\Ekzit
+                        if(   $t instanceof Compiler\Llk\Rule\Ekzit
                            && $t->getRule() == $rule) {
 
                             --$opened;
@@ -522,12 +506,12 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
         foreach($rules as $rule) {
 
-            $out    = array();
+            $out    = [];
             $closed = 0;
 
             foreach($this->_trace as $t) {
 
-                if(   $t instanceof \Hoa\Compiler\Llk\Rule\Ekzit
+                if(   $t instanceof Compiler\Llk\Rule\Ekzit
                    && $t->getRule() == $rule)
                     ++$closed;
 
@@ -535,7 +519,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
                     $out[] = $t;
 
-                    if(   $t instanceof \Hoa\Compiler\Llk\Rule\Ekzit
+                    if(   $t instanceof Compiler\Llk\Rule\Ekzit
                        && $t->getRule() == $rule) {
 
                         --$closed;
@@ -564,11 +548,11 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             $pop = array_pop($this->_trace);
 
-            if($pop instanceof \Hoa\Compiler\Llk\Rule\Entry) {
+            if($pop instanceof Compiler\Llk\Rule\Entry) {
 
                 $rule  = $this->_rules[$pop->getRule()];
-                $found =    $rule instanceof \Hoa\Compiler\Llk\Rule\Choice
-                         || $rule instanceof \Hoa\Compiler\Llk\Rule\Repetition;
+                $found =    $rule instanceof Compiler\Llk\Rule\Choice
+                         || $rule instanceof Compiler\Llk\Rule\Repetition;
             }
         } while(0 < count($this->_trace) && false === $found);
 
@@ -578,7 +562,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
         $ruleName       = $pop->getRule();
         $this->_covered = $pop->getData();
         $this->_todo    = $pop->getTodo();
-        $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+        $this->_todo[]  = new Compiler\Llk\Rule\Entry(
             $ruleName,
             $this->_covered,
             $this->_todo
@@ -594,14 +578,14 @@ class Coverage extends Sampler implements \Hoa\Iterator {
      * @param   \Hoa\Compiler\Llk\Rule\Ekzit  $rule    Rule to consider.
      * @return  void
      */
-    protected function updateCoverage ( \Hoa\Compiler\Llk\Rule\Ekzit $Rule ) {
+    protected function updateCoverage ( Compiler\Llk\Rule\Ekzit $Rule ) {
 
         $ruleName = $Rule->getRule();
         $child    = $Rule->getData();
         $rule     = $this->_rules[$ruleName];
         $content  = $rule->getContent();
 
-        if($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition) {
+        if($rule instanceof Compiler\Llk\Rule\Repetition) {
 
             if(0 === $child)
                 $this->_coveredRules[$ruleName][$child] = 1;
@@ -620,7 +604,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
                     $this->_coveredRules[$ruleName][$child] = .5;
             }
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Choice) {
+        elseif($rule instanceof Compiler\Llk\Rule\Choice) {
 
             if(   true === $this->allCovered($content[$child])
                || true === $this->checkRuleRoot($content[$child]))
@@ -628,7 +612,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
             else
                 $this->_coveredRules[$ruleName][$child] = .5;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
+        elseif($rule instanceof Compiler\Llk\Rule\Concatenation) {
 
             $isCovered = true;
 
@@ -639,7 +623,7 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             $this->_coveredRules[$ruleName][0] = true === $isCovered ? 1 : .5;
         }
-        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Token)
+        elseif($rule instanceof Compiler\Llk\Rule\Token)
             $this->_coveredRules[$ruleName][0] = 1;
 
         return;
@@ -680,12 +664,12 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
             $lastRule = $this->_trace[$i];
 
-            if($lastRule instanceof \Hoa\Compiler\Llk\Rule\Entry) {
+            if($lastRule instanceof Compiler\Llk\Rule\Entry) {
 
                 if($lastRule->getRule() == $ruleName)
                     ++$nb;
             }
-            elseif($lastRule instanceof \Hoa\Compiler\Llk\Rule\Ekzit) {
+            elseif($lastRule instanceof Compiler\Llk\Rule\Ekzit) {
 
                 if($lastRule->getRule() == $ruleName)
                     --$nb;
@@ -696,6 +680,4 @@ class Coverage extends Sampler implements \Hoa\Iterator {
 
         return 0 < $nb;
     }
-}
-
 }

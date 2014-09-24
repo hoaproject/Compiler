@@ -34,18 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception
- */
--> import('Compiler.Exception.~');
-
-}
-
-namespace Hoa\Compiler\Exception {
+namespace Hoa\Compiler\Exception;
 
 /**
  * Class \Hoa\Compiler\Exception\IllegalToken.
@@ -99,6 +88,4 @@ class IllegalToken extends Exception {
 
         return $this->column;
     }
-}
-
 }

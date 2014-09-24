@@ -943,7 +943,7 @@ foreach($compiler->getTrace() as $element)
 $rules    = $compiler->getRules();
 
 // 2. Start with the root rule.
-$stack    = array($compiler->getRootRule() => true);
+$stack    = [$compiler->getRootRule() => true];
 
 while(false !== current($stack)) {
 

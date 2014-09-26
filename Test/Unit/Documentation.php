@@ -41,7 +41,7 @@ use Hoa\Compiler as LUT;
 use Hoa\File;
 
 /**
- * Class \Hoa\Mime\Test\Unit\Documentation.
+ * Class \Hoa\Compiler\Test\Unit\Documentation.
  *
  * Test suite of the examples in the documentation.
  *

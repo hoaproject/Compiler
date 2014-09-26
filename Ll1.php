@@ -34,29 +34,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception\FinalStateHasNotBeenReached
- */
--> import('Compiler.Exception.FinalStateHasNotBeenReached')
-
-/**
- * \Hoa\Compiler\Exception\IllegalToken
- */
--> import('Compiler.Exception.IllegalToken');
+namespace Hoa\Compiler;
 
 /**
  * Define the __ constant, so useful in compiler :-).
  */
-define('GO', 'GO');
-define('__', '__');
-
-}
-
-namespace Hoa\Compiler {
+_define('GO', 'GO');
+_define('__', '__');
 
 /**
  * Class \Hoa\Compiler\Ll1.
@@ -84,15 +68,15 @@ abstract class Ll1 {
      * Tokens' rules could be apply here (i.e. normal and special tokens are
      * understood).
      * Example:
-     *     array(
+     *     [
      *         '#\s+',           // white spaces
      *         '#//.*',          // inline comment
      *         '#/\*(.|\n)*\*\/' // block comment
-     *     )
+     *     ]
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_skip                = array();
+    protected $_skip                = [];
 
     /**
      * Tokens.
@@ -105,39 +89,39 @@ abstract class Ll1 {
      * We got an array of arrays because of sub-automata, one sub-array per
      * sub-automaton.
      * Example:
-     *     array(
-     *         array(
+     *     [
+     *         [
      *             '{'  // open brack
-     *         ),
-     *         array(
+     *         ],
+     *         [
      *             '"',            // quote
      *             ':',            // semi-colon
      *             ',',            // comma
      *             '{',            // open bracket
      *             '}'             // close bracket
-     *         ),
-     *         array(
+     *         ],
+     *         [
      *             '#[a-z_\ \n]+", // id/string
      *             '"'             // quote
-     *         )
-     *     )
+     *         ]
+     *     ]
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_tokens              = array();
+    protected $_tokens              = [];
 
     /**
      * States.
      * We got an array of arrays because of sub-automata, one sub-array per
      * sub-automaton.
      * Example:
-     *     array(
-     *         array(
+     *     [
+     *         [
      *              __ , // error
      *             'GO', // start
      *             'OK'  // terminal
-     *         ),
-     *         array(
+     *         ],
+     *         [
      *              __ , // error
      *             'GO', // start
      *             'KE', // key
@@ -145,14 +129,14 @@ abstract class Ll1 {
      *             'VA', // value
      *             'BL', // block
      *             'OK'  // terminal
-     *         ),
-     *         array(
+     *         ],
+     *         [
      *              __ , // error
      *             'GO', // start
      *             'ST', // string
      *             'OK'  // terminal
-     *         )
-     *     )
+     *         ]
+     *     ]
      *
      * Note: the constant GO or the string 'GO' must be used to represent the
      *       initial state.
@@ -161,22 +145,22 @@ abstract class Ll1 {
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_states              = array();
+    protected $_states              = [];
 
     /**
      * Terminal states (defined in the states set).
      * We got an array of arrays because of sub-automata, one sub-array per
      * sub-automaton.
      * Example:
-     *     array(
-     *         array('OK'),
-     *         array('OK'),
-     *         array('OK')
-     *     )
+     *     [
+     *         ['OK'],
+     *         ['OK'],
+     *         ['OK']
+     *     ]
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_terminal            = array();
+    protected $_terminal            = [];
 
     /**
      * Transitions table.
@@ -184,30 +168,30 @@ abstract class Ll1 {
      * We got an array of arrays because of sub-automata, one sub-array per
      * sub-automaton.
      * Example:
-     *     array(
-     *         array(
-     *                        {
-     *             __  array( __ ),
-     *             GO  array('OK'),
-     *             OK  array( __ ),
+     *     [
+     *        [
+     *                   {
+     *             __  [ __ ],
+     *             GO  ['OK'],
+     *             OK  [ __ ],
      *         ),
-     *         array(
-     *                        "     :     ,     {     }
-     *             __  array( __ ,  __ ,  __ ,  __ ,  __ ),
-     *             GO  array('KE',  __ ,  __ ,  __ , 'OK'),
-     *             KE  array( __ , 'CO',  __ ,  __ ,  __ ),
-     *             CO  array('VA',  __ ,  __ , 'BL',  __ ),
-     *             VA  array( __ ,  __ , 'GO',  __ , 'OK'),
-     *             BL  array( __ ,  __ , 'GO',  __ , 'OK'),
-     *             OK  array( __ ,  __ ,  __ ,  __ ,  __ )
-     *         ),
-     *         array(
-     *                        id    "
-     *             __  array( __ ,  __ ),
-     *             GO  array('ST', 'OK'),
-     *             ST  array( __ , 'OK'),
-     *             OK  array( __ ,  __ )
-     *         )
+     *         [
+     *                   "     :     ,     {     }
+     *             __  [ __ ,  __ ,  __ ,  __ ,  __ ],
+     *             GO  ['KE',  __ ,  __ ,  __ , 'OK'],
+     *             KE  [ __ , 'CO',  __ ,  __ ,  __ ],
+     *             CO  ['VA',  __ ,  __ , 'BL',  __ ],
+     *             VA  [ __ ,  __ , 'GO',  __ , 'OK'],
+     *             BL  [ __ ,  __ , 'GO',  __ , 'OK'],
+     *             OK  [ __ ,  __ ,  __ ,  __ ,  __ ]
+     *         ],
+     *         [
+     *                   id    "
+     *             __  [ __ ,  __ ],
+     *             GO  ['ST', 'OK'],
+     *             ST  [ __ , 'OK'],
+     *             OK  [ __ ,  __ ]
+     *         ]
      *     )
      *
      * Note: tokens and states should be declared in the strict same order as
@@ -215,7 +199,7 @@ abstract class Ll1 {
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_transitions         = array();
+    protected $_transitions         = [];
 
     /**
      * Actions table.
@@ -223,31 +207,31 @@ abstract class Ll1 {
      * We got an array of arrays because of sub-automata, one sub-array per
      * sub-automaton.
      * Example:
-     *     array(
-     *         array(
-     *                        {
-     *             __  array( 0),
-     *             GO  array( 0),
-     *             OK  array( 2),
-     *         ),
-     *         array(
-     *                        "   :    ,    {    }
-     *             __  array( 0,  0 ,  0 ,  0 ,  0 ),
-     *             GO  array( 0,  0 ,  0 ,  0 , 'd'),
-     *             KE  array( 3, 'k',  0 ,  0 ,  0 ),
-     *             CO  array( 0,  0 ,  0 , 'u',  0 ),
-     *             VA  array( 3,  0 , 'v',  0 , 'x'),
-     *             BL  array( 0,  0 ,  0 ,  2 , 'd'),
-     *             OK  array( 0,  0 ,  0 ,  0 ,  0 )
-     *         ),
-     *         array(
-     *                       id  "
-     *             __  array( 0, 0),
-     *             GO  array(-1, 0),
-     *             ST  array( 0, 0),
-     *             OK  array( 0, 0)
-     *         )
-     *     )
+     *     [
+     *         [
+     *                   {
+     *             __  [ 0 ],
+     *             GO  [ 0 ],
+     *             OK  [ 2 ],
+     *         ],
+     *         [
+     *                   "   :    ,    {    }
+     *             __  [ 0,  0 ,  0 ,  0 ,  0 ],
+     *             GO  [ 0,  0 ,  0 ,  0 , 'd'],
+     *             KE  [ 3, 'k',  0 ,  0 ,  0 ],
+     *             CO  [ 0,  0 ,  0 , 'u',  0 ],
+     *             VA  [ 3,  0 , 'v',  0 , 'x'],
+     *             BL  [ 0,  0 ,  0 ,  2 , 'd'],
+     *             OK  [ 0,  0 ,  0 ,  0 ,  0 ]
+     *         ],
+     *         [
+     *                   id  "
+     *             __  [ 0, 0 ],
+     *             GO  [-1, 0 ],
+     *             ST  [ 0, 0 ],
+     *             OK  [ 0, 0 ]
+     *         ]
+     *     ]
      *
      * AT is filled with integer or char n.
      * If n is a char, it means an action.
@@ -287,26 +271,26 @@ abstract class Ll1 {
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $_actions             = array();
+    protected $_actions             = [];
 
     /**
      * Names of automata.
      */
-    protected $_names               = array();
+    protected $_names               = [];
 
     /**
      * Recursive stack.
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    private $_stack                 = array();
+    private $_stack                 = [];
 
     /**
      * Buffers.
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected $buffers              = array();
+    protected $buffers              = [];
 
     /**
      * Current token's line.
@@ -327,7 +311,7 @@ abstract class Ll1 {
      *
      * @var \Hoa\Compiler\Ll1 array
      */
-    protected static $_cache        = array();
+    protected static $_cache        = [];
 
     /**
      * Whether cache is enabled or not.
@@ -357,7 +341,7 @@ abstract class Ll1 {
                                   Array $terminal,
                                   Array $transitions,
                                   Array $actions,
-                                  Array $names = array() ) {
+                                  Array $names = [] ) {
 
         $this->setSkip($skip);
         $this->setTokens($tokens);
@@ -392,7 +376,7 @@ abstract class Ll1 {
         $_skip         = array_flip($this->_skip);
         $_tokens       = array_flip($this->_tokens[$c]);
         $_states       = array_flip($this->_states[$c]);
-        $_actions      = array($c => 0);
+        $_actions      = [$c => 0];
 
         $nextChar      = null;
         $nextToken     = 0;
@@ -402,7 +386,7 @@ abstract class Ll1 {
         $this->line    = $this->getInitialLine();
         $this->column  = 0;
 
-        $this->buffers = array();
+        $this->buffers = [];
 
         $line          = $this->line;
         $column        = $this->column;
@@ -511,7 +495,7 @@ abstract class Ll1 {
 
                     //echo '*** Change automata (up to ' . ($foo - 1) . ')' . "\n";
 
-                    $this->_stack[$d] = array($c, $nextState, $nextToken);
+                    $this->_stack[$d] = [$c, $nextState, $nextToken];
                     end($this->_stack);
 
                     $c            = $foo - 1;
@@ -641,7 +625,7 @@ abstract class Ll1 {
                     'Illegal token at line ' . ($this->line + 1) . ' and column ' .
                     ($this->column + 1) . "\n" . $error . "\n" .
                     str_repeat(' ', $this->column) . '↑',
-                    0, array(), $this->line + 1, $this->column + 1
+                    0, [], $this->line + 1, $this->column + 1
                 );
             }
 
@@ -824,7 +808,7 @@ abstract class Ll1 {
             foreach($automata as $i => $state)
                 foreach($state as $j => $token)
                     if(0 != preg_match('#^(\d+),(.*)$#', $token, $matches))
-                        $actions[$e][$i][$j] = array((int) $matches[1], $matches[2]);
+                        $actions[$e][$i][$j] = [(int) $matches[1], $matches[2]];
 
         $old            = $this->_actions;
         $this->_actions = $actions;
@@ -995,7 +979,7 @@ abstract class Ll1 {
 
             foreach($this->_states[$e] as $i => $state) {
 
-                $name  = array();
+                $name  = [];
                 $label = $state;
 
                 if(__ != $state) {
@@ -1053,6 +1037,4 @@ abstract class Ll1 {
 
         return $out;
     }
-}
-
 }

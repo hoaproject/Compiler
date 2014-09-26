@@ -34,28 +34,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Rule;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Rule
- */
--> import('Compiler.Llk.Rule.~')
-
-/**
- * \Hoa\File\Read
- */
--> import('File.Read')
-
-/**
- * \Hoa\Compiler\Llk
- */
--> import('Compiler.Llk.~');
-
-}
-
-namespace Hoa\Compiler\Llk\Rule {
+use Hoa\Compiler;
+use Hoa\File;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Token.
@@ -220,10 +202,10 @@ class Token extends Rule {
 
         if(null === static::$_regexCompiler) {
 
-            $stream = new \Hoa\File\Read('hoa://Library/Regex/Grammar.pp');
+            $stream = new File\Read('hoa://Library/Regex/Grammar.pp');
             $stream->rewind();
 
-            static::$_regexCompiler = \Hoa\Compiler\Llk::load($stream);
+            static::$_regexCompiler = Compiler\Llk::load($stream);
         }
 
         if(null === $this->_ast)
@@ -296,6 +278,4 @@ class Token extends Rule {
 
         return $this->_unification;
     }
-}
-
 }

@@ -34,43 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception
- */
--> import('Compiler.Exception.~')
-
-/**
- * \Hoa\Compiler\Exception\UnexpectedToken
- */
--> import('Compiler.Exception.UnexpectedToken')
-
-/**
- * \Hoa\Compiler\Llk\Lexer
- */
--> import('Compiler.Llk.Lexer')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Entry
- */
--> import('Compiler.Llk.Rule.Entry')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Ekzit
- */
--> import('Compiler.Llk.Rule.Ekzit')
-
-/**
- * \Hoa\Compiler\Llk\TreeNode
- */
--> import('Compiler.Llk.TreeNode');
-
-}
-
-namespace Hoa\Compiler\Llk {
+use Hoa\Compiler;
 
 /**
  * Class \Hoa\Compiler\Llk\Parser.
@@ -126,14 +92,14 @@ class Parser {
      *
      * @var \Hoa\Compiler\Llk\Parser array
      */
-    protected $_tokenSequence = array();
+    protected $_tokenSequence = [];
 
     /**
      * Trace of activated rules.
      *
      * @var \Hoa\Compiler\Llk\Parser array
      */
-    protected $_trace         = array();
+    protected $_trace         = [];
 
     /**
      * Stack of todo list.
@@ -166,8 +132,8 @@ class Parser {
      * @param   array  $rules     Rules.
      * @return  void
      */
-    public function __construct ( Array $tokens = array(),
-                                  Array $rules  = array() ) {
+    public function __construct ( Array $tokens = [],
+                                  Array $rules  = [] ) {
 
         $this->_tokens = $tokens;
         $this->_rules  = $rules;
@@ -191,15 +157,15 @@ class Parser {
         $this->_tokenSequence = $lexer->lexMe($text, $this->_tokens);
         $this->_currentState  = 0;
         $this->_errorState    = 0;
-        $this->_trace         = array();
-        $this->_todo          = array();
+        $this->_trace         = [];
+        $this->_todo          = [];
 
         if(false === array_key_exists($rule, $this->_rules))
             $rule = $this->getRootRule();
 
         $closeRule   = new Rule\Ekzit($rule, 0);
-        $openRule    = new Rule\Entry($rule, 0, array($closeRule));
-        $this->_todo = array($closeRule, $openRule);
+        $openRule    = new Rule\Entry($rule, 0, [$closeRule]);
+        $this->_todo = [$closeRule, $openRule];
 
         do {
 
@@ -231,10 +197,10 @@ class Parser {
                         $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
                 }
 
-                throw new \Hoa\Compiler\Exception\UnexpectedToken(
+                throw new Compiler\Exception\UnexpectedToken(
                     'Unexpected token "%s" (%s) at line %d and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
-                    0, array($token['value'], $token['token'], $line, $column, $text),
+                    0, [$token['value'], $token['token'], $line, $column, $text],
                     $line, $column
                 );
             }
@@ -247,8 +213,8 @@ class Parser {
         $tree = $this->_buildTree();
 
         if(!($tree instanceof TreeNode))
-            throw new \Hoa\Compiler\Exception(
-                'Parsing error: cannot build AST, the trace is corrupted.', 0);
+            throw new Compiler\Exception(
+                'Parsing error: cannot build AST, the trace is corrupted.', 1);
 
         return $this->_tree = $tree;
     }
@@ -513,7 +479,7 @@ class Parser {
      * @param   array    &$children    Collected children.
      * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    protected function _buildTree ( $i = 0, &$children = array() ) {
+    protected function _buildTree ( $i = 0, &$children = [] ) {
 
         $max = count($this->_trace);
 
@@ -541,19 +507,19 @@ class Parser {
                     $children[] = $ruleName;
 
                 if(null !== $id)
-                    $children[] = array(
+                    $children[] = [
                         'id'      => $id,
                         'options' => $rule->getNodeOptions()
-                    );
+                    ];
 
                 $i = $this->_buildTree($i + 1, $children);
 
                 if(false === $isRule)
                     continue;
 
-                $handle   = array();
+                $handle   = [];
                 $cId      = null;
-                $cOptions = array();
+                $cOptions = [];
 
                 do {
 
@@ -614,11 +580,11 @@ class Parser {
                     continue;
                 }
 
-                $child      = new TreeNode('token', array(
+                $child      = new TreeNode('token', [
                     'token'     => $trace->getTokenName(),
                     'value'     => $trace->getValue(),
                     'namespace' => $trace->getNamespace(),
-                ));
+                ]);
                 $children[] = $child;
                 ++$i;
             }
@@ -801,6 +767,4 @@ class Parser {
 
         return $rule;
     }
-}
-
 }

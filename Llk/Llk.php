@@ -34,28 +34,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception
- */
--> import('Compiler.Exception.~')
-
-/**
- * \Hoa\Compiler\Llk\Parser
- */
--> import('Compiler.Llk.Parser')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Analyzer
- */
--> import('Compiler.Llk.Rule.Analyzer');
-
-}
-
-namespace Hoa\Compiler\Llk {
+use Hoa\Compiler;
+use Hoa\Core;
+use Hoa\Stream;
 
 /**
  * Class \Hoa\Compiler\Llk.
@@ -138,7 +121,7 @@ class Llk {
      * @return  \Hoa\Compiler\Llk
      * @throw   \Hoa\Compiler\Exception
      */
-    public static function load ( \Hoa\Stream\IStream\In $stream ) {
+    public static function load ( Stream\IStream\In $stream ) {
 
         $pp = $stream->readAll();
 
@@ -146,7 +129,7 @@ class Llk {
 
             $message = 'The grammar is empty';
 
-            if($stream instanceof \Hoa\Stream\IStream\Pointable)
+            if($stream instanceof Stream\IStream\Pointable)
                 if(0 < $stream->tell())
                     $message .= ': the stream ' . $stream->getStreamName() .
                                 ' is pointable and not rewinded, maybe it ' .
@@ -155,7 +138,7 @@ class Llk {
                     $message .= ': nothing to read on the stream ' .
                                 $stream->getStreamName();
 
-            throw new \Hoa\Compiler\Exception($message . '.', 0);
+            throw new Compiler\Exception($message . '.', 0);
         }
 
         static::parsePP($pp, $tokens, $rawRules);
@@ -179,8 +162,8 @@ class Llk {
     public static function parsePP ( $pp, &$tokens, &$rules ) {
 
         $lines  = explode("\n", $pp);
-        $tokens = array('default' => array());
-        $rules  = array();
+        $tokens = ['default' => []];
+        $rules  = [];
 
         for($i = 0, $m = count($lines); $i < $m; ++$i) {
 
@@ -200,7 +183,7 @@ class Llk {
                         $matches[1] = 'default';
 
                     if(!isset($tokens[$matches[1]]))
-                        $tokens[$matches[1]] = array();
+                        $tokens[$matches[1]] = [];
 
                     if(!isset($tokens[$matches[1]]['skip']))
                         $tokens[$matches[1]]['skip'] = $matches[3];
@@ -222,16 +205,16 @@ class Llk {
                         $matches[2] = $matches[2] . ':' . $matches[4];
 
                     if(!isset($tokens[$matches[1]]))
-                        $tokens[$matches[1]] = array();
+                        $tokens[$matches[1]] = [];
 
                     $tokens[$matches[1]][$matches[2]] = $matches[3];
                 }
 
                 else
-                    throw new \Hoa\Compiler\Exception(
+                    throw new Compiler\Exception(
                         'Unrecognized instructions:' . "\n" .
                         '    %s' . "\n" . 'in file %s at line %d.',
-                        1, array($line, $stream->getStreamName(), $i + 1));
+                        1, [$line, $stream->getStreamName(), $i + 1]);
 
                 continue;
             }
@@ -266,13 +249,7 @@ class Llk {
     }
 }
 
-}
-
-namespace {
-
 /**
  * Flex entity.
  */
-Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Llk');
-
-}
+Core\Consistency::flexEntity('Hoa\Compiler\Llk\Llk');

@@ -34,18 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception\UnrecognizedToken
- */
--> import('Compiler.Exception.UnrecognizedToken');
-
-}
-
-namespace Hoa\Compiler\Exception {
+namespace Hoa\Compiler\Exception;
 
 /**
  * Class \Hoa\Compiler\Exception\UnexpectedToken.
@@ -58,5 +47,3 @@ namespace Hoa\Compiler\Exception {
  */
 
 class UnexpectedToken extends UnrecognizedToken { }
-
-}

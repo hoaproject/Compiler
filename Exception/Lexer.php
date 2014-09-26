@@ -34,18 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception
- */
--> import('Compiler.Exception.~');
-
-}
-
-namespace Hoa\Compiler\Exception {
+namespace Hoa\Compiler\Exception;
 
 /**
  * Class \Hoa\Compiler\Exception\Lexer.
@@ -58,5 +47,3 @@ namespace Hoa\Compiler\Exception {
  */
 
 class Lexer extends Exception { }
-
-}

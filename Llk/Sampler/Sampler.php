@@ -34,18 +34,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Sampler;
 
-from('Hoa')
-
-/**
- * \Hoa\Iterator
- */
--> import('Iterator.~');
-
-}
-
-namespace Hoa\Compiler\Llk\Sampler {
+use Hoa\Compiler;
+use Hoa\Core;
+use Hoa\Visitor;
 
 /**
  * Class \Hoa\Compiler\Llk\Sampler.
@@ -112,8 +105,8 @@ abstract class Sampler {
      * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
      * @return  void
      */
-    public function __construct ( \Hoa\Compiler\Llk\Parser $compiler,
-                                  \Hoa\Visitor\Visit       $tokenSampler ) {
+    public function __construct ( Compiler\Llk\Parser $compiler,
+                                  Visitor\Visit       $tokenSampler ) {
 
         $this->_compiler     = $compiler;
         $this->_tokens       = $compiler->getTokens();
@@ -132,7 +125,7 @@ abstract class Sampler {
      * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
      * @return  string
      */
-    protected function completeToken ( \Hoa\Compiler\Llk\Rule\Token $token ) {
+    protected function completeToken ( Compiler\Llk\Rule\Token $token ) {
 
         if(null !== $token->getRepresentation())
             return $this->_currentNamespace;
@@ -189,7 +182,7 @@ abstract class Sampler {
      * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
      * @return  string
      */
-    protected function generateToken ( \Hoa\Compiler\Llk\Rule\Token $token ) {
+    protected function generateToken ( Compiler\Llk\Rule\Token $token ) {
 
         $toNamespace = $this->completeToken($token);
         $this->setCurrentNamespace($toNamespace);
@@ -200,13 +193,7 @@ abstract class Sampler {
     }
 }
 
-}
-
-namespace {
-
 /**
  * Flex entity.
  */
-Hoa\Core\Consistency::flexEntity('Hoa\Compiler\Llk\Sampler\Sampler');
-
-}
+Core\Consistency::flexEntity('Hoa\Compiler\Llk\Sampler\Sampler');

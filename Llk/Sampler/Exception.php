@@ -34,18 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Llk\Sampler;
 
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Exception
- */
--> import('Compiler.Exception.~');
-
-}
-
-namespace Hoa\Compiler\Llk\Sampler {
+use Hoa\Compiler;
 
 /**
  * Class \Hoa\Compiler\Llk\Sampler\Exception.
@@ -57,6 +48,4 @@ namespace Hoa\Compiler\Llk\Sampler {
  * @license    New BSD License
  */
 
-class Exception extends \Hoa\Compiler\Exception { }
-
-}
+class Exception extends Compiler\Exception { }

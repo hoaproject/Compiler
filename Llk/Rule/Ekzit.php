@@ -33,19 +33,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-namespace {
-
-from('Hoa')
-
-/**
- * \Hoa\Compiler\Llk\Rule\Invocation
- */
--> import('Compiler.Llk.Rule.Invocation');
-
-}
-
-namespace Hoa\Compiler\Llk\Rule {
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Ekzit.
@@ -59,5 +47,3 @@ namespace Hoa\Compiler\Llk\Rule {
  */
 
 class Ekzit extends Invocation { }
-
-}

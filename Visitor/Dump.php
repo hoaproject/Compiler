@@ -34,18 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace {
+namespace Hoa\Compiler\Visitor;
 
-from('Hoa')
-
-/**
- * \Hoa\Visitor\Visit
- */
--> import('Visitor.Visit');
-
-}
-
-namespace Hoa\Compiler\Visitor {
+use Hoa\Visitor;
 
 /**
  * Class \Hoa\Compiler\Visitor\Dump.
@@ -57,7 +48,7 @@ namespace Hoa\Compiler\Visitor {
  * @license    New BSD License
  */
 
-class Dump implements \Hoa\Visitor\Visit {
+class Dump implements Visitor\Visit {
 
     /**
      * Indentation depth.
@@ -77,7 +68,7 @@ class Dump implements \Hoa\Visitor\Visit {
      * @param   mixed                 $eldnah     Handle (not reference).
      * @return  mixed
      */
-    public function visit ( \Hoa\Visitor\Element $element,
+    public function visit ( Visitor\Element $element,
                             &$handle = null, $eldnah = null ) {
 
         ++self::$_i;
@@ -126,6 +117,4 @@ class Dump implements \Hoa\Visitor\Visit {
 
         return $out;
     }
-}
-
 }

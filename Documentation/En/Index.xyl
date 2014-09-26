@@ -186,7 +186,8 @@ rule4 ::= e f</code></pre>
   <p>The PP language, standing for <em>PHP Parser</em>, allows to express
   <strong>algebraic grammars</strong>. It is written in files having the
   <code>.pp</code> extension (please, see the
-  <code>hoa://Library/Compiler/.Mime</code> file).</p>
+  <a href="@central_resource:path=Library/Compiler/.Mime"><code>hoa://Library/Compiler/.Mime</code></a>
+  file).</p>
   <p>A grammar is composed of <strong>lexemes</strong> and
   <strong>rules</strong>. The declaration of a lexeme has the following syntax:
   <code>%token <em>namespace_in</em>:<em>name</em> <em>value</em> ->
@@ -212,7 +213,8 @@ rule4 ::= e f</code></pre>
   <a href="http://json.org/">JSON language</a> (please, see the
   <a href="https://tools.ietf.org/html/rfc4627">RFC4627</a>). The
   <strong>complete</strong> grammar is located in the
-  <code>hoa://Library/Json/Grammar.pp</code> file. Thus:</p>
+  <a href="@central_resource:path=Library/Json/Grammar.pp"><code>hoa://Library/Json/Grammar.pp</code></a>
+  file. Thus:</p>
   <pre><code class="language-pp">%skip   space          \s
 // Scalars.
 %token  true           true
@@ -278,7 +280,8 @@ number:
   </ul>
   <p>Few constructions but largely enough.</p>
   <p>Finally, the grammar of the PP language is written… with the PP language!
-  You can find it in the <code>hoa://Library/Compiler/Llk/Llk.pp</code>
+  You can find it in the
+  <a href="@central_resource:path=Library/Compiler/Llk/Llk.pp"><code>hoa://Library/Compiler/Llk/Llk.pp</code></a>
   file.</p>
 
   <h3 id="Compilation_process" for="main-toc">Compilation process</h3>

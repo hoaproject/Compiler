@@ -29,11 +29,11 @@
         "hoa/file"    : "~0.0",
         "hoa/iterator": "~0.0",
         "hoa/math"    : "~0.0",
+        "hoa/regex"   : "~0.0",
         "hoa/visitor" : "~0.0"
     },
     "require-dev": {
-        "hoa/json" : "~0.0",
-        "hoa/regex": "~0.0"
+        "hoa/json": "~0.0"
     },
     "target-dir": "Hoa/Compiler",
     "autoload"  : { "psr-0": { "Hoa\\Compiler": "." } },

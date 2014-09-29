@@ -118,6 +118,17 @@ abstract class Sampler {
     }
 
     /**
+     * Get compiler.
+     *
+     * @access  public
+     * @return  \Hoa\Compiler\Llk\Parser
+     */
+    public function getCompiler ( ) {
+
+        return $this->_compiler;
+    }
+
+    /**
      * Complete a token (namespace and representation).
      * It returns the next namespace.
      *

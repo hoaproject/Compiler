@@ -36,15 +36,10 @@
 
 namespace Hoa\Compiler\Test\Unit\Llk;
 
-use Hoa\Test;
-use Hoa\Compiler as LUT;
-use Hoa\File;
-use Hoa\Iterator;
-use Hoa\Math;
-use Hoa\Regex;
+use Hoa\Json;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Soundness.
+ * Class \Hoa\Compiler\Test\Unit\Llk\Soundness.
  *
  * Check soundness of the LL(k) compiler.
  *
@@ -53,86 +48,4 @@ use Hoa\Regex;
  * @license    New BSD License
  */
 
-class Soundness extends Test\Unit\Suite {
-
-    public function case_exaustive_json ( ) {
-
-        $this->with_json(
-            new LUT\Llk\Sampler\BoundedExhaustive(
-                $this->getJSONCompiler(),
-                $this->getRegexSampler(),
-                12
-            )
-        );
-    }
-
-    public function case_coverage_json ( ) {
-
-        $this->with_json(
-            new LUT\Llk\Sampler\Coverage(
-                $this->getJSONCompiler(),
-                $this->getRegexSampler()
-            )
-        );
-    }
-
-    public function case_uniform_random_json ( ) {
-
-        $this
-            ->given(
-                $sampler = new LUT\Llk\Sampler\Uniform(
-                    $this->getJSONCompiler(),
-                    $this->getRegexSampler(),
-                    5
-                )
-            )
-            ->with_json(
-                new Iterator\Limit(
-                    new Iterator\CallbackGenerator(function ( ) use ( $sampler ) {
-
-                        return $sampler->uniform();
-                    }),
-                    0,
-                    1000
-                ),
-                $sampler->getCompiler()
-            );
-    }
-
-    protected function with_json ( $sampler, $compiler = null ) {
-
-        if(null === $compiler)
-            $compiler = $sampler->getCompiler();
-
-        $this
-            ->when(function ( ) use ( $compiler, $sampler ) {
-
-                foreach($sampler as $data) {
-
-                    $this
-                        ->given(json_decode($data))
-                        ->when($error = json_last_error())
-                        ->then
-                            ->integer($error)
-                                ->isEqualTo(JSON_ERROR_NONE)
-
-                        ->when($result = $compiler->parse($data, null, false))
-                        ->then
-                            ->boolean($result)
-                                ->isTrue();
-                }
-            });
-    }
-
-    protected function getJSONCompiler ( ) {
-
-        return LUT\Llk::load(
-            new File\Read('hoa://Library/Json/Grammar.pp')
-        );
-    }
-
-    protected function getRegexSampler ( ) {
-
-        return new Regex\Visitor\Isotropic(new Math\Sampler\Random());
-    }
-}
+class Soundness extends Json\Test\Unit\Soundness { }

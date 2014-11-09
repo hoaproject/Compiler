@@ -27,7 +27,7 @@
     "require": {
         "hoa/core"    : "~2.0",
         "hoa/file"    : "~0.0",
-        "hoa/iterator": "~0.0",
+        "hoa/iterator": "~1.0",
         "hoa/math"    : "~0.0",
         "hoa/regex"   : "~0.0",
         "hoa/visitor" : "~0.0"

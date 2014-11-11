@@ -289,7 +289,8 @@ class Parser {
                             --$skip;
                         }
                     }
-                    elseif($trace instanceof Rule\Ekzit)
+                    elseif(   $trace instanceof Rule\Ekzit
+                           && false === $trace->isTransitional())
                         $skip += $trace->getDepth() > $this->_depth;
 
                     if(0 < $skip)

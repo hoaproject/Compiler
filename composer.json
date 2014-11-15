@@ -30,7 +30,7 @@
         "hoa/iterator": "~1.0",
         "hoa/math"    : "~0.0",
         "hoa/regex"   : "~0.0",
-        "hoa/visitor" : "~0.0"
+        "hoa/visitor" : "~1.0"
     },
     "require-dev": {
         "hoa/json": "~1.0"

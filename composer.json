@@ -33,7 +33,8 @@
         "hoa/visitor" : "~1.0"
     },
     "require-dev": {
-        "hoa/json": "~1.0"
+        "hoa/json": "~1.0",
+        "hoa/test": "~1.0"
     },
     "target-dir": "Hoa/Compiler",
     "autoload"  : { "psr-0": { "Hoa\\Compiler": "." } },

@@ -36,9 +36,12 @@
         "hoa/json": "~1.0",
         "hoa/test": "~1.0"
     },
-    "target-dir": "Hoa/Compiler",
-    "autoload"  : { "psr-0": { "Hoa\\Compiler": "." } },
-    "extra"     : {
+    "autoload": {
+        "psr-4": {
+            "Hoa\\Compiler\\": "."
+        }
+    },
+    "extra": {
         "branch-alias": {
             "dev-master": "2.x-dev"
         }

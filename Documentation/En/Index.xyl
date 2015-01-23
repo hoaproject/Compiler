@@ -105,7 +105,7 @@ digit   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 
   <h3 id="Matching_words" for="main-toc">Matching words</h3>
 
-  <div id="parsers" class="verbatim schema"></div>
+  <div id="parsers" class="schema"></div>
   <script>
   Hoa.Document.onReady(function ( ) {
 
@@ -286,7 +286,7 @@ number:
 
   <h3 id="Compilation_process" for="main-toc">Compilation process</h3>
 
-  <div id="overview" class="verbatim schema"></div>
+  <div id="overview" class="schema"></div>
   <script>
   Hoa.Document.onReady(function ( ) {
 
@@ -620,7 +620,7 @@ rule:
 
   <h3 id="Abstract_Syntax_Tree" for="main-toc">Abstract Syntax Tree</h3>
 
-  <div id="overview_ast" class="verbatim schema"></div>
+  <div id="overview_ast" class="schema"></div>
   <script>
   Hoa.Document.onReady(function ( ) {
 
@@ -776,7 +776,7 @@ $previous = $data['previousComputing'];</code></pre>
 
   <h3 id="Traces" for="main-toc">Traces</h3>
 
-  <div id="overview_trace" class="verbatim schema"></div>
+  <div id="overview_trace" class="schema"></div>
   <script>
   Hoa.Document.onReady(function ( ) {
 

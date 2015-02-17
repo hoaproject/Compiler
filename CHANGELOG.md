@@ -10,7 +10,7 @@
 
 # 2.14.11.09
 
-  * Use `hoa/iteratoar` `~1.0`. (Ivan Enderlin, 2014-11-09T10:58:53+01:00)
+  * Use `hoa/iterator` `~1.0`. (Ivan Enderlin, 2014-11-09T10:58:53+01:00)
   * Move test into `Hoa\Json`. (Ivan Enderlin, 2014-10-04T12:14:45+02:00)
   * `Hoa\Json` has been released. (Ivan Enderlin, 2014-10-03T22:23:12+02:00)
   * Add the `getCompiler` method. (Ivan Enderlin, 2014-09-29T09:52:51+02:00)

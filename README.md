@@ -207,8 +207,9 @@ $sampler = new Hoa\Compiler\Llk\Sampler\Coverage(
     new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random())
 );
 
-foreach($sampler as $i => $data)
+foreach ($sampler as $i => $data) {
     echo $i, ' => ', $data, "\n";
+}
 
 /**
  * Will output:

@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,39 +43,36 @@ use Hoa\Compiler;
  *
  * PP lexer.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Lexer {
-
+class Lexer
+{
     /**
      * Lexer state.
      *
-     * @var \Hoa\Compiler\Llk\Lexer array
+     * @var array
      */
     protected $_lexerState = null;
 
     /**
      * Text.
      *
-     * @var \Hoa\Compiler\Llk\Lexer string
+     * @var string
      */
     protected $_text       = null;
 
     /**
      * Tokens.
      *
-     * @var \Hoa\Compiler\Llk\Lexer array
+     * @var array
      */
     protected $_tokens     = [];
 
     /**
      * Namespace stacks.
      *
-     * @var \SplStack object
+     * @var \SplStack
      */
     protected $_nsStack    = null;
 
@@ -85,14 +82,13 @@ class Lexer {
      * Text tokenizer: splits the text in parameter in an ordered array of
      * tokens.
      *
-     * @access  protected
      * @param   string  $text      Text to tokenize.
      * @param   array   $tokens    Tokens to be returned.
      * @return  array
-     * @throw   \Hoa\Compiler\Exception\UnrecognizedToken
+     * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
-    public function lexMe ( $text, Array $tokens ) {
-
+    public function lexMe($text, Array $tokens)
+    {
         $this->_text       = $text;
         $this->_tokens     = $tokens;
         $this->_nsStack    = null;
@@ -102,15 +98,13 @@ class Lexer {
         $this->_lexerState = 'default';
         $stack             = false;
 
-        foreach($this->_tokens as &$tokens) {
-
+        foreach ($this->_tokens as &$tokens) {
             $_tokens = [];
 
-            foreach($tokens as $fullLexeme => $regex) {
-
-                if(false === strpos($fullLexeme, ':')) {
-
+            foreach ($tokens as $fullLexeme => $regex) {
+                if (false === strpos($fullLexeme, ':')) {
                     $_tokens[$fullLexeme] = [$regex, null];
+
                     continue;
                 }
 
@@ -125,26 +119,30 @@ class Lexer {
             $tokens = $_tokens;
         }
 
-        if(true == $stack)
+        if (true == $stack) {
             $this->_nsStack = new \SplStack();
+        }
 
-        while($offset < $maxOffset) {
-
+        while ($offset < $maxOffset) {
             $nextToken = $this->nextToken($offset);
 
-            if(null === $nextToken)
+            if (null === $nextToken) {
                 throw new Compiler\Exception\UnrecognizedToken(
                     'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" .
                     str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑',
-                    0, [
+                    0,
+                    [
                         mb_substr(substr($text, $offset), 0, 1),
                         $offset + 1,
                         $text
-                    ], 1, $offset);
+                    ],
+                    1,
+                    $offset
+                );
+            }
 
-            if(true === $nextToken['keep']) {
-
+            if (true === $nextToken['keep']) {
                 $nextToken['offset'] = $offset;
                 $tokenized[]         = $nextToken;
             }
@@ -167,60 +165,73 @@ class Lexer {
     /**
      * Compute the next token recognized at the beginning of the string.
      *
-     * @access  protected
      * @param   int  $offset    Offset.
      * @return  array
-     * @throw   \Hoa\Compiler\Exception\UnrecognizedToken
+     * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
-    protected function nextToken ( $offset ) {
-
+    protected function nextToken($offset)
+    {
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
-        foreach($tokenArray as $lexeme => $bucket) {
-
+        foreach ($tokenArray as $lexeme => $bucket) {
             list($regex, $nextState) = $bucket;
 
-            if(null === $nextState)
+            if (null === $nextState) {
                 $nextState = $this->_lexerState;
+            }
 
             $out = $this->matchLexeme($lexeme, $regex, $offset);
 
-            if(null !== $out) {
-
+            if (null !== $out) {
                 $out['namespace'] = $this->_lexerState;
                 $out['keep']      = 'skip' !== $lexeme;
 
-                if($nextState !== $this->_lexerState) {
-
+                if ($nextState !== $this->_lexerState) {
                     $shift = false;
 
-                    if(   null !== $this->_nsStack
-                       &&    0 !== preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches)) {
-
+                    if (null !== $this->_nsStack &&
+                        0 !== preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches)) {
                         $i = isset($matches[1]) ? intval($matches[1]) : 1;
 
-                        if($i > ($c = count($this->_nsStack)))
+                        if ($i > ($c = count($this->_nsStack))) {
                             throw new Compiler\Exception\Lexer(
                                 'Cannot shift namespace %d-times, from token ' .
                                 '%s in namespace %s,  because the stack ' .
                                 'contains only %d namespaces.',
-                                1, [$i, $lexeme, $this->_lexerState, $c]);
+                                1,
+                                [
+                                    $i,
+                                    $lexeme,
+                                    $this->_lexerState,
+                                    $c
+                                ]
+                            );
+                        }
 
-                        while(1 <=  $i--)
+                        while (1 <=  $i--) {
                             $previousNamespace = $this->_nsStack->pop();
+                        }
 
                         $nextState = $previousNamespace;
                         $shift     = true;
                     }
 
-                    if(!isset($this->_tokens[$nextState]))
+                    if (!isset($this->_tokens[$nextState])) {
                         throw new Compiler\Exception\Lexer(
                             'Namespace %s does not exist, called by token %s ' .
                             'in namespace %s.',
-                            2, [$nextState, $lexeme, $this->_lexerState]);
+                            2,
+                            [
+                                $nextState,
+                                $lexeme,
+                                $this->_lexerState
+                            ]
+                        );
+                    }
 
-                    if(null !== $this->_nsStack && false === $shift)
+                    if (null !== $this->_nsStack && false === $shift) {
                         $this->_nsStack[] = $this->_lexerState;
+                    }
 
                     $this->_lexerState = $nextState;
                 }
@@ -235,15 +246,14 @@ class Lexer {
     /**
      * Check if a given lexeme is matched at the beginning of the text.
      *
-     * @access  protected
      * @param   string  $lexeme    Name of the lexeme.
      * @param   string  $regex     Regular expression describing the lexeme.
      * @param   int     $offset    Offset.
      * @return  array
-     * @throw   \Hoa\Compiler\Exception\Lexer
+     * @throws  \Hoa\Compiler\Exception\Lexer
      */
-    protected function matchLexeme ( $lexeme, $regex, $offset ) {
-
+    protected function matchLexeme($lexeme, $regex, $offset)
+    {
         $_regex = str_replace('#', '\#', $regex);
         $preg   = preg_match(
             '#\G(?|' . $_regex . ')#u',
@@ -253,13 +263,18 @@ class Lexer {
             $offset
         );
 
-        if(0 === $preg)
+        if (0 === $preg) {
             return null;
+        }
 
-        if('' === $matches[0])
+        if ('' === $matches[0]) {
             throw new Compiler\Exception\Lexer(
                 'A lexeme must not match an empty value, which is the ' .
-                'case of "%s" (%s).', 3, [$lexeme, $regex]);
+                'case of "%s" (%s).',
+                3,
+                [$lexeme, $regex]
+            );
+        }
 
         return [
             'token'  => $lexeme,

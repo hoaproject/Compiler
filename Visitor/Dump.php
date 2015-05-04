@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,17 +43,15 @@ use Hoa\Visitor;
  *
  * Dump AST produced by LL(k) compiler.
  *
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Dump implements Visitor\Visit {
-
+class Dump implements Visitor\Visit
+{
     /**
      * Indentation depth.
      *
-     * @var \Hoa\Compiler\Visitor\Dump int
+     * @var int
      */
     protected static $_i = 0;
 
@@ -62,36 +60,41 @@ class Dump implements Visitor\Visit {
     /**
      * Visit an element.
      *
-     * @access  public
      * @param   \Hoa\Visitor\Element  $element    Element to visit.
      * @param   mixed                 &$handle    Handle (reference).
      * @param   mixed                 $eldnah     Handle (not reference).
      * @return  mixed
      */
-    public function visit ( Visitor\Element $element,
-                            &$handle = null, $eldnah = null ) {
-
+    public function visit(
+        Visitor\Element $element,
+        &$handle = null,
+        $eldnah  = null
+    ) {
         ++self::$_i;
 
-        $out  = str_repeat('>  ' , self::$_i) . $element->getId();
+        $out  = str_repeat('>  ', self::$_i) . $element->getId();
 
-        if(null !== $value = $element->getValue())
-            $out .= '(' .
-                    ('default' !== $value['namespace']
-                        ? $value['namespace'] . ':'
-                        : '') .
-                    $value['token'] . ', ' .
-                    $value['value'] . ')';
+        if (null !== $value = $element->getValue()) {
+            $out .=
+                '(' .
+                ('default' !== $value['namespace']
+                    ? $value['namespace'] . ':'
+                    : '') .
+                $value['token'] . ', ' .
+                $value['value'] . ')';
+        }
 
         $data = $element->getData();
 
-        if(!empty($data))
+        if (!empty($data)) {
             $out .= ' ' . $this->dumpData($data);
+        }
 
         $out .= "\n";
 
-        foreach($element->getChildren() as $child)
+        foreach ($element->getChildren() as $child) {
             $out .= $child->accept($this, $handle, $eldnah);
+        }
 
         --self::$_i;
 
@@ -101,19 +104,20 @@ class Dump implements Visitor\Visit {
     /**
      * Dump data.
      *
-     * @access  protected
      * @param   mixed  $data    Data.
      * @return  string
      */
-    protected function dumpData ( $data ) {
-
+    protected function dumpData($data)
+    {
         $out = null;
 
-        if(!is_array($data))
+        if (!is_array($data)) {
             return $data;
+        }
 
-        foreach($data as $key => $value)
+        foreach ($data as $key => $value) {
             $out .= '[' . $key . ' => ' . $this->dumpData($value) . ']';
+        }
 
         return $out;
     }

@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,17 +41,15 @@ namespace Hoa\Compiler\Exception;
  *
  * Extending the \Hoa\Compiler\Exception class.
  *
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class IllegalToken extends Exception {
-
+class IllegalToken extends Exception
+{
     /**
      * Column.
      *
-     * @var \Hoa\Compiler\Exception\IllegalToken int
+     * @var int
      */
     protected $column = 0;
 
@@ -60,7 +58,6 @@ class IllegalToken extends Exception {
     /**
      * Override line and add column support.
      *
-     * @access  public
      * @param   string  $message    Formatted message.
      * @param   int     $code       Code (the ID).
      * @param   array   $arg        RaiseError string arguments.
@@ -68,8 +65,8 @@ class IllegalToken extends Exception {
      * @param   int     $column     Column.
      * @return  void
      */
-    public function __construct ( $message, $code, $arg, $line, $column ) {
-
+    public function __construct($message, $code, $arg, $line, $column)
+    {
         parent::__construct($message, $code, $arg);
 
         $this->line   = $line;
@@ -81,11 +78,10 @@ class IllegalToken extends Exception {
     /**
      * Get column.
      *
-     * @access  public
      * @return  int
      */
-    public function getColumn ( ) {
-
+    public function getColumn()
+    {
         return $this->column;
     }
 }

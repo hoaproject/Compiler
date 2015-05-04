@@ -487,7 +487,7 @@ $header   = sprintf($format, '#', 'namespace', 'token name', 'token value', 'off
 
 echo $header, str_repeat('-', strlen($header)), "\n";
 
-foreach($sequence as $i => $token)
+foreach ($sequence as $i => $token) {
     printf(
         $format,
         $i,
@@ -496,6 +496,7 @@ foreach($sequence as $i => $token)
         $token['value'],
         $token['offset']
     );
+}
 
 /**
  * Will output:
@@ -662,66 +663,71 @@ rule:
   one method to implement: <code>visit</code> with three arguments:
   the element and two optional arguments (by reference and by copy). Let's
   see:</p>
-  <pre><code class="language-php">class PrettyPrinter implements Hoa\Visitor\Visit {
-
-    public function visit ( Hoa\Visitor\Element $element,
-                            &amp;amp;$handle = null, $eldnah = null ) {
-
+  <pre><code class="language-php">class PrettyPrinter implements Hoa\Visitor\Visit
+{
+    public function visit (
+        Hoa\Visitor\Element $element,
+        &amp;amp;$handle = null,
+        $eldnah = null
+    ) {
         static $i      = 0;
         static $indent = '    ';
 
         // One behaviour per node in the AST.
-        switch($element->getId()) {
-
+        switch ($element->getId()) {
             // Object: { … }.
             case '#object':
                 echo '{', "\n";
                 ++$i;
 
-                foreach($element->getChildren() as $e => $child) {
-
-                    if(0 &amp;lt; $e)
+                foreach ($element->getChildren() as $e => $child) {
+                    if (0 &amp;lt; $e) {
                         echo ',', "\n";
+                    }
 
                     echo str_repeat($indent, $i);
                     $child->accept($this, $handle, $eldnah);
                 }
 
                 echo "\n", str_repeat($indent, --$i), '}';
-              break;
+
+                break;
 
             // Array: [ … ].
             case '#array':
                 echo '[', "\n";
                 ++$i;
 
-                foreach($element->getChildren() as $e => $child) {
-
-                    if(0 &amp;lt; $e)
+                foreach ($element->getChildren() as $e => $child) {
+                    if (0 &amp;lt; $e) {
                         echo ',', "\n";
+                    }
 
                     echo str_repeat($indent, $i);
                     $child->accept($this, $handle, $eldnah);
                 }
 
                 echo "\n", str_repeat($indent, --$i), ']';
-              break;
+
+                break;
 
             // Pair: "…": ….
             case '#pair':
-                echo $element->getChild(0)->accept($this, $handle, $eldnah),
-                     ': ',
-                     $element->getChild(1)->accept($this, $handle, $eldnah);
-              break;
+                echo
+                    $element->getChild(0)->accept($this, $handle, $eldnah),
+                    ': ',
+                    $element->getChild(1)->accept($this, $handle, $eldnah);
+
+                break;
 
             // Many tokens.
             case 'token':
-                switch($element->getValueToken()) {
-
+                switch ($element->getValueToken()) {
                     // String: "…".
                     case 'string':
                         echo '"', $element->getValueValue(), '"';
-                      break;
+
+                        break;
 
                     // Booleans.
                     case 'true':
@@ -733,9 +739,11 @@ rule:
                     // Number.
                     case 'number':
                         echo $element->getValueValue();
-                      break;
+
+                        break;
                 }
-              break;
+
+                break;
         }
     }
 }</code></pre>
@@ -761,8 +769,9 @@ echo $prettyPrint->visit($ast);
   array; thus:</p>
   <pre><code class="language-php">$data = $element->getData();
 
-if(!isset($data['previousComputing']))
+if (!isset($data['previousComputing'])) {
     throw new Exception('Need a previous computing.', 0);
+}
 
 $previous = $data['previousComputing'];</code></pre>
   <p>It is common to use one visitor per <strong>constraint</strong>:
@@ -815,14 +824,17 @@ $previous = $data['previousComputing'];</code></pre>
 $ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 $i        = 0;
 
-foreach($compiler->getTrace() as $element)
-    if($element instanceof Hoa\Compiler\Llk\Rule\Entry)
+foreach ($compiler->getTrace() as $element) {
+    if ($element instanceof Hoa\Compiler\Llk\Rule\Entry) {
         echo str_repeat('>   ', ++$i), 'enter ', $element->getRule(), "\n";
-    elseif($element instanceof Hoa\Compiler\Llk\Rule\Token)
-        echo str_repeat('    ', $i + 1), 'token ', $element->getTokenName(),
-             ', consumed ', $element->getValue(), "\n";
-    else
+    } elseif ($element instanceof Hoa\Compiler\Llk\Rule\Token) {
+        echo
+            str_repeat('    ', $i + 1), 'token ', $element->getTokenName(),
+            ', consumed ', $element->getValue(), "\n";
+    } else {
         echo str_repeat('&amp;lt;   ', $i--), 'ekzit ', $element->getRule(), "\n";
+    }
+}
 
 /**
  * Will output:
@@ -912,27 +924,28 @@ $rules    = $compiler->getRules();
 // 2. Start with the root rule.
 $stack    = [$compiler->getRootRule() => true];
 
-while(false !== current($stack)) {
-
+while (false !== current($stack)) {
     $rule = key($stack);
     next($stack);
-    echo "\n", '"', $rule, '" is a ',
-         strtolower(substr(get_class($rules[$rule]), 22));
+    echo
+        "\n", '"', $rule, '" is a ',
+        strtolower(substr(get_class($rules[$rule]), 22));
 
     $subrules = $rules[$rule]->getContent();
 
     // 3a. Token.
-    if(null === $subrules)
+    if (null === $subrules) {
         continue;
+    }
 
     echo ' of rules: ';
 
     // 3b. Other rules.
-    foreach((array) $rules[$rule]->getContent() as $subrule) {
-
-        if(!array_key_exists($subrule, $stack))
+    foreach ((array) $rules[$rule]->getContent() as $subrule) {
+        if (!array_key_exists($subrule, $stack)) {
             // 4. Unshift new rules to print.
             $stack[$subrule] = true;
+        }
 
         echo $subrule, ' ';
     }
@@ -1058,8 +1071,9 @@ while(false !== current($stack)) {
     7
 );
 
-for($i = 0; $i &amp;lt; 10; ++$i)
+for ($i = 0; $i &amp;lt; 10; ++$i) {
     echo $i, ' => ', $sampler->uniform(), "\n";
+}
 
 /**
  * Will output:
@@ -1097,8 +1111,9 @@ for($i = 0; $i &amp;lt; 10; ++$i)
     7
 );
 
-foreach($sampler as $i => $data)
+foreach ($sampler as $i => $data) {
     echo $i, ' => ', $data, "\n";
+}
 
 /**
  * Will output:
@@ -1151,8 +1166,9 @@ foreach($sampler as $i => $data)
     new Hoa\Regex\Visitor\Isotropic(new Hoa\Math\Sampler\Random())
 );
 
-foreach($sampler as $i => $data)
+foreach ($sampler as $i => $data) {
     echo $i, ' => ', $data, "\n";
+}
 
 /**
  * Will output:

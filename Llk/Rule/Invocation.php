@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,39 +41,36 @@ namespace Hoa\Compiler\Llk\Rule;
  *
  * Parent of entry and ekzit rules.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-abstract class Invocation {
-
+abstract class Invocation
+{
     /**
      * Rule.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Invocation string
+     * @var string
      */
     protected $_rule         = null;
 
     /**
      * Data.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Invocation mixed
+     * @var mixed
      */
     protected $_data         = null;
 
     /**
      * Piece of todo sequence.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Invocation array
+     * @var array
      */
     protected $_todo         = null;
 
     /**
      * Depth in the trace.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Invocation int
+     * @var int
      */
     protected $_depth        = -1;
 
@@ -81,7 +78,7 @@ abstract class Invocation {
      * Whether the rule is transitional or not (i.e. not declared in the grammar
      * but created by the analyzer).
      *
-     * @var \Hoa\Compiler\Llk\Rule\Invocation bool
+     * @var bool
      */
     protected $_transitional = false;
 
@@ -90,16 +87,18 @@ abstract class Invocation {
     /**
      * Constructor.
      *
-     * @access  public
      * @param   string  $rule     Rule name.
      * @param   mixed   $data     Data.
      * @param   array   $todo     Todo.
      * @param   int     $depth    Depth.
      * @return  void
      */
-    public function __construct ( $rule, $data, Array $todo = null,
-                                  $depth = -1 ) {
-
+    public function __construct(
+        $rule,
+        $data,
+        Array $todo = null,
+        $depth      = -1
+    ) {
         $this->_rule         = $rule;
         $this->_data         = $data;
         $this->_todo         = $todo;
@@ -112,45 +111,41 @@ abstract class Invocation {
     /**
      * Get rule name.
      *
-     * @access  public
      * @return  string
      */
-    public function getRule ( ) {
-
+    public function getRule()
+    {
         return $this->_rule;
     }
 
     /**
      * Get data.
      *
-     * @access  public
      * @return  mixed
      */
-    public function getData ( ) {
-
+    public function getData()
+    {
         return $this->_data;
     }
 
     /**
      * Get todo sequence.
      *
-     * @access  public
      * @return  array
      */
-    public function getTodo ( ) {
-
+    public function getTodo()
+    {
         return $this->_todo;
     }
 
     /**
      * Set depth in trace.
      *
-     * @access  public
      * @parma   int  $depth    Depth.
      * @return  int
      */
-    public function setDepth ( $depth) {
-
+    public function setDepth($depth)
+    {
         $old          = $this->_depth;
         $this->_depth = $depth;
 
@@ -160,22 +155,20 @@ abstract class Invocation {
     /**
      * Get depth in trace.
      *
-     * @access  public
      * @return  int
      */
-    public function getDepth ( ) {
-
+    public function getDepth()
+    {
         return $this->_depth;
     }
 
     /**
      * Check whether the rule is transitional or not.
      *
-     * @access  public
      * @return  bool
      */
-    public function isTransitional ( ) {
-
+    public function isTransitional()
+    {
         return $this->_transitional;
     }
 }

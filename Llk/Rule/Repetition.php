@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,25 +41,22 @@ namespace Hoa\Compiler\Llk\Rule;
  *
  * The repetition rule.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Repetition extends Rule {
-
+class Repetition extends Rule
+{
     /**
      * Minimum bound.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Repetition int
+     * @var int
      */
     protected $_min     = 0;
 
     /**
      * Maximum bound.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Repetition int
+     * @var int
      */
     protected $_max     = 0;
 
@@ -68,7 +65,6 @@ class Repetition extends Rule {
     /**
      * Constructor.
      *
-     * @access  public
      * @param   string  $name       Name.
      * @param   int     $min        Minimum bound.
      * @param   int     $max        Maximum bound.
@@ -76,8 +72,8 @@ class Repetition extends Rule {
      * @param   string  $nodeId     Node ID.
      * @return  void
      */
-    public function __construct ( $name, $min, $max, $content, $nodeId ) {
-
+    public function __construct($name, $min, $max, $content, $nodeId)
+    {
         parent::__construct($name, $content, $nodeId);
         $this->_min    = $min;
         $this->_max    = $max;
@@ -88,22 +84,20 @@ class Repetition extends Rule {
     /**
      * Get minimum bound.
      *
-     * @access  public
      * @return  int
      */
-    public function getMin ( ) {
-
+    public function getMin()
+    {
         return $this->_min;
     }
 
     /**
      * Get maximum bound.
      *
-     * @access  public
      * @return  int
      */
-    public function getMax ( ) {
-
+    public function getMax()
+    {
         return $this->_max;
     }
 }

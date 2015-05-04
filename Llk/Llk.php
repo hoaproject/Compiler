@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -50,14 +50,11 @@ use Hoa\Stream;
  * skipped token (::token::), kept token (<token>), token unification (token[i])
  * and rule unification (rule()[j]).
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Llk {
-
+class Llk
+{
     /**
      * Load parser from a file that contains the grammar.
      * Example:
@@ -115,28 +112,30 @@ class Llk {
      *         <inner>
      *         ::lt:: ::slash:: ::tagname[0]:: ::gt::
      *
-     * @access  public
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
      *                                             grammar.
      * @return  \Hoa\Compiler\Llk
-     * @throw   \Hoa\Compiler\Exception
+     * @throws  \Hoa\Compiler\Exception
      */
-    public static function load ( Stream\IStream\In $stream ) {
-
+    public static function load(Stream\IStream\In $stream)
+    {
         $pp = $stream->readAll();
 
-        if(empty($pp)) {
-
+        if (empty($pp)) {
             $message = 'The grammar is empty';
 
-            if($stream instanceof Stream\IStream\Pointable)
-                if(0 < $stream->tell())
-                    $message .= ': the stream ' . $stream->getStreamName() .
-                                ' is pointable and not rewinded, maybe it ' .
-                                'could be the reason';
-                else
-                    $message .= ': nothing to read on the stream ' .
-                                $stream->getStreamName();
+            if ($stream instanceof Stream\IStream\Pointable) {
+                if (0 < $stream->tell()) {
+                    $message .=
+                        ': the stream ' . $stream->getStreamName() .
+                        ' is pointable and not rewinded, maybe it ' .
+                        'could be the reason';
+                } else {
+                    $message .=
+                        ': nothing to read on the stream ' .
+                        $stream->getStreamName();
+                }
+            }
 
             throw new Compiler\Exception($message . '.', 0);
         }
@@ -152,69 +151,68 @@ class Llk {
     /**
      * Parse PP.
      *
-     * @access  public
      * @param   string  $pp        PP.
      * @param   array   $tokens    Extracted tokens.
      * @param   array   $rules     Extracted raw rules.
      * @return  void
-     * @throw   \Hoa\Compiler\Exception
+     * @throws  \Hoa\Compiler\Exception
      */
-    public static function parsePP ( $pp, &$tokens, &$rules ) {
-
+    public static function parsePP($pp, &$tokens, &$rules)
+    {
         $lines  = explode("\n", $pp);
         $tokens = ['default' => []];
         $rules  = [];
 
-        for($i = 0, $m = count($lines); $i < $m; ++$i) {
-
+        for ($i = 0, $m = count($lines); $i < $m; ++$i) {
             $line = rtrim($lines[$i]);
 
-            if(0 === strlen($line) || '//' == substr($line, 0, 2))
+            if (0 === strlen($line) || '//' == substr($line, 0, 2)) {
                 continue;
+            }
 
-            if('%' == $line[0]) {
-
-                if(0 !== preg_match(
-                    '#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u',
-                    $line,
-                    $matches)) {
-
-                    if(empty($matches[1]))
+            if ('%' == $line[0]) {
+                if (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                    if (empty($matches[1])) {
                         $matches[1] = 'default';
+                    }
 
-                    if(!isset($tokens[$matches[1]]))
+                    if (!isset($tokens[$matches[1]])) {
                         $tokens[$matches[1]] = [];
+                    }
 
-                    if(!isset($tokens[$matches[1]]['skip']))
+                    if (!isset($tokens[$matches[1]]['skip'])) {
                         $tokens[$matches[1]]['skip'] = $matches[3];
-                    else
+                    } else {
                         $tokens[$matches[1]]['skip'] =
                             '(?:' . $matches[3] . ')|' .
                             $tokens[$matches[1]]['skip'];
-                }
-
-                elseif(0 !== preg_match(
-                    '#^%token\s+(?:([^:]+):)?([^\s]+)\s+(.*?)(?:\s+->\s+(.*))?$#u',
-                    $line,
-                    $matches)) {
-
-                    if(empty($matches[1]))
+                    }
+                } elseif (0 !== preg_match('#^%token\s+(?:([^:]+):)?([^\s]+)\s+(.*?)(?:\s+->\s+(.*))?$#u', $line, $matches)) {
+                    if (empty($matches[1])) {
                         $matches[1] = 'default';
+                    }
 
-                    if(isset($matches[4]) && !empty($matches[4]))
+                    if (isset($matches[4]) && !empty($matches[4])) {
                         $matches[2] = $matches[2] . ':' . $matches[4];
+                    }
 
-                    if(!isset($tokens[$matches[1]]))
+                    if (!isset($tokens[$matches[1]])) {
                         $tokens[$matches[1]] = [];
+                    }
 
                     $tokens[$matches[1]][$matches[2]] = $matches[3];
-                }
-
-                else
+                } else {
                     throw new Compiler\Exception(
                         'Unrecognized instructions:' . "\n" .
                         '    %s' . "\n" . 'in file %s at line %d.',
-                        1, [$line, $stream->getStreamName(), $i + 1]);
+                        1,
+                        [
+                            $line,
+                            $stream->getStreamName(),
+                            $i + 1
+                        ]
+                    );
+                }
 
                 continue;
             }
@@ -223,14 +221,12 @@ class Llk {
             $rule     = null;
             ++$i;
 
-            while(   $i < $m
-                  && isset($lines[$i][0])
-                  && (' '  == $lines[$i][0]
-                  ||  "\t" == $lines[$i][0]
-                  ||  '//' == substr($lines[$i], 0, 2))) {
-
-                if('//' == substr($lines[$i], 0, 2)) {
-
+            while ($i < $m &&
+                   isset($lines[$i][0]) &&
+                   (' '  === $lines[$i][0] ||
+                    "\t" === $lines[$i][0] ||
+                    '//' === substr($lines[$i], 0, 2))) {
+                if ('//' === substr($lines[$i], 0, 2)) {
                     ++$i;
 
                     continue;
@@ -239,8 +235,9 @@ class Llk {
                 $rule .= ' ' . trim($lines[$i++]);
             }
 
-            if(isset($lines[$i][0]))
+            if (isset($lines[$i][0])) {
                 --$i;
+            }
 
             $rules[$ruleName] = $rule;
         }

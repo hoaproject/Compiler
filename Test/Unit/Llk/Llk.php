@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,24 +36,22 @@
 
 namespace Hoa\Compiler\Test\Unit\Llk;
 
-use Hoa\Test;
 use Hoa\Compiler as LUT;
 use Hoa\File;
+use Hoa\Test;
 
 /**
  * Class \Hoa\Compiler\Test\Unit\Documentation.
  *
  * Test suite of the examples in the documentation.
  *
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Llk extends Test\Unit\Suite {
-
-    public function case_without_unification ( ) {
-
+class Llk extends Test\Unit\Suite
+{
+    public function case_without_unification()
+    {
         $_grammar = <<<GRAMMAR
 %token  quote   '|"
 %token  string  \w+
@@ -89,8 +87,8 @@ GRAMMAR;
                     ->isTrue();
     }
 
-    public function case_unification ( ) {
-
+    public function case_unification()
+    {
         $_grammar = <<<GRAMMAR
 %token  quote   '|"
 %token  string  \w+
@@ -115,21 +113,21 @@ GRAMMAR;
                 ->boolean($result)
                     ->isTrue()
 
-            ->exception(function ( ) use ( &$compiler ) {
+            ->exception(function () use (&$compiler) {
 
                 $compiler->parse('\'foo"', null, false);
             })
                 ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken')
 
-            ->exception(function ( ) use ( &$compiler ) {
+            ->exception(function () use (&$compiler) {
 
                 $compiler->parse('"foo\'', null, false);
             })
                 ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken');
     }
 
-    public function case_unification_palindrome ( ) {
-
+    public function case_unification_palindrome()
+    {
         $_grammar = <<<GRAMMAR
 %token t \w
 
@@ -163,7 +161,7 @@ GRAMMAR;
                 ->boolean($result)
                     ->isTrue()
 
-            ->exception(function ( ) use ( &$compiler ) {
+            ->exception(function () use (&$compiler) {
 
                 $compiler->parse('abcdcba', null, false);
             })

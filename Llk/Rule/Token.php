@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Ivan Enderlin. All rights reserved.
+ * Copyright © 2007-2015, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -44,67 +44,64 @@ use Hoa\File;
  *
  * The token rule.
  *
- * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
- * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
- * @copyright  Copyright © 2007-2015 Frédéric Dadeau, Ivan Enderlin.
+ * @copyright  Copyright © 2007-2015 Hoa community
  * @license    New BSD License
  */
-
-class Token extends Rule {
-
+class Token extends Rule
+{
     /**
      * LL(k) compiler of hoa://Library/Regex/Grammar.pp
      *
-     * @var \Hoa\Compiler\Llk object
+     * @var \Hoa\Compiler\Llk
      */
     protected static $_regexCompiler = null;
 
     /**
      * Token name.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token string
+     * @var string
      */
     protected $_tokenName            = null;
 
     /**
      * Namespace.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token string
+     * @var string
      */
     protected $_namespace            = null;
 
     /**
      * Token representation.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token string
+     * @var string
      */
     protected $_regex                = null;
 
     /**
      * AST of the regex.
      *
-     * @var \Hoa\Compiler\Llk\TreeNode object
+     * @var \Hoa\Compiler\Llk\TreeNode
      */
     protected $_ast                  = null;
 
     /**
      * Token value.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token string
+     * @var string
      */
     protected $_value                = null;
 
     /**
      * Whether the token is kept or not in the AST.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token bool
+     * @var bool
      */
     protected $_kept                 = false;
 
     /**
      * Unification index.
      *
-     * @var \Hoa\Compiler\Llk\Rule\Token int
+     * @var int
      */
     protected $_unification          = -1;
 
@@ -113,15 +110,14 @@ class Token extends Rule {
     /**
      * Constructor.
      *
-     * @access  public
      * @param   string  $name           Name.
      * @param   string  $tokenName      Token name.
      * @param   string  $nodeId         Node ID.
      * @param   int     $unification    Unification index.
      * @return  void
      */
-    public function __construct ( $name, $tokenName, $nodeId, $unification ) {
-
+    public function __construct($name, $tokenName, $nodeId, $unification)
+    {
         parent::__construct($name, null, $nodeId);
         $this->_tokenName   = $tokenName;
         $this->_unification = $unification;
@@ -132,23 +128,21 @@ class Token extends Rule {
     /**
      * Get token name.
      *
-     * @access  public
      * @return  string
      */
-    public function getTokenName ( ) {
-
+    public function getTokenName()
+    {
         return $this->_tokenName;
     }
 
     /**
      * Set token namespace.
      *
-     * @access  public
      * @param   string  $namespace    Namespace.
      * @return  string
      */
-    public function setNamespace ( $namespace ) {
-
+    public function setNamespace($namespace)
+    {
         $old              = $this->_namespace;
         $this->_namespace = $namespace;
 
@@ -158,23 +152,21 @@ class Token extends Rule {
     /**
      * Get token namespace.
      *
-     * @access  public
      * @return  string
      */
-    public function getNamespace ( ) {
-
+    public function getNamespace()
+    {
         return $this->_namespace;
     }
 
     /**
      * Set representation.
      *
-     * @access  public
      * @param   string  $regex    Representation.
      * @return  string
      */
-    public function setRepresentation ( $regex ) {
-
+    public function setRepresentation($regex)
+    {
         $old          = $this->_regex;
         $this->_regex = $regex;
 
@@ -184,34 +176,32 @@ class Token extends Rule {
     /**
      * Get token representation.
      *
-     * @access  public
      * @return  string
      */
-    public function getRepresentation ( ) {
-
+    public function getRepresentation()
+    {
         return $this->_regex;
     }
 
     /**
      * Get AST of the token representation.
      *
-     * @access  public
      * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    public function getAST ( ) {
-
-        if(null === static::$_regexCompiler) {
-
+    public function getAST()
+    {
+        if (null === static::$_regexCompiler) {
             $stream = new File\Read('hoa://Library/Regex/Grammar.pp');
             $stream->rewind();
 
             static::$_regexCompiler = Compiler\Llk::load($stream);
         }
 
-        if(null === $this->_ast)
+        if (null === $this->_ast) {
             $this->_ast = static::$_regexCompiler->parse(
                 $this->getRepresentation()
             );
+        }
 
         return $this->_ast;
     }
@@ -219,12 +209,11 @@ class Token extends Rule {
     /**
      * Set token value.
      *
-     * @access  public
      * @param   string  $value    Value.
      * @return  string
      */
-    public function setValue ( $value ) {
-
+    public function setValue($value)
+    {
         $old          = $this->_value;
         $this->_value = $value;
 
@@ -234,23 +223,21 @@ class Token extends Rule {
     /**
      * Get token value.
      *
-     * @access  public
      * @return  string
      */
-    public function getValue ( ) {
-
+    public function getValue()
+    {
         return $this->_value;
     }
 
     /**
      * Set whether the token is kept or not in the AST.
      *
-     * @access  public
      * @param   bool  $kept    Kept.
      * @return  bool
      */
-    public function setKept ( $kept ) {
-
+    public function setKept($kept)
+    {
         $old         = $this->_kept;
         $this->_kept = $kept;
 
@@ -260,22 +247,20 @@ class Token extends Rule {
     /**
      * Check whether the token is kept in the AST or not.
      *
-     * @access  public
      * @return  bool
      */
-    public function isKept ( ) {
-
+    public function isKept()
+    {
         return $this->_kept;
     }
 
     /**
      * Get unification index.
      *
-     * @access  public
      * @return  int
      */
-    public function getUnificationIndex ( ) {
-
+    public function getUnificationIndex()
+    {
         return $this->_unification;
     }
 }

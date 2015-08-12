@@ -715,6 +715,7 @@ class Parser
     /**
      * Get rule by name.
      *
+     * @param   string  $name    Rule name.
      * @return  \Hoa\Compiler\Llk\Rule
      */
     public function getRule($name)

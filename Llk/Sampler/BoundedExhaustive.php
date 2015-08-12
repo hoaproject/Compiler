@@ -97,6 +97,7 @@ class          BoundedExhaustive
      *
      * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
      * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
+     * @param   int                       $length          Max data length.
      * @return  void
      */
     public function __construct(

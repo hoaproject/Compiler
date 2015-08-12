@@ -218,6 +218,7 @@ class TreeNode implements Visitor\Element
     /**
      * Set children.
      *
+     * @param   array  $children    Children.
      * @return  array
      */
     public function setChildren(Array $children)
@@ -262,6 +263,7 @@ class TreeNode implements Visitor\Element
     /**
      * Check if a child exists.
      *
+     * @param   int  $i    Index.
      * @return  bool
      */
     public function childExists($i)

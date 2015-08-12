@@ -150,6 +150,7 @@ abstract class Rule
     /**
      * Set rule content.
      *
+     * @param   mixed  $content    Content.
      * @return  mixed
      */
     protected function setContent($content)

@@ -167,7 +167,7 @@ class Lexer
      *
      * @param   int  $offset    Offset.
      * @return  array
-     * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
+     * @throws  \Hoa\Compiler\Exception\Lexer
      */
     protected function nextToken($offset)
     {

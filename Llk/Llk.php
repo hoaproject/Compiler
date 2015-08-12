@@ -114,7 +114,7 @@ class Llk
      *
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
      *                                             grammar.
-     * @return  \Hoa\Compiler\Llk
+     * @return  \Hoa\Compiler\Llk\Parser
      * @throws  \Hoa\Compiler\Exception
      */
     public static function load(Stream\IStream\In $stream)

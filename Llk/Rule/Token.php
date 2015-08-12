@@ -52,7 +52,7 @@ class Token extends Rule
     /**
      * LL(k) compiler of hoa://Library/Regex/Grammar.pp
      *
-     * @var \Hoa\Compiler\Llk
+     * @var \Hoa\Compiler\Llk\Parser
      */
     protected static $_regexCompiler = null;
 

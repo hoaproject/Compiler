@@ -141,7 +141,7 @@ abstract class Invocation
     /**
      * Set depth in trace.
      *
-     * @parma   int  $depth    Depth.
+     * @param   int  $depth    Depth.
      * @return  int
      */
     public function setDepth($depth)

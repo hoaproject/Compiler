@@ -114,13 +114,11 @@ GRAMMAR;
                     ->isTrue()
 
             ->exception(function () use (&$compiler) {
-
                 $compiler->parse('\'foo"', null, false);
             })
                 ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken')
 
             ->exception(function () use (&$compiler) {
-
                 $compiler->parse('"foo\'', null, false);
             })
                 ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken');
@@ -162,7 +160,6 @@ GRAMMAR;
                     ->isTrue()
 
             ->exception(function () use (&$compiler) {
-
                 $compiler->parse('abcdcba', null, false);
             })
                 ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken');

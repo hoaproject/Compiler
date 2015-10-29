@@ -106,7 +106,7 @@ GRAMMAR;
 
         $this
             ->given(
-                $grammar = new File\ReadWrite('hoa://Test/Vfs/Json.pp'),
+                $grammar = new File\ReadWrite('hoa://Test/Vfs/Json.pp?type=file'),
                 $grammar->writeAll($_grammar),
                 $compiler = LUT\Llk::load($grammar)
             )

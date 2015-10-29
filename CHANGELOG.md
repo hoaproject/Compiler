@@ -1,3 +1,7 @@
+# 2.15.10.29
+
+  * Test: Specify file type with `hoa://Test/Vfs`. (Ivan Enderlin, 2015-10-29T22:07:56+01:00)
+
 # 2.15.10.21
 
   * Fix CS. (Ivan Enderlin, 2015-10-14T17:23:16+02:00)

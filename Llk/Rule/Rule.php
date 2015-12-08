@@ -36,7 +36,7 @@
 
 namespace Hoa\Compiler\Llk\Rule;
 
-use Hoa\Core;
+use Hoa\Consistency;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule.
@@ -292,4 +292,4 @@ abstract class Rule
 /**
  * Flex entity.
  */
-Core\Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');
+Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');

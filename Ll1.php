@@ -39,8 +39,8 @@ namespace Hoa\Compiler;
 /**
  * Define the __ constant, so useful in compiler :-).
  */
-_define('GO', 'GO');
-_define('__', '__');
+!defined('GO') and define('GO', 'GO');
+!defined('__') and define('__', '__');
 
 /**
  * Class \Hoa\Compiler\Ll1.

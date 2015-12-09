@@ -37,6 +37,7 @@
 namespace Hoa\Compiler\Bin;
 
 use Hoa\Compiler;
+use Hoa\Consistency;
 use Hoa\Console;
 use Hoa\File;
 
@@ -152,7 +153,7 @@ class Pp extends Console\Dispatcher\Kit
         }
 
         if (null !== $visitor) {
-            $visitor = dnew($visitor);
+            $visitor = Consistency\Autoloader::dnew($visitor);
             echo $visitor->visit($ast);
         }
 

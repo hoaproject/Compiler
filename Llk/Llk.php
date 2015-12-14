@@ -140,7 +140,7 @@ class Llk
             throw new Compiler\Exception($message . '.', 0);
         }
 
-        static::parsePP($pp, $tokens, $rawRules);
+        static::parsePP($pp, $tokens, $rawRules, $stream->getStreamName());
 
         $ruleAnalyzer = new Rule\Analyzer($tokens);
         $rules        = $ruleAnalyzer->analyzeRules($rawRules);
@@ -151,13 +151,14 @@ class Llk
     /**
      * Parse PP.
      *
-     * @param   string  $pp        PP.
-     * @param   array   $tokens    Extracted tokens.
-     * @param   array   $rules     Extracted raw rules.
+     * @param   string  $pp         PP.
+     * @param   array   $tokens     Extracted tokens.
+     * @param   array   $rules      Extracted raw rules.
+     * @param   string  $streamName The name of the stream that contains the grammar
      * @return  void
      * @throws  \Hoa\Compiler\Exception
      */
-    public static function parsePP($pp, &$tokens, &$rules)
+    public static function parsePP($pp, &$tokens, &$rules, $streamName)
     {
         $lines  = explode("\n", $pp);
         $tokens = ['default' => []];
@@ -208,7 +209,7 @@ class Llk
                         1,
                         [
                             $line,
-                            $stream->getStreamName(),
+                            $streamName,
                             $i + 1
                         ]
                     );

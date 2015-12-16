@@ -151,10 +151,10 @@ class Llk
     /**
      * Parse PP.
      *
-     * @param   string  $pp         PP.
-     * @param   array   $tokens     Extracted tokens.
-     * @param   array   $rules      Extracted raw rules.
-     * @param   string  $streamName The name of the stream that contains the grammar
+     * @param   string  $pp            PP.
+     * @param   array   $tokens        Extracted tokens.
+     * @param   array   $rules         Extracted raw rules.
+     * @param   string  $streamName    The name of the stream that contains the grammar.
      * @return  void
      * @throws  \Hoa\Compiler\Exception
      */

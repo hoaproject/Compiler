@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Hoa community. All rights reserved.
+ * Copyright © 2007-2016, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ use Hoa\Compiler;
  *
  * PP lexer.
  *
- * @copyright  Copyright © 2007-2015 Hoa community
+ * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
 class Lexer
@@ -87,7 +87,7 @@ class Lexer
      * @return  array
      * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
-    public function lexMe($text, Array $tokens)
+    public function lexMe($text, array $tokens)
     {
         $this->_text       = $text;
         $this->_tokens     = $tokens;

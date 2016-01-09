@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Hoa community. All rights reserved.
+ * Copyright © 2007-2016, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -47,7 +47,7 @@ namespace Hoa\Compiler;
  *
  * Provide an abstract LL(1) compiler, based on sub-automata and stacks.
  *
- * @copyright  Copyright © 2007-2015 Hoa community
+ * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
 abstract class Ll1
@@ -333,13 +333,13 @@ abstract class Ll1
      * @return  void
      */
     public function __construct(
-        Array $skip,
-        Array $tokens,
-        Array $states,
-        Array $terminal,
-        Array $transitions,
-        Array $actions,
-        Array $names = []
+        array $skip,
+        array $tokens,
+        array $states,
+        array $terminal,
+        array $transitions,
+        array $actions,
+        array $names = []
     ) {
         $this->setSkip($skip);
         $this->setTokens($tokens);
@@ -708,7 +708,7 @@ abstract class Ll1
      * @param   array   $skip    Skip.
      * @return  array
      */
-    public function setSkip(Array $skip)
+    public function setSkip(array $skip)
     {
         $old         = $this->_skip;
         $this->_skip = $skip;
@@ -723,7 +723,7 @@ abstract class Ll1
      * @param   array   $tokens    Tokens.
      * @return  array
      */
-    public function setTokens(Array $tokens)
+    public function setTokens(array $tokens)
     {
         $old           = $this->_tokens;
         $this->_tokens = $tokens;
@@ -737,7 +737,7 @@ abstract class Ll1
      * @param   array   $states    States.
      * @return  array
      */
-    public function setStates(Array $states)
+    public function setStates(array $states)
     {
         $old           = $this->_states;
         $this->_states = $states;
@@ -751,7 +751,7 @@ abstract class Ll1
      * @param   array   $terminal    Terminal states.
      * @return  array
      */
-    public function setTerminal(Array $terminal)
+    public function setTerminal(array $terminal)
     {
         $old             = $this->_terminal;
         $this->_terminal = $terminal;
@@ -765,7 +765,7 @@ abstract class Ll1
      * @param   array   $transitions    Transitions table.
      * @return  array
      */
-    public function setTransitions(Array $transitions)
+    public function setTransitions(array $transitions)
     {
         $old                = $this->_transitions;
         $this->_transitions = $transitions;
@@ -779,7 +779,7 @@ abstract class Ll1
      * @param   array   $actions    Actions table.
      * @return  array
      */
-    public function setActions(Array $actions)
+    public function setActions(array $actions)
     {
         foreach ($actions as $e => $automata) {
             foreach ($automata as $i => $state) {
@@ -803,7 +803,7 @@ abstract class Ll1
      * @param   array   $names    Names of automata.
      * @return  array
      */
-    public function setNames(Array $names)
+    public function setNames(array $names)
     {
         $old          = $this->_names;
         $this->_names = $names;

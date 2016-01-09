@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Hoa community. All rights reserved.
+ * Copyright © 2007-2016, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -56,7 +56,7 @@ use Hoa\Iterator;
  *      • + is unfolded 1 or 2 times;
  *      • {x,y} is unfolded x, x + 1, y - 1 and y times.
  *
- * @copyright  Copyright © 2007-2015 Hoa community
+ * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
 class          Coverage
@@ -463,7 +463,7 @@ class          Coverage
      * @param   array  $rules    Rules to consider.
      * @return  array
      */
-    protected function extract(Array $rules)
+    protected function extract(array $rules)
     {
         $out = [];
 

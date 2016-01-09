@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2015, Hoa community. All rights reserved.
+ * Copyright © 2007-2016, Hoa community. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ use Hoa\Compiler;
  *
  * Analyze rules and transform them into atomic rules operations.
  *
- * @copyright  Copyright © 2007-2015 Hoa community
+ * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
 class Analyzer
@@ -91,7 +91,7 @@ class Analyzer
      * @param   array  $tokens    Tokens.
      * @return  void
      */
-    public function __construct(Array $tokens)
+    public function __construct(array $tokens)
     {
         $this->_tokens = $tokens;
 
@@ -115,7 +115,7 @@ class Analyzer
      * @return  void
      * @throws  \Hoa\Compiler\Exception
      */
-    public function analyzeRules(Array $rules)
+    public function analyzeRules(array $rules)
     {
         if (empty($rules)) {
             throw new Compiler\Exception\Rule('No rules specified!', 0);

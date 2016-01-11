@@ -1,3 +1,15 @@
+# 3.16.01.11
+
+  * Quality: Drop PHP5.4. (Ivan Enderlin, 2016-01-11T09:15:26+01:00)
+  * Quality: Run devtools:cs. (Ivan Enderlin, 2016-01-09T08:58:15+01:00)
+  * Core: Remove `Hoa\Core`. (Ivan Enderlin, 2016-01-09T08:03:04+01:00)
+  * Consistency: Update `dnew` call. (Ivan Enderlin, 2015-12-09T16:44:21+01:00)
+  * Consistency: Remove a call to `_define`. (Ivan Enderlin, 2015-12-08T22:27:56+01:00)
+  * Consistency: Use `Hoa\Consistency`. (Ivan Enderlin, 2015-12-08T10:56:44+01:00)
+  * Exception: Use `Hoa\Exception`. (Ivan Enderlin, 2015-11-20T07:15:35+01:00)
+  * Documentation: Format API. (Ivan Enderlin, 2015-12-16T07:38:23+01:00)
+  * Fix Llk\Llk::parsePP unrecognized instructions exception (lovenunu, 2015-12-14T16:48:09+01:00)
+
 # 2.15.10.29
 
   * Test: Specify file type with `hoa://Test/Vfs`. (Ivan Enderlin, 2015-10-29T22:07:56+01:00)

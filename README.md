@@ -17,7 +17,7 @@ dependencies, you need to require
 ```json
 {
     "require": {
-        "hoa/compiler": "~2.0"
+        "hoa/compiler": "~3.0"
     }
 }
 ```

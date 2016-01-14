@@ -27,11 +27,11 @@
     "require": {
         "hoa/consistency": "~1.0",
         "hoa/exception"  : "~1.0",
-        "hoa/file"       : "~0.0",
+        "hoa/file"       : "~1.0",
         "hoa/iterator"   : "~2.0",
-        "hoa/math"       : "~0.0",
+        "hoa/math"       : "~1.0",
         "hoa/protocol"   : "~1.0",
-        "hoa/regex"      : "~0.0",
+        "hoa/regex"      : "~1.0",
         "hoa/visitor"    : "~2.0"
     },
     "require-dev": {

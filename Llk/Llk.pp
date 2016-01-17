@@ -35,7 +35,6 @@
 //
 // Provide grammar for the LL(k) parser.
 //
-// @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
 // @copyright  Copyright © 2007-2016, Hoa community.
 // @license    New BSD License
 //

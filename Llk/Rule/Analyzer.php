@@ -295,7 +295,6 @@ class Analyzer
      */
     protected function repetition(&$pNodeId)
     {
-
         // simple() …
         $content = $this->simple($pNodeId);
 
@@ -305,7 +304,6 @@ class Analyzer
 
         // … quantifier()?
         switch ($this->getCurrentToken()) {
-
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;

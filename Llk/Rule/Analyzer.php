@@ -37,6 +37,7 @@
 namespace Hoa\Compiler\Llk\Rule;
 
 use Hoa\Compiler;
+use Hoa\Iterator;
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Analyzer.
@@ -53,35 +54,35 @@ class Analyzer
      *
      * @var array
      */
-    protected $_createdRules = null;
+    protected $_createdRules  = null;
 
     /**
      * Tokens representing rules.
      *
      * @var array
      */
-    protected $_tokens       = null;
+    protected $_tokens        = null;
 
     /**
      * Rules.
      *
      * @var array
      */
-    protected $_rules        = null;
+    protected $_rules         = null;
 
     /**
      * Current analyzed rule.
      *
      * @var string
      */
-    protected $_rule         = null;
+    protected $_rule          = null;
 
     /**
-     * Current analyzer state.
+     * Lexer iterator.
      *
-     * @var int
+     * @var \Hoa\Iterator\Lookahead
      */
-    protected $_currentState = 0;
+    protected $_tokenSequence = null;
 
 
 
@@ -143,13 +144,14 @@ class Analyzer
 
         $this->_createdRules = [];
         $this->_rules        = $rules;
+        $lexer               = new Compiler\Llk\Lexer();
 
         foreach ($rules as $key => $value) {
-            $lexer                = new Compiler\Llk\Lexer();
-            $this->_tokenSequence = $lexer->lexMe($value, $tokens);
-            $this->_rule          = $value;
-            $this->_currentState  = 0;
-            $nodeId               = null;
+            $this->_tokenSequence = new Iterator\Lookahead($lexer->lexMe($value, $tokens));
+            $this->_tokenSequence->rewind();
+
+            $this->_rule = $value;
+            $nodeId      = null;
 
             if ('#' === $key[0]) {
                 $nodeId = $key;
@@ -513,7 +515,7 @@ class Analyzer
                 );
             }
 
-            if (0     ==  $this->_currentState &&
+            if (0     ==  $this->_tokenSequence->key() &&
                 'EOF' === $this->getNextToken()) {
                 $name                       = count($this->_createdRules) + 1;
                 $this->_createdRules[$name] = new Concatenation(
@@ -534,25 +536,33 @@ class Analyzer
     }
 
     /**
-     * Get current token informations.
+     * Get current token information.
      *
      * @param   string  $kind    Token information.
      * @return  string
      */
     public function getCurrentToken($kind = 'token')
     {
-        return $this->_tokenSequence[$this->_currentState][$kind];
+        $token = $this->_tokenSequence->current();
+
+        return $token[$kind];
     }
 
     /**
-     * Get next token informations.
+     * Get next token information.
      *
      * @param   string  $kind    Token information.
      * @return  string
      */
     public function getNextToken($kind = 'token')
     {
-        return $this->_tokenSequence[$this->_currentState + 1][$kind];
+        if (true !== $this->_tokenSequence->hasNext()) {
+            return null;
+        }
+
+        $token = $this->_tokenSequence->getNext();
+
+        return $token[$kind];
     }
 
     /**
@@ -562,6 +572,8 @@ class Analyzer
      */
     public function consumeToken()
     {
-        return ++$this->_currentState;
+        $this->_tokenSequence->next();
+
+        return $this->_tokenSequence->key();
     }
 }

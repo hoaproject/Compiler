@@ -37,6 +37,7 @@
 namespace Hoa\Compiler\Llk;
 
 use Hoa\Compiler;
+use Hoa\Iterator;
 
 /**
  * Class \Hoa\Compiler\Llk\Parser.
@@ -71,25 +72,18 @@ class Parser
     protected $_rules         = null;
 
     /**
-     * Current state of the analyzer.
+     * Lexer iterator.
      *
-     * @var int
+     * @var \Hoa\Iterator\Lookahead
      */
-    protected $_currentState  = 0;
+    protected $_tokenSequence = null;
 
     /**
-     * Error state of the analyzer (when an error is encountered).
-     *
-     * @var int
-     */
-    protected $_errorState    = 0;
-
-    /**
-     * Current token sequence being analyzed.
+     * Possible token causing an error.
      *
      * @var array
      */
-    protected $_tokenSequence = [];
+    protected $_errorToken    = null;
 
     /**
      * Trace of activated rules.
@@ -148,11 +142,15 @@ class Parser
     public function parse($text, $rule = null, $tree = true)
     {
         $lexer                = new Lexer();
-        $this->_tokenSequence = $lexer->lexMe($text, $this->_tokens);
-        $this->_currentState  = 0;
-        $this->_errorState    = 0;
-        $this->_trace         = [];
-        $this->_todo          = [];
+        $this->_tokenSequence = new Iterator\Buffer(
+            $lexer->lexMe($text, $this->_tokens),
+            1024
+        );
+        $this->_tokenSequence->rewind();
+
+        $this->_errorToken = null;
+        $this->_trace      = [];
+        $this->_todo       = [];
 
         if (false === array_key_exists($rule, $this->_rules)) {
             $rule = $this->getRootRule();
@@ -171,7 +169,7 @@ class Parser
             }
 
             if (false === $this->backtrack()) {
-                $token  = $this->_tokenSequence[$this->_errorState];
+                $token  = $this->_errorToken;
                 $offset = $token['offset'];
                 $line   = 1;
                 $column = 1;
@@ -330,8 +328,9 @@ class Parser
             }
 
             array_pop($this->_todo);
-            $this->_trace[]    = $zzeRule;
-            $this->_errorState = ++$this->_currentState;
+            $this->_trace[] = $zzeRule;
+            $this->_tokenSequence->next();
+            $this->_errorToken = $this->_tokenSequence->current();
 
             return true;
         } elseif ($zeRule instanceof Rule\Concatenation) {
@@ -371,9 +370,9 @@ class Parser
                 $this->_todo,
                 $this->_depth
             );
-            $nextRule       = $content[$next];
-            $this->_todo[]  = new Rule\Ekzit($nextRule, 0);
-            $this->_todo[]  = new Rule\Entry($nextRule, 0);
+            $nextRule      = $content[$next];
+            $this->_todo[] = new Rule\Ekzit($nextRule, 0);
+            $this->_todo[] = new Rule\Entry($nextRule, 0);
 
             return true;
         } elseif ($zeRule instanceof Rule\Repetition) {
@@ -447,7 +446,7 @@ class Parser
                 $zeRule = $this->_rules[$last->getRule()];
                 $found  = $zeRule instanceof Rule\Repetition;
             } elseif ($last instanceof Rule\Token) {
-                --$this->_currentState;
+                $this->_tokenSequence->previous();
             }
         } while (0 < count($this->_trace) && false === $found);
 
@@ -669,7 +668,9 @@ class Parser
      */
     public function getCurrentToken($kind = 'token')
     {
-        return $this->_tokenSequence[$this->_currentState][$kind];
+        $token = $this->_tokenSequence->current();
+
+        return $token[$kind];
     }
 
     /**
@@ -703,9 +704,9 @@ class Parser
     }
 
     /**
-     * Get token sequence.
+     * Get the lexer iterator.
      *
-     * @return  array
+     * @return  \Hoa\Iterator\Buffer
      */
     public function getTokenSequence()
     {

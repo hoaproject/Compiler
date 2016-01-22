@@ -84,7 +84,7 @@ class Lexer
      *
      * @param   string  $text      Text to tokenize.
      * @param   array   $tokens    Tokens to be returned.
-     * @return  array
+     * @return  \Generator
      * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
     public function lexMe($text, array $tokens)
@@ -94,7 +94,6 @@ class Lexer
         $this->_nsStack    = null;
         $offset            = 0;
         $maxOffset         = strlen($this->_text);
-        $tokenized         = [];
         $this->_lexerState = 'default';
         $stack             = false;
 
@@ -144,13 +143,13 @@ class Lexer
 
             if (true === $nextToken['keep']) {
                 $nextToken['offset'] = $offset;
-                $tokenized[]         = $nextToken;
+                yield $nextToken;
             }
 
             $offset += strlen($nextToken['value']);
         }
 
-        $tokenized[] = [
+        yield [
             'token'     => 'EOF',
             'value'     => 'EOF',
             'length'    => 0,
@@ -158,8 +157,6 @@ class Lexer
             'keep'      => true,
             'offset'    => $offset
         ];
-
-        return $tokenized;
     }
 
     /**

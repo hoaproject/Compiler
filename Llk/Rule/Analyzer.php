@@ -50,39 +50,62 @@ use Hoa\Iterator;
 class Analyzer
 {
     /**
-     * Created rules.
-     *
-     * @var array
+     * PP lexemes.
      */
-    protected $_createdRules  = null;
-
-    /**
-     * Tokens representing rules.
-     *
-     * @var array
-     */
-    protected $_tokens        = null;
-
-    /**
-     * Rules.
-     *
-     * @var array
-     */
-    protected $_rules         = null;
-
-    /**
-     * Current analyzed rule.
-     *
-     * @var string
-     */
-    protected $_rule          = null;
+    protected static $_ppLexemes = [
+        'default' => [
+            'skip'          => '\s',
+            'or'            => '\|',
+            'zero_or_one'   => '\?',
+            'one_or_more'   => '\+',
+            'zero_or_more'  => '\*',
+            'n_to_m'        => '\{[0-9]+,[0-9]+\}',
+            'zero_to_m'     => '\{,[0-9]+\}',
+            'n_or_more'     => '\{[0-9]+,\}',
+            'exactly_n'     => '\{[0-9]+\}',
+            'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
+            'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?>',
+            'named'         => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
+            'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
+            'capturing_'    => '\(',
+            '_capturing'    => '\)'
+        ]
+    ];
 
     /**
      * Lexer iterator.
      *
      * @var \Hoa\Iterator\Lookahead
      */
-    protected $_tokenSequence = null;
+    protected $_lexer       = null;
+
+    /**
+     * Tokens representing rules.
+     *
+     * @var array
+     */
+    protected $_tokens      = null;
+
+    /**
+     * Rules.
+     *
+     * @var array
+     */
+    protected $_rules       = null;
+
+    /**
+     * Rule name being analyzed.
+     *
+     * @var string
+     */
+    private $_ruleName      = null;
+
+    /**
+     * Parsed rules.
+     *
+     * @var array
+     */
+    protected $_parsedRules = null;
 
 
 
@@ -99,16 +122,6 @@ class Analyzer
         return;
     }
 
-    /**
-     * Get created rules.
-     *
-     * @return  array
-     */
-    public function getCreatedRules()
-    {
-        return $this->_createdRules;
-    }
-
    /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
@@ -122,36 +135,16 @@ class Analyzer
             throw new Compiler\Exception\Rule('No rules specified!', 0);
         }
 
-        $tokens = ['default' =>
-            [
-                'skip'          => '\s',
-                'or'            => '\|',
-                'zero_or_one'   => '\?',
-                'one_or_more'   => '\+',
-                'zero_or_more'  => '\*',
-                'n_to_m'        => '\{[0-9]+,[0-9]+\}',
-                'zero_to_m'     => '\{,[0-9]+\}',
-                'n_or_more'     => '\{[0-9]+,\}',
-                'exactly_n'     => '\{[0-9]+\}',
-                'skipped'       => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
-                'kept'          => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?' . '>',
-                'named'         => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
-                'node'          => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
-                'capturing_'    => '\(',
-                '_capturing'    => '\)'
-            ]
-        ];
-
-        $this->_createdRules = [];
-        $this->_rules        = $rules;
-        $lexer               = new Compiler\Llk\Lexer();
+        $this->_parsedRules = [];
+        $this->_rules       = $rules;
+        $lexer              = new Compiler\Llk\Lexer();
 
         foreach ($rules as $key => $value) {
-            $this->_tokenSequence = new Iterator\Lookahead($lexer->lexMe($value, $tokens));
-            $this->_tokenSequence->rewind();
+            $this->_lexer = new Iterator\Lookahead($lexer->lexMe($value, static::$_ppLexemes));
+            $this->_lexer->rewind();
 
-            $this->_rule = $value;
-            $nodeId      = null;
+            $this->_ruleName = $value;
+            $nodeId          = null;
 
             if ('#' === $key[0]) {
                 $nodeId = $key;
@@ -169,7 +162,7 @@ class Analyzer
                 );
             }
 
-            $zeRule = $this->_createdRules[$rule];
+            $zeRule = $this->_parsedRules[$rule];
             $zeRule->setName($key);
             $zeRule->setPPRepresentation($value);
 
@@ -177,11 +170,11 @@ class Analyzer
                 $zeRule->setDefaultId($nodeId);
             }
 
-            unset($this->_createdRules[$rule]);
-            $this->_createdRules[$key] = $zeRule;
+            unset($this->_parsedRules[$rule]);
+            $this->_parsedRules[$key] = $zeRule;
         }
 
-        return $this->_createdRules;
+        return $this->_parsedRules;
     }
 
     /**
@@ -201,7 +194,7 @@ class Analyzer
      */
     protected function choice(&$pNodeId)
     {
-        $content = [];
+        $children = [];
 
         // concatenation() …
         $nNodeId = $pNodeId;
@@ -212,11 +205,11 @@ class Analyzer
         }
 
         if (null !== $nNodeId) {
-            $this->_createdRules[$rule]->setNodeId($nNodeId);
+            $this->_parsedRules[$rule]->setNodeId($nNodeId);
         }
 
-        $content[] = $rule;
-        $others    = false;
+        $children[] = $rule;
+        $others     = false;
 
         // … ( ::or:: concatenation() )*
         while ('or' === $this->getCurrentToken()) {
@@ -230,10 +223,10 @@ class Analyzer
             }
 
             if (null !== $nNodeId) {
-                $this->_createdRules[$rule]->setNodeId($nNodeId);
+                $this->_parsedRules[$rule]->setNodeId($nNodeId);
             }
 
-            $content[] = $rule;
+            $children[] = $rule;
         }
 
         $pNodeId = null;
@@ -242,8 +235,8 @@ class Analyzer
             return $rule;
         }
 
-        $name                       = count($this->_createdRules) + 1;
-        $this->_createdRules[$name] = new Choice($name, $content, null);
+        $name                      = count($this->_parsedRules) + 1;
+        $this->_parsedRules[$name] = new Choice($name, $children, null);
 
         return $name;
     }
@@ -255,7 +248,7 @@ class Analyzer
      */
     protected function concatenation(&$pNodeId)
     {
-        $content = [];
+        $children = [];
 
         // repetition() …
         $rule    = $this->repetition($pNodeId);
@@ -264,23 +257,23 @@ class Analyzer
             return null;
         }
 
-        $content[] = $rule;
-        $others    = false;
+        $children[] = $rule;
+        $others     = false;
 
         // … repetition()*
         while (null !== $r1 = $this->repetition($pNodeId)) {
-            $content[] = $r1;
-            $others    = true;
+            $children[] = $r1;
+            $others     = true;
         }
 
         if (false === $others && null === $pNodeId) {
             return $rule;
         }
 
-        $name                       = count($this->_createdRules) + 1;
-        $this->_createdRules[$name] = new Concatenation(
+        $name                      = count($this->_parsedRules) + 1;
+        $this->_parsedRules[$name] = new Concatenation(
             $name,
-            $content,
+            $children,
             null
         );
 
@@ -296,9 +289,9 @@ class Analyzer
     protected function repetition(&$pNodeId)
     {
         // simple() …
-        $content = $this->simple($pNodeId);
+        $children = $this->simple($pNodeId);
 
-        if (null === $content) {
+        if (null === $children) {
             return null;
         }
 
@@ -364,7 +357,7 @@ class Analyzer
         }
 
         if (!isset($min)) {
-            return $content;
+            return $children;
         }
 
         if (-1 != $max && $max < $min) {
@@ -375,12 +368,12 @@ class Analyzer
             );
         }
 
-        $name                       = count($this->_createdRules) + 1;
-        $this->_createdRules[$name] = new Repetition(
+        $name                      = count($this->_parsedRules) + 1;
+        $this->_parsedRules[$name] = new Repetition(
             $name,
             $min,
             $max,
-            $content,
+            $children,
             null
         );
 
@@ -438,14 +431,14 @@ class Analyzer
 
             if (false == $exists) {
                 throw new Compiler\Exception(
-                    'Token ::%s:: does not exist in%s.',
+                    'Token ::%s:: does not exist in %s.',
                     3,
-                    [$tokenName, $this->_rule]
+                    [$tokenName, $this->_ruleName]
                 );
             }
 
-            $name                       = count($this->_createdRules) + 1;
-            $this->_createdRules[$name] = new Token(
+            $name                      = count($this->_parsedRules) + 1;
+            $this->_parsedRules[$name] = new Token(
                 $name,
                 $tokenName,
                 null,
@@ -481,13 +474,13 @@ class Analyzer
 
             if (false == $exists) {
                 throw new Compiler\Exception(
-                    'Token <%s> does not exist in%s.',
+                    'Token <%s> does not exist in %s.',
                     4,
                     [$tokenName, $this->_rule]
                 );
             }
 
-            $name  = count($this->_createdRules) + 1;
+            $name  = count($this->_parsedRules) + 1;
             $token = new Token(
                 $name,
                 $tokenName,
@@ -495,7 +488,7 @@ class Analyzer
                 $uId
             );
             $token->setKept(true);
-            $this->_createdRules[$name] = $token;
+            $this->_parsedRules[$name] = $token;
             $this->consumeToken();
 
             return $name;
@@ -513,10 +506,10 @@ class Analyzer
                 );
             }
 
-            if (0     ==  $this->_tokenSequence->key() &&
+            if (0     === $this->_lexer->key() &&
                 'EOF' === $this->getNextToken()) {
-                $name                       = count($this->_createdRules) + 1;
-                $this->_createdRules[$name] = new Concatenation(
+                $name                      = count($this->_parsedRules) + 1;
+                $this->_parsedRules[$name] = new Concatenation(
                     $name,
                     [$tokenName],
                     null
@@ -539,11 +532,9 @@ class Analyzer
      * @param   string  $kind    Token information.
      * @return  string
      */
-    public function getCurrentToken($kind = 'token')
+    protected function getCurrentToken($kind = 'token')
     {
-        $token = $this->_tokenSequence->current();
-
-        return $token[$kind];
+        return $this->_lexer->current()[$kind];
     }
 
     /**
@@ -552,26 +543,20 @@ class Analyzer
      * @param   string  $kind    Token information.
      * @return  string
      */
-    public function getNextToken($kind = 'token')
+    protected function getNextToken($kind = 'token')
     {
-        if (true !== $this->_tokenSequence->hasNext()) {
-            return null;
-        }
-
-        $token = $this->_tokenSequence->getNext();
-
-        return $token[$kind];
+        return $this->_lexer->getNext()[$kind];
     }
 
     /**
      * Consume the current token and move to the next one.
      *
-     * @return  int
+     * @return  void
      */
-    public function consumeToken()
+    protected function consumeToken()
     {
-        $this->_tokenSequence->next();
+        $this->_lexer->next();
 
-        return $this->_tokenSequence->key();
+        return;
     }
 }

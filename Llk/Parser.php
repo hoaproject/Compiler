@@ -344,19 +344,19 @@ class Parser
                 null,
                 $this->_depth
             );
-            $content        = $zeRule->getContent();
+            $children = $zeRule->getChildren();
 
-            for ($i = count($content) - 1; $i >= 0; --$i) {
-                $nextRule      = $content[$i];
+            for ($i = count($children) - 1; $i >= 0; --$i) {
+                $nextRule      = $children[$i];
                 $this->_todo[] = new Rule\Ekzit($nextRule, 0);
                 $this->_todo[] = new Rule\Entry($nextRule, 0);
             }
 
             return true;
         } elseif ($zeRule instanceof Rule\Choice) {
-            $content = $zeRule->getContent();
+            $children = $zeRule->getChildren();
 
-            if ($next >= count($content)) {
+            if ($next >= count($children)) {
                 return false;
             }
 
@@ -370,13 +370,13 @@ class Parser
                 $this->_todo,
                 $this->_depth
             );
-            $nextRule      = $content[$next];
+            $nextRule      = $children[$next];
             $this->_todo[] = new Rule\Ekzit($nextRule, 0);
             $this->_todo[] = new Rule\Entry($nextRule, 0);
 
             return true;
         } elseif ($zeRule instanceof Rule\Repetition) {
-            $nextRule = $zeRule->getContent();
+            $nextRule = $zeRule->getChildren();
 
             if (0 === $next) {
                 $name = $zeRule->getName();

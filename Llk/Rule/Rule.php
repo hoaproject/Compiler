@@ -56,11 +56,11 @@ abstract class Rule
     protected $_name           = null;
 
     /**
-     * Rule content.
+     * Rule's children. Can be an array of names or a single name.
      *
      * @var mixed
      */
-    protected $_content        = null;
+    protected $_children       = null;
 
     /**
      * Node ID.
@@ -96,6 +96,7 @@ abstract class Rule
      * @var string
      */
     protected $_pp             = null;
+
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar
      * but created by the analyzer).
@@ -109,15 +110,15 @@ abstract class Rule
     /**
      * Constructor.
      *
-     * @param   string  $name       Name.
-     * @param   mixed   $content    Content.
-     * @param   string  $nodeId     Node ID.
+     * @param   string  $name        Name.
+     * @param   mixed   $children    Children.
+     * @param   string  $nodeId      Node ID.
      * @return  void
      */
-    public function __construct($name, $content, $nodeId = null)
+    public function __construct($name, $children, $nodeId = null)
     {
         $this->setName($name);
-        $this->setContent($content);
+        $this->setChildren($children);
         $this->setNodeId($nodeId);
 
         return;
@@ -148,27 +149,27 @@ abstract class Rule
     }
 
     /**
-     * Set rule content.
+     * Set rule's children.
      *
-     * @param   mixed  $content    Content.
+     * @param   mixed  $children    Children.
      * @return  mixed
      */
-    protected function setContent($content)
+    protected function setChildren($children)
     {
-        $old            = $this->_content;
-        $this->_content = $content;
+        $old             = $this->_children;
+        $this->_children = $children;
 
         return $old;
     }
 
     /**
-     * Get rule content.
+     * Get rule's children.
      *
      * @return  mixed
      */
-    public function getContent()
+    public function getChildren()
     {
-        return $this->_content;
+        return $this->_children;
     }
 
     /**

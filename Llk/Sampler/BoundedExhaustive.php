@@ -222,7 +222,7 @@ class          BoundedExhaustive
      */
     protected function boundedExhaustive(Compiler\Llk\Rule $rule, $next)
     {
-        $content = $rule->getContent();
+        $children = $rule->getChildren();
 
         if ($rule instanceof Compiler\Llk\Rule\Repetition) {
             if (0 === $next) {
@@ -240,11 +240,11 @@ class          BoundedExhaustive
 
                 for ($i = 0, $min = $rule->getMin(); $i < $min; ++$i) {
                     $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
-                        $content,
+                        $children,
                         0
                     );
                     $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                        $content,
+                        $children,
                         0
                     );
                 }
@@ -268,19 +268,13 @@ class          BoundedExhaustive
                     $next,
                     $this->_todo
                 );
-                $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
-                    $content,
-                    0
-                );
-                $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                    $content,
-                    0
-                );
+                $this->_todo[] = new Compiler\Llk\Rule\Ekzit($children, 0);
+                $this->_todo[] = new Compiler\Llk\Rule\Entry($children, 0);
             }
 
             return true;
         } elseif ($rule instanceof Compiler\Llk\Rule\Choice) {
-            if (count($content) <= $next) {
+            if (count($children) <= $next) {
                 return false;
             }
 
@@ -289,15 +283,9 @@ class          BoundedExhaustive
                 $next,
                 $this->_todo
             );
-            $nextRule       = $content[$next];
-            $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
-                $nextRule,
-                0
-            );
-            $this->_todo[]  = new Compiler\Llk\Rule\Entry(
-                $nextRule,
-                0
-            );
+            $nextRule      = $children[$next];
+            $this->_todo[] = new Compiler\Llk\Rule\Ekzit($nextRule, 0);
+            $this->_todo[] = new Compiler\Llk\Rule\Entry($nextRule, 0);
 
             return true;
         } elseif ($rule instanceof Compiler\Llk\Rule\Concatenation) {
@@ -306,16 +294,10 @@ class          BoundedExhaustive
                 $next
             );
 
-            for ($i = count($content) - 1; $i >= 0; --$i) {
-                $nextRule      = $content[$i];
-                $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
-                    $nextRule,
-                    0
-                );
-                $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                    $nextRule,
-                    0
-                );
+            for ($i = count($children) - 1; $i >= 0; --$i) {
+                $nextRule      = $children[$i];
+                $this->_todo[] = new Compiler\Llk\Rule\Ekzit($nextRule, 0);
+                $this->_todo[] = new Compiler\Llk\Rule\Entry($nextRule, 0);
             }
 
             return true;

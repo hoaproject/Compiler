@@ -492,9 +492,9 @@ class Analyzer
                 $name,
                 $tokenName,
                 null,
-                $uId
+                $uId,
+                true
             );
-            $token->setKept(true);
             $this->_parsedRules[$name] = $token;
             $this->_lexer->next();
 

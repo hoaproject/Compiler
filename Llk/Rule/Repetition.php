@@ -51,14 +51,14 @@ class Repetition extends Rule
      *
      * @var int
      */
-    protected $_min     = 0;
+    protected $_min = 0;
 
     /**
      * Maximum bound.
      *
      * @var int
      */
-    protected $_max     = 0;
+    protected $_max = 0;
 
 
 

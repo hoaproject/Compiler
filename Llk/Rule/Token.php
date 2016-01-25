@@ -114,13 +114,15 @@ class Token extends Rule
      * @param   string  $tokenName      Token name.
      * @param   string  $nodeId         Node ID.
      * @param   int     $unification    Unification index.
+     * @param   bool    $kept           Whether the token is kept or not in the AST.
      * @return  void
      */
-    public function __construct($name, $tokenName, $nodeId, $unification)
+    public function __construct($name, $tokenName, $nodeId, $unification, $kept = false)
     {
         parent::__construct($name, null, $nodeId);
         $this->_tokenName   = $tokenName;
         $this->_unification = $unification;
+        $this->setKept($kept);
 
         return;
     }

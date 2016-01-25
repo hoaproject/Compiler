@@ -77,35 +77,42 @@ class Analyzer
      *
      * @var \Hoa\Iterator\Lookahead
      */
-    protected $_lexer       = null;
+    protected $_lexer                   = null;
 
     /**
      * Tokens representing rules.
      *
      * @var array
      */
-    protected $_tokens      = null;
+    protected $_tokens                  = null;
 
     /**
      * Rules.
      *
      * @var array
      */
-    protected $_rules       = null;
+    protected $_rules                   = null;
 
     /**
      * Rule name being analyzed.
      *
      * @var string
      */
-    private $_ruleName      = null;
+    private $_ruleName                  = null;
 
     /**
      * Parsed rules.
      *
      * @var array
      */
-    protected $_parsedRules = null;
+    protected $_parsedRules             = null;
+
+    /**
+     * Counter to auto-name transitional rules.
+     *
+     * @var int
+     */
+    protected $_transitionalRuleCounter = 0;
 
 
 
@@ -235,8 +242,8 @@ class Analyzer
             return $rule;
         }
 
-        $name                      = count($this->_parsedRules) + 1;
-        $this->_parsedRules[$name] = new Choice($name, $children, null);
+        $name                      = $this->_transitionalRuleCounter++;
+        $this->_parsedRules[$name] = new Choice($name, $children);
 
         return $name;
     }
@@ -251,7 +258,7 @@ class Analyzer
         $children = [];
 
         // repetition() …
-        $rule    = $this->repetition($pNodeId);
+        $rule = $this->repetition($pNodeId);
 
         if (null === $rule) {
             return null;
@@ -270,7 +277,7 @@ class Analyzer
             return $rule;
         }
 
-        $name                      = count($this->_parsedRules) + 1;
+        $name                      = $this->_transitionalRuleCounter++;
         $this->_parsedRules[$name] = new Concatenation(
             $name,
             $children,
@@ -368,7 +375,7 @@ class Analyzer
             );
         }
 
-        $name                      = count($this->_parsedRules) + 1;
+        $name                      = $this->_transitionalRuleCounter++;
         $this->_parsedRules[$name] = new Repetition(
             $name,
             $min,
@@ -437,7 +444,7 @@ class Analyzer
                 );
             }
 
-            $name                      = count($this->_parsedRules) + 1;
+            $name                      = $this->_transitionalRuleCounter++;
             $this->_parsedRules[$name] = new Token(
                 $name,
                 $tokenName,
@@ -480,7 +487,7 @@ class Analyzer
                 );
             }
 
-            $name  = count($this->_parsedRules) + 1;
+            $name  = $this->_transitionalRuleCounter++;
             $token = new Token(
                 $name,
                 $tokenName,

@@ -212,8 +212,8 @@ class Analyzer
         $others     = false;
 
         // … ( ::or:: concatenation() )*
-        while ('or' === $this->getCurrentToken()) {
-            $this->consumeToken();
+        while ('or' === $this->_lexer->current()['token']) {
+            $this->_lexer->next();
             $others   = true;
             $nNodeId  = $pNodeId;
             $rule     = $this->concatenation($nNodeId);
@@ -296,64 +296,64 @@ class Analyzer
         }
 
         // … quantifier()?
-        switch ($this->getCurrentToken()) {
+        switch ($this->_lexer->current()['token']) {
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;
-                $this->consumeToken();
+                $this->_lexer->next();
 
                 break;
 
             case 'one_or_more':
                 $min =  1;
                 $max = -1;
-                $this->consumeToken();
+                $this->_lexer->next();
 
                break;
 
             case 'zero_or_more':
                 $min =  0;
                 $max = -1;
-                $this->consumeToken();
+                $this->_lexer->next();
 
                 break;
 
             case 'n_to_m':
-                $handle = trim($this->getCurrentToken('value'), '{}');
+                $handle = trim($this->_lexer->current()['value'], '{}');
                 $nm     = explode(',', $handle);
                 $min    = (int) trim($nm[0]);
                 $max    = (int) trim($nm[1]);
-                $this->consumeToken();
+                $this->_lexer->next();
 
                 break;
 
             case 'zero_to_m':
                 $min = 0;
-                $max = (int) trim($this->getCurrentToken('value'), '{,}');
-                $this->consumeToken();
+                $max = (int) trim($this->_lexer->current()['value'], '{,}');
+                $this->_lexer->next();
 
                 break;
 
             case 'n_or_more':
-                $min = (int) trim($this->getCurrentToken('value'), '{,}');
+                $min = (int) trim($this->_lexer->current()['value'], '{,}');
                 $max = -1;
-                $this->consumeToken();
+                $this->_lexer->next();
 
                 break;
 
             case 'exactly_n':
-                $handle = trim($this->getCurrentToken('value'), '{}');
+                $handle = trim($this->_lexer->current()['value'], '{}');
                 $min    = (int) $handle;
                 $max    = $min;
-                $this->consumeToken();
+                $this->_lexer->next();
 
                 break;
         }
 
         // … <node>?
-        if ('node' === $this->getCurrentToken()) {
-            $pNodeId = $this->getCurrentToken('value');
-            $this->consumeToken();
+        if ('node' === $this->_lexer->current()['token']) {
+            $pNodeId = $this->_lexer->current()['value'];
+            $this->_lexer->next();
         }
 
         if (!isset($min)) {
@@ -389,25 +389,25 @@ class Analyzer
      */
     protected function simple(&$pNodeId)
     {
-        if ('capturing_' === $this->getCurrentToken()) {
-            $this->consumeToken();
+        if ('capturing_' === $this->_lexer->current()['token']) {
+            $this->_lexer->next();
             $rule = $this->choice($pNodeId);
 
             if (null === $rule) {
                 return null;
             }
 
-            if ('_capturing' != $this->getCurrentToken()) {
+            if ('_capturing' != $this->_lexer->current()['token']) {
                 return null;
             }
 
-            $this->consumeToken();
+            $this->_lexer->next();
 
             return $rule;
         }
 
-        if ('skipped' === $this->getCurrentToken()) {
-            $tokenName = trim($this->getCurrentToken('value'), ':');
+        if ('skipped' === $this->_lexer->current()['token']) {
+            $tokenName = trim($this->_lexer->current()['value'], ':');
 
             if (']' === substr($tokenName, -1)) {
                 $uId       = (int) substr($tokenName, strpos($tokenName, '[') + 1, -1);
@@ -444,13 +444,13 @@ class Analyzer
                 null,
                 $uId
             );
-            $this->consumeToken();
+            $this->_lexer->next();
 
             return $name;
         }
 
-        if ('kept' === $this->getCurrentToken()) {
-            $tokenName = trim($this->getCurrentToken('value'), '<>');
+        if ('kept' === $this->_lexer->current()['token']) {
+            $tokenName = trim($this->_lexer->current()['value'], '<>');
 
             if (']' === substr($tokenName, -1)) {
                 $uId       = (int) substr($tokenName, strpos($tokenName, '[') + 1, -1);
@@ -489,13 +489,13 @@ class Analyzer
             );
             $token->setKept(true);
             $this->_parsedRules[$name] = $token;
-            $this->consumeToken();
+            $this->_lexer->next();
 
             return $name;
         }
 
-        if ('named' === $this->getCurrentToken()) {
-            $tokenName = rtrim($this->getCurrentToken('value'), '()');
+        if ('named' === $this->_lexer->current()['token']) {
+            $tokenName = rtrim($this->_lexer->current()['value'], '()');
 
             if (false === array_key_exists($tokenName, $this->_rules) &&
                 false === array_key_exists('#' . $tokenName, $this->_rules)) {
@@ -507,8 +507,8 @@ class Analyzer
             }
 
             if (0     === $this->_lexer->key() &&
-                'EOF' === $this->getNextToken()) {
-                $name                      = count($this->_parsedRules) + 1;
+                'EOF' === $this->_lexer->getNext()['token']) {
+                $name                      = $this->_transitionalRuleCounter++;
                 $this->_parsedRules[$name] = new Concatenation(
                     $name,
                     [$tokenName],
@@ -518,45 +518,11 @@ class Analyzer
                 $name = $tokenName;
             }
 
-            $this->consumeToken();
+            $this->_lexer->next();
 
             return $name;
         }
 
         return null;
-    }
-
-    /**
-     * Get current token information.
-     *
-     * @param   string  $kind    Token information.
-     * @return  string
-     */
-    protected function getCurrentToken($kind = 'token')
-    {
-        return $this->_lexer->current()[$kind];
-    }
-
-    /**
-     * Get next token information.
-     *
-     * @param   string  $kind    Token information.
-     * @return  string
-     */
-    protected function getNextToken($kind = 'token')
-    {
-        return $this->_lexer->getNext()[$kind];
-    }
-
-    /**
-     * Consume the current token and move to the next one.
-     *
-     * @return  void
-     */
-    protected function consumeToken()
-    {
-        $this->_lexer->next();
-
-        return;
     }
 }

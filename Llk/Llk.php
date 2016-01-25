@@ -148,6 +148,139 @@ class Llk
         return new Parser($tokens, $rules);
     }
 
+    public static function save(Parser $parser, $className)
+    {
+        $out       = null;
+        $outTokens = null;
+        $outRules  = null;
+        $outExtra  = null;
+
+        $escapeRuleName = function ($ruleName) use ($parser) {
+            if (true == $parser->getRule($ruleName)->isTransitional()) {
+                return $ruleName;
+            }
+
+            return '\'' . $ruleName . '\'';
+        };
+
+        foreach ($parser->getTokens() as $namespace => $tokens) {
+            $outTokens .= '                \'' . $namespace . '\' => [' . "\n";
+
+            foreach ($tokens as $tokenName => $tokenValue) {
+                $outTokens .=
+                    '                    \'' . $tokenName . '\' => \'' .
+                    str_replace(
+                        ['\'', '\\\\'],
+                        ['\\\'', '\\\\\\'],
+                        $tokenValue
+                    ) . '\',' . "\n";
+            }
+
+            $outTokens .= '                ],' . "\n";
+        }
+
+        foreach ($parser->getRules() as $rule) {
+            $arguments = [];
+
+            // Name.
+            $arguments['name'] = $escapeRuleName($rule->getName());
+
+            if ($rule instanceof Rule\Token) {
+                // Token name.
+                $arguments['tokenName'] = '\'' . $rule->getTokenName() . '\'';
+            } else {
+                if ($rule instanceof Rule\Repetition) {
+                    // Minimum.
+                    $arguments['min'] = $rule->getMin();
+
+                    // Maximum.
+                    $arguments['max'] = $rule->getMax();
+                }
+
+                // Children.
+                $ruleChildren = $rule->getChildren();
+
+                if (null === $ruleChildren) {
+                    $arguments['children'] = 'null';
+                } elseif (false === is_array($ruleChildren)) {
+                    $arguments['children'] = $escapeRuleName($ruleChildren);
+                } else {
+                    $arguments['children'] =
+                        '[' .
+                        implode(', ', array_map($escapeRuleName, $ruleChildren)) .
+                        ']';
+                }
+            }
+
+            // Node ID.
+            $nodeId = $rule->getNodeId();
+
+            if (null === $nodeId) {
+                $arguments['nodeId'] = 'null';
+            } else {
+                $arguments['nodeId'] = '\'' . $nodeId . '\'';
+            }
+
+            if ($rule instanceof Rule\Token) {
+                // Unification.
+                $arguments['unification'] = $rule->getUnificationIndex();
+
+                // Kept.
+                $arguments['kept'] = $rule->isKept() ? 'true' : 'false';
+            }
+
+            // Default node ID.
+            if (null !== $defaultNodeId = $rule->getDefaultId()) {
+                $defaultNodeOptions = $rule->getDefaultOptions();
+
+                if (!empty($defaultNodeOptions)) {
+                    $defaultNodeId .= ':' . implode('', $defaultNodeOptions);
+                }
+
+                $outExtra .=
+                    "\n" .
+                    '        $this->getRule(' . $arguments['name'] . ')->setDefaultId(' .
+                        '\'' . $defaultNodeId . '\'' .
+                    ');';
+            }
+
+            // PP representation.
+            if (null !== $ppRepresentation = $rule->getPPRepresentation()) {
+                $outExtra .=
+                    "\n" .
+                    '        $this->getRule(' . $arguments['name'] . ')->setPPRepresentation(' .
+                        '\'' . str_replace('\'', '\\\'', $ppRepresentation) . '\'' .
+                    ');';
+            }
+
+            $outRules .=
+                "\n" .
+                '                ' . $arguments['name'] . ' => new \\' . get_class($rule) . '(' .
+                implode(', ', $arguments) .
+                '),';
+
+        }
+
+        $out .=
+            'class ' . $className . ' extends \Hoa\Compiler\Llk\Parser' . "\n" .
+            '{' . "\n" .
+            '    public function __construct()' . "\n" .
+            '    {' . "\n" .
+            '        parent::__construct(' . "\n" .
+            '            [' . "\n" .
+            $outTokens .
+            '            ],' . "\n" .
+            '            [' .
+            $outRules . "\n" .
+            '            ]' . "\n" .
+            '        );' . "\n" .
+            $outExtra . "\n" .
+            '    }' . "\n" .
+            '}' . "\n";
+
+        return $out;
+    }
+
     /**
      * Parse PP.
      *

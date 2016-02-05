@@ -53,30 +53,52 @@ class Lexer
      *
      * @var array
      */
-    protected $_lexerState = null;
+    protected $_lexerState  = null;
 
     /**
      * Text.
      *
      * @var string
      */
-    protected $_text       = null;
+    protected $_text        = null;
 
     /**
      * Tokens.
      *
      * @var array
      */
-    protected $_tokens     = [];
+    protected $_tokens      = [];
 
     /**
      * Namespace stacks.
      *
      * @var \SplStack
      */
-    protected $_nsStack    = null;
+    protected $_nsStack     = null;
+
+    /**
+     * PCRE options.
+     *
+     * @var string
+     */
+    protected $_pcreOptions = null;
 
 
+
+    /**
+     * Constructor.
+     *
+     * @param   array  $pragmas    Pragmas.
+     * @return  void
+     */
+    public function __construct(array $pragmas = [])
+    {
+        if (!isset($pragmas['unicode']) || true === $pragmas['unicode']) {
+            $this->_pcreOptions .= 'u';
+        }
+
+        return;
+    }
 
     /**
      * Text tokenizer: splits the text in parameter in an ordered array of
@@ -253,7 +275,7 @@ class Lexer
     {
         $_regex = str_replace('#', '\#', $regex);
         $preg   = preg_match(
-            '#\G(?|' . $_regex . ')#u',
+            '#\G(?|' . $_regex . ')#' . $this->_pcreOptions,
             $this->_text,
             $matches,
             0,

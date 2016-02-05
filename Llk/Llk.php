@@ -112,6 +112,11 @@ class Llk
      *         <inner>
      *         ::lt:: ::slash:: ::tagname[0]:: ::gt::
      *
+     * In addition to `%skip` and `%token`, we have the `%pragma` keyword to declare a
+     * pragma. Currently support pragmas are:
+     *   * `unicode`, used by the lexer to turn the Unicode mode on for the
+     *     regular expressions.
+     *
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
      *                                             grammar.
      * @return  \Hoa\Compiler\Llk\Parser
@@ -140,12 +145,12 @@ class Llk
             throw new Compiler\Exception($message . '.', 0);
         }
 
-        static::parsePP($pp, $tokens, $rawRules, $stream->getStreamName());
+        static::parsePP($pp, $tokens, $rawRules, $pragmas, $stream->getStreamName());
 
         $ruleAnalyzer = new Rule\Analyzer($tokens);
         $rules        = $ruleAnalyzer->analyzeRules($rawRules);
 
-        return new Parser($tokens, $rules);
+        return new Parser($tokens, $rules, $pragmas);
     }
 
     public static function save(Parser $parser, $className)
@@ -287,15 +292,17 @@ class Llk
      * @param   string  $pp            PP.
      * @param   array   $tokens        Extracted tokens.
      * @param   array   $rules         Extracted raw rules.
+     * @param   array   $pragmas       Extracted raw pragmas.
      * @param   string  $streamName    The name of the stream that contains the grammar.
      * @return  void
      * @throws  \Hoa\Compiler\Exception
      */
-    public static function parsePP($pp, &$tokens, &$rules, $streamName)
+    public static function parsePP($pp, &$tokens, &$rules, &$pragmas, $streamName)
     {
-        $lines  = explode("\n", $pp);
-        $tokens = ['default' => []];
-        $rules  = [];
+        $lines   = explode("\n", $pp);
+        $pragmas = [];
+        $tokens  = ['default' => []];
+        $rules   = [];
 
         for ($i = 0, $m = count($lines); $i < $m; ++$i) {
             $line = rtrim($lines[$i]);
@@ -305,7 +312,24 @@ class Llk
             }
 
             if ('%' == $line[0]) {
-                if (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                if (0 !== preg_match('#^%pragma\s+([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                    switch ($matches[2]) {
+                        case 'true':
+                            $pragmaValue = true;
+
+                            break;
+
+                        case 'false':
+                            $pragmaValue = false;
+
+                            break;
+
+                        default:
+                            $pragmaValue = $matches[2];
+                    }
+
+                    $pragmas[$matches[1]] = $pragmaValue;
+                } else if (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }

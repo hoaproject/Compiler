@@ -50,6 +50,13 @@ use Hoa\Iterator;
 class Parser
 {
     /**
+     * List of pragmas.
+     *
+     * @var array
+     */
+    protected $_pragmas       = null;
+
+    /**
      * List of skipped tokens.
      *
      * @var array
@@ -118,14 +125,19 @@ class Parser
     /**
      * Construct the parser.
      *
-     * @param   array  $tokens    Tokens.
-     * @param   array  $rules     Rules.
+     * @param   array  $tokens     Tokens.
+     * @param   array  $rules      Rules.
+     * @param   array  $pragmas    Pragmas.
      * @return  void
      */
-    public function __construct(array $tokens = [], array $rules  = [])
-    {
-        $this->_tokens = $tokens;
-        $this->_rules  = $rules;
+    public function __construct(
+        array $tokens  = [],
+        array $rules   = [],
+        array $pragmas = []
+    ) {
+        $this->_tokens  = $tokens;
+        $this->_rules   = $rules;
+        $this->_pragmas = $pragmas;
 
         return;
     }
@@ -141,7 +153,7 @@ class Parser
      */
     public function parse($text, $rule = null, $tree = true)
     {
-        $lexer                = new Lexer();
+        $lexer                = new Lexer($this->_pragmas);
         $this->_tokenSequence = new Iterator\Buffer(
             $lexer->lexMe($text, $this->_tokens),
             1024
@@ -691,6 +703,16 @@ class Parser
     public function getTrace()
     {
         return $this->_trace;
+    }
+
+    /**
+     * Get pragmas.
+     *
+     * @return  array
+     */
+    public function getPragmas()
+    {
+        return $this->_pragmas;
     }
 
     /**

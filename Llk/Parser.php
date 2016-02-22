@@ -182,7 +182,7 @@ class Parser
             $out = $this->unfold();
 
             if (null  !== $out &&
-                'EOF' === $this->getCurrentToken()) {
+                'EOF' === $this->_tokenSequence->current()['token']) {
                 break;
             }
 
@@ -283,13 +283,13 @@ class Parser
     protected function _parse(Rule $zeRule, $next)
     {
         if ($zeRule instanceof Rule\Token) {
-            $name = $this->getCurrentToken();
+            $name = $this->_tokenSequence->current()['token'];
 
             if ($zeRule->getTokenName() !== $name) {
                 return false;
             }
 
-            $value = $this->getCurrentToken('value');
+            $value = $this->_tokenSequence->current()['value'];
 
             if (0 <= $unification = $zeRule->getUnificationIndex()) {
                 for ($skip = 0, $i = count($this->_trace) - 1; $i >= 0; --$i) {
@@ -320,7 +320,7 @@ class Parser
                 }
             }
 
-            $namespace = $this->getCurrentToken('namespace');
+            $namespace = $this->_tokenSequence->current()['namespace'];
             $zzeRule   = clone $zeRule;
             $zzeRule->setValue($value);
             $zzeRule->setNamespace($namespace);
@@ -678,19 +678,6 @@ class Parser
         }
 
         return;
-    }
-
-    /**
-     * Get current token.
-     *
-     * @param   string  $kind    Token informations.
-     * @return  mixed
-     */
-    public function getCurrentToken($kind = 'token')
-    {
-        $token = $this->_tokenSequence->current();
-
-        return $token[$kind];
     }
 
     /**

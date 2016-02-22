@@ -159,10 +159,11 @@ class Llk
 
     public static function save(Parser $parser, $className)
     {
-        $out       = null;
-        $outTokens = null;
-        $outRules  = null;
-        $outExtra  = null;
+        $out        = null;
+        $outTokens  = null;
+        $outRules   = null;
+        $outPragmas = null;
+        $outExtra   = null;
 
         $escapeRuleName = function ($ruleName) use ($parser) {
             if (true == $parser->getRule($ruleName)->isTransitional()) {
@@ -270,6 +271,18 @@ class Llk
 
         }
 
+        foreach ($parser->getPragmas() as $pragmaName => $pragmaValue) {
+            $outPragmas .=
+                "\n" .
+                '                \'' . $pragmaName . '\' => ' .
+                (is_bool($pragmaValue)
+                    ? (true === $pragmaValue ? 'true' : 'false')
+                    : (is_int($pragmaValue)
+                        ? $pragmaValue
+                        : '\'' .$pragmaValue . '\'')) .
+                ',';
+        }
+
         $out .=
             'class ' . $className . ' extends \Hoa\Compiler\Llk\Parser' . "\n" .
             '{' . "\n" .
@@ -281,6 +294,9 @@ class Llk
             '            ],' . "\n" .
             '            [' .
             $outRules . "\n" .
+            '            ],' . "\n" .
+            '            [' .
+            $outPragmas . "\n" .
             '            ]' . "\n" .
             '        );' . "\n" .
             $outExtra . "\n" .

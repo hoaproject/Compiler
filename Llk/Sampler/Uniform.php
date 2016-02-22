@@ -116,7 +116,7 @@ class Uniform extends Sampler
         }
 
         if ($rule instanceof Compiler\Llk\Rule\Choice) {
-            $children = $rule->getContent();
+            $children = $rule->getChildren();
             $stat     = [];
 
             foreach ($children as $c => $child) {
@@ -131,7 +131,7 @@ class Uniform extends Sampler
 
             return $this->uniform($this->_rules[$children[$e]], $n);
         } elseif ($rule instanceof Compiler\Llk\Rule\Concatenation) {
-            $children  = $rule->getContent();
+            $children  = $rule->getChildren();
             $out       = null;
             $Γ         = $data['Γ'];
             $γ         = $Γ[$this->_sampler->getInteger(0, count($Γ) - 1)];
@@ -144,7 +144,7 @@ class Uniform extends Sampler
         } elseif ($rule instanceof Compiler\Llk\Rule\Repetition) {
             $out   =  null;
             $stat  = &$data['xy'];
-            $child =  $this->_rules[$rule->getContent()];
+            $child =  $this->_rules[$rule->getChildren()];
             $b     =  0;
             $i     =  $this->_sampler->getInteger(1, $computed);
 
@@ -193,11 +193,11 @@ class Uniform extends Sampler
         $rule                       =  $this->_rules[$ruleName];
 
         if ($rule instanceof Compiler\Llk\Rule\Choice) {
-            foreach ($rule->getContent() as $child) {
+            foreach ($rule->getChildren() as $child) {
                 $out += $this->count($this->_rules[$child], $n);
             }
         } elseif ($rule instanceof Compiler\Llk\Rule\Concatenation) {
-            $children = $rule->getContent();
+            $children = $rule->getChildren();
             $Γ        = new Math\Combinatorics\Combination\Gamma(
                 count($children),
                 $n
@@ -221,7 +221,7 @@ class Uniform extends Sampler
         } elseif ($rule instanceof Compiler\Llk\Rule\Repetition) {
             $this->_data[$ruleName][$n]['xy'] = [];
             $handle                           = &$this->_data[$ruleName][$n]['xy'];
-            $child                            =  $this->_rules[$rule->getContent()];
+            $child                            =  $this->_rules[$rule->getChildren()];
             $x                                =  $rule->getMin();
             $y                                =  $rule->getMax();
 

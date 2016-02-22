@@ -168,7 +168,7 @@ class          Coverage
                     $this->_coveredRules[$name][$max]  = 0;
                 }
             } elseif ($rule instanceof Compiler\Llk\Rule\Choice) {
-                for ($i = 0, $max = count($rule->getContent()); $i < $max; ++$i) {
+                for ($i = 0, $max = count($rule->getChildren()); $i < $max; ++$i) {
                     $this->_coveredRules[$name][$i] = 0;
                 }
             } else {
@@ -261,7 +261,7 @@ class          Coverage
      */
     protected function coverage(Compiler\Llk\Rule $rule)
     {
-        $content = $rule->getContent();
+        $children = $rule->getChildren();
 
         if ($rule instanceof Compiler\Llk\Rule\Repetition) {
             $uncovered  = [];
@@ -301,16 +301,16 @@ class          Coverage
                     $rand
                 );
 
-                if ($this->_rules[$content] instanceof Compiler\Llk\Rule\Token) {
+                if ($this->_rules[$children] instanceof Compiler\Llk\Rule\Token) {
                     for ($i = 0; $i < $rand; ++$i) {
                         $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                            $content,
+                            $children,
                             $this->_coveredRules,
                             $this->_todo
                         );
                     }
                 } else {
-                    $sequence = $this->extract([$content]);
+                    $sequence = $this->extract([$children]);
 
                     if (null === $sequence) {
                         return null;
@@ -341,7 +341,7 @@ class          Coverage
 
                 for ($i= 0 ; $i < $rand; ++$i) {
                     $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                        $content,
+                        $children,
                         $this->_coveredRules,
                         $this->_todo
                     );
@@ -370,7 +370,7 @@ class          Coverage
                     $this->_coveredRules,
                     $this->_todo
                 );
-                $sequence       = $this->extract($content);
+                $sequence = $this->extract($children);
 
                 if (null === $sequence) {
                     return null;
@@ -413,7 +413,7 @@ class          Coverage
                     $rand
                 );
                 $this->_todo[]  = new Compiler\Llk\Rule\Entry(
-                    $content[$rand],
+                    $children[$rand],
                     $this->_coveredRules,
                     $this->_todo
                 );
@@ -431,9 +431,9 @@ class          Coverage
                 false
             );
 
-            for ($i = count($content) - 1; $i >= 0; --$i) {
+            for ($i = count($children) - 1; $i >= 0; --$i) {
                 $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                    $content[$i],
+                    $children[$i],
                     false,
                     $this->_todo
                 );
@@ -567,14 +567,14 @@ class          Coverage
         $ruleName = $Rule->getRule();
         $child    = $Rule->getData();
         $rule     = $this->_rules[$ruleName];
-        $content  = $rule->getContent();
+        $children = $rule->getChildren();
 
         if ($rule instanceof Compiler\Llk\Rule\Repetition) {
             if (0 === $child) {
                 $this->_coveredRules[$ruleName][$child] = 1;
             } else {
-                if (true === $this->allCovered($content) ||
-                    true === $this->checkRuleRoot($content)) {
+                if (true === $this->allCovered($children) ||
+                    true === $this->checkRuleRoot($children)) {
                     $this->_coveredRules[$ruleName][$child] = 1;
 
                     foreach ($this->_coveredRules[$ruleName] as $child => $value) {
@@ -587,8 +587,8 @@ class          Coverage
                 }
             }
         } elseif ($rule instanceof Compiler\Llk\Rule\Choice) {
-            if (true === $this->allCovered($content[$child]) ||
-                true === $this->checkRuleRoot($content[$child])) {
+            if (true === $this->allCovered($children[$child]) ||
+                true === $this->checkRuleRoot($children[$child])) {
                 $this->_coveredRules[$ruleName][$child] = 1;
             } else {
                 $this->_coveredRules[$ruleName][$child] = .5;
@@ -596,9 +596,9 @@ class          Coverage
         } elseif ($rule instanceof Compiler\Llk\Rule\Concatenation) {
             $isCovered = true;
 
-            for ($i = count($content) - 1; $i >= 0 && true === $isCovered; --$i) {
-                if (false === $this->allCovered($content[$i]) &&
-                    false === $this->checkRuleRoot($content[$i])) {
+            for ($i = count($children) - 1; $i >= 0 && true === $isCovered; --$i) {
+                if (false === $this->allCovered($children[$i]) &&
+                    false === $this->checkRuleRoot($children[$i])) {
                     $isCovered = false;
                 }
             }

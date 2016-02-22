@@ -53,30 +53,52 @@ class Lexer
      *
      * @var array
      */
-    protected $_lexerState = null;
+    protected $_lexerState  = null;
 
     /**
      * Text.
      *
      * @var string
      */
-    protected $_text       = null;
+    protected $_text        = null;
 
     /**
      * Tokens.
      *
      * @var array
      */
-    protected $_tokens     = [];
+    protected $_tokens      = [];
 
     /**
      * Namespace stacks.
      *
      * @var \SplStack
      */
-    protected $_nsStack    = null;
+    protected $_nsStack     = null;
+
+    /**
+     * PCRE options.
+     *
+     * @var string
+     */
+    protected $_pcreOptions = null;
 
 
+
+    /**
+     * Constructor.
+     *
+     * @param   array  $pragmas    Pragmas.
+     * @return  void
+     */
+    public function __construct(array $pragmas = [])
+    {
+        if (!isset($pragmas['lexer.unicode']) || true === $pragmas['lexer.unicode']) {
+            $this->_pcreOptions .= 'u';
+        }
+
+        return;
+    }
 
     /**
      * Text tokenizer: splits the text in parameter in an ordered array of
@@ -84,7 +106,7 @@ class Lexer
      *
      * @param   string  $text      Text to tokenize.
      * @param   array   $tokens    Tokens to be returned.
-     * @return  array
+     * @return  \Generator
      * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
     public function lexMe($text, array $tokens)
@@ -94,7 +116,6 @@ class Lexer
         $this->_nsStack    = null;
         $offset            = 0;
         $maxOffset         = strlen($this->_text);
-        $tokenized         = [];
         $this->_lexerState = 'default';
         $stack             = false;
 
@@ -144,13 +165,14 @@ class Lexer
 
             if (true === $nextToken['keep']) {
                 $nextToken['offset'] = $offset;
-                $tokenized[]         = $nextToken;
+                yield $nextToken;
             }
+
 
             $offset += strlen($nextToken['value']);
         }
 
-        $tokenized[] = [
+        yield [
             'token'     => 'EOF',
             'value'     => 'EOF',
             'length'    => 0,
@@ -158,8 +180,6 @@ class Lexer
             'keep'      => true,
             'offset'    => $offset
         ];
-
-        return $tokenized;
     }
 
     /**
@@ -256,7 +276,7 @@ class Lexer
     {
         $_regex = str_replace('#', '\#', $regex);
         $preg   = preg_match(
-            '#\G(?|' . $_regex . ')#u',
+            '#\G(?|' . $_regex . ')#' . $this->_pcreOptions,
             $this->_text,
             $matches,
             0,

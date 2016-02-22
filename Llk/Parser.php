@@ -37,6 +37,7 @@
 namespace Hoa\Compiler\Llk;
 
 use Hoa\Compiler;
+use Hoa\Iterator;
 
 /**
  * Class \Hoa\Compiler\Llk\Parser.
@@ -48,6 +49,13 @@ use Hoa\Compiler;
  */
 class Parser
 {
+    /**
+     * List of pragmas.
+     *
+     * @var array
+     */
+    protected $_pragmas       = null;
+
     /**
      * List of skipped tokens.
      *
@@ -71,25 +79,18 @@ class Parser
     protected $_rules         = null;
 
     /**
-     * Current state of the analyzer.
+     * Lexer iterator.
      *
-     * @var int
+     * @var \Hoa\Iterator\Lookahead
      */
-    protected $_currentState  = 0;
+    protected $_tokenSequence = null;
 
     /**
-     * Error state of the analyzer (when an error is encountered).
-     *
-     * @var int
-     */
-    protected $_errorState    = 0;
-
-    /**
-     * Current token sequence being analyzed.
+     * Possible token causing an error.
      *
      * @var array
      */
-    protected $_tokenSequence = [];
+    protected $_errorToken    = null;
 
     /**
      * Trace of activated rules.
@@ -124,14 +125,19 @@ class Parser
     /**
      * Construct the parser.
      *
-     * @param   array  $tokens    Tokens.
-     * @param   array  $rules     Rules.
+     * @param   array  $tokens     Tokens.
+     * @param   array  $rules      Rules.
+     * @param   array  $pragmas    Pragmas.
      * @return  void
      */
-    public function __construct(array $tokens = [], array $rules  = [])
-    {
-        $this->_tokens = $tokens;
-        $this->_rules  = $rules;
+    public function __construct(
+        array $tokens  = [],
+        array $rules   = [],
+        array $pragmas = []
+    ) {
+        $this->_tokens  = $tokens;
+        $this->_rules   = $rules;
+        $this->_pragmas = $pragmas;
 
         return;
     }
@@ -147,12 +153,22 @@ class Parser
      */
     public function parse($text, $rule = null, $tree = true)
     {
-        $lexer                = new Lexer();
-        $this->_tokenSequence = $lexer->lexMe($text, $this->_tokens);
-        $this->_currentState  = 0;
-        $this->_errorState    = 0;
-        $this->_trace         = [];
-        $this->_todo          = [];
+        $k = 1024;
+
+        if (isset($this->_pragmas['parser.lookahead'])) {
+            $k = max(0, intval($this->_pragmas['parser.lookahead']));
+        }
+
+        $lexer                = new Lexer($this->_pragmas);
+        $this->_tokenSequence = new Iterator\Buffer(
+            $lexer->lexMe($text, $this->_tokens),
+            $k
+        );
+        $this->_tokenSequence->rewind();
+
+        $this->_errorToken = null;
+        $this->_trace      = [];
+        $this->_todo       = [];
 
         if (false === array_key_exists($rule, $this->_rules)) {
             $rule = $this->getRootRule();
@@ -166,12 +182,12 @@ class Parser
             $out = $this->unfold();
 
             if (null  !== $out &&
-                'EOF' === $this->getCurrentToken()) {
+                'EOF' === $this->_tokenSequence->current()['token']) {
                 break;
             }
 
             if (false === $this->backtrack()) {
-                $token  = $this->_tokenSequence[$this->_errorState];
+                $token  = $this->_errorToken;
                 $offset = $token['offset'];
                 $line   = 1;
                 $column = 1;
@@ -248,10 +264,8 @@ class Parser
                 $zeRule   = $this->_rules[$ruleName];
                 $out      = $this->_parse($zeRule, $next);
 
-                if (false === $out) {
-                    if (false === $this->backtrack()) {
-                        return null;
-                    }
+                if (false === $out && false === $this->backtrack()) {
+                    return null;
                 }
             }
         }
@@ -269,13 +283,13 @@ class Parser
     protected function _parse(Rule $zeRule, $next)
     {
         if ($zeRule instanceof Rule\Token) {
-            $name = $this->getCurrentToken();
+            $name = $this->_tokenSequence->current()['token'];
 
             if ($zeRule->getTokenName() !== $name) {
                 return false;
             }
 
-            $value = $this->getCurrentToken('value');
+            $value = $this->_tokenSequence->current()['value'];
 
             if (0 <= $unification = $zeRule->getUnificationIndex()) {
                 for ($skip = 0, $i = count($this->_trace) - 1; $i >= 0; --$i) {
@@ -306,7 +320,7 @@ class Parser
                 }
             }
 
-            $namespace = $this->getCurrentToken('namespace');
+            $namespace = $this->_tokenSequence->current()['namespace'];
             $zzeRule   = clone $zeRule;
             $zzeRule->setValue($value);
             $zzeRule->setNamespace($namespace);
@@ -330,8 +344,9 @@ class Parser
             }
 
             array_pop($this->_todo);
-            $this->_trace[]    = $zzeRule;
-            $this->_errorState = ++$this->_currentState;
+            $this->_trace[] = $zzeRule;
+            $this->_tokenSequence->next();
+            $this->_errorToken = $this->_tokenSequence->current();
 
             return true;
         } elseif ($zeRule instanceof Rule\Concatenation) {
@@ -345,19 +360,19 @@ class Parser
                 null,
                 $this->_depth
             );
-            $content        = $zeRule->getContent();
+            $children = $zeRule->getChildren();
 
-            for ($i = count($content) - 1; $i >= 0; --$i) {
-                $nextRule      = $content[$i];
+            for ($i = count($children) - 1; $i >= 0; --$i) {
+                $nextRule      = $children[$i];
                 $this->_todo[] = new Rule\Ekzit($nextRule, 0);
                 $this->_todo[] = new Rule\Entry($nextRule, 0);
             }
 
             return true;
         } elseif ($zeRule instanceof Rule\Choice) {
-            $content = $zeRule->getContent();
+            $children = $zeRule->getChildren();
 
-            if ($next >= count($content)) {
+            if ($next >= count($children)) {
                 return false;
             }
 
@@ -371,13 +386,13 @@ class Parser
                 $this->_todo,
                 $this->_depth
             );
-            $nextRule       = $content[$next];
-            $this->_todo[]  = new Rule\Ekzit($nextRule, 0);
-            $this->_todo[]  = new Rule\Entry($nextRule, 0);
+            $nextRule      = $children[$next];
+            $this->_todo[] = new Rule\Ekzit($nextRule, 0);
+            $this->_todo[] = new Rule\Entry($nextRule, 0);
 
             return true;
         } elseif ($zeRule instanceof Rule\Repetition) {
-            $nextRule = $zeRule->getContent();
+            $nextRule = $zeRule->getChildren();
 
             if (0 === $next) {
                 $name = $zeRule->getName();
@@ -447,7 +462,11 @@ class Parser
                 $zeRule = $this->_rules[$last->getRule()];
                 $found  = $zeRule instanceof Rule\Repetition;
             } elseif ($last instanceof Rule\Token) {
-                --$this->_currentState;
+                $this->_tokenSequence->previous();
+
+                if (false === $this->_tokenSequence->valid()) {
+                    return false;
+                }
             }
         } while (0 < count($this->_trace) && false === $found);
 
@@ -662,17 +681,6 @@ class Parser
     }
 
     /**
-     * Get current token.
-     *
-     * @param   string  $kind    Token informations.
-     * @return  mixed
-     */
-    public function getCurrentToken($kind = 'token')
-    {
-        return $this->_tokenSequence[$this->_currentState][$kind];
-    }
-
-    /**
      * Get AST.
      *
      * @return  \Hoa\Compiler\Llk\TreeNode
@@ -693,6 +701,16 @@ class Parser
     }
 
     /**
+     * Get pragmas.
+     *
+     * @return  array
+     */
+    public function getPragmas()
+    {
+        return $this->_pragmas;
+    }
+
+    /**
      * Get tokens.
      *
      * @return  array
@@ -703,9 +721,9 @@ class Parser
     }
 
     /**
-     * Get token sequence.
+     * Get the lexer iterator.
      *
-     * @return  array
+     * @return  \Hoa\Iterator\Buffer
      */
     public function getTokenSequence()
     {

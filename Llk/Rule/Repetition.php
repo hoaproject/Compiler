@@ -51,32 +51,32 @@ class Repetition extends Rule
      *
      * @var int
      */
-    protected $_min     = 0;
+    protected $_min = 0;
 
     /**
      * Maximum bound.
      *
      * @var int
      */
-    protected $_max     = 0;
+    protected $_max = 0;
 
 
 
     /**
      * Constructor.
      *
-     * @param   string  $name       Name.
-     * @param   int     $min        Minimum bound.
-     * @param   int     $max        Maximum bound.
-     * @param   mixed   $content    Content.
-     * @param   string  $nodeId     Node ID.
+     * @param   string  $name        Name.
+     * @param   int     $min         Minimum bound.
+     * @param   int     $max         Maximum bound.
+     * @param   mixed   $children    Children.
+     * @param   string  $nodeId      Node ID.
      * @return  void
      */
-    public function __construct($name, $min, $max, $content, $nodeId)
+    public function __construct($name, $min, $max, $children, $nodeId)
     {
-        parent::__construct($name, $content, $nodeId);
-        $this->_min    = $min;
-        $this->_max    = $max;
+        parent::__construct($name, $children, $nodeId);
+        $this->_min = $min;
+        $this->_max = $max;
 
         return;
     }

@@ -174,11 +174,15 @@ class Llk
 
             foreach ($tokens as $tokenName => $tokenValue) {
                 $outTokens .=
-                    '                \'' . $tokenName . '\' => \'' .
-                    str_replace('\'', '\\\'', $tokenValue) . '\',' . "\n";
+                    '                    \'' . $tokenName . '\' => \'' .
+                    str_replace(
+                        ['\'', '\\\\'],
+                        ['\\\'', '\\\\\\'],
+                        $tokenValue
+                    ) . '\',' . "\n";
             }
 
-            $outTokens .= '                    ],' . "\n";
+            $outTokens .= '                ],' . "\n";
         }
 
         foreach ($parser->getRules() as $rule) {

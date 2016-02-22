@@ -463,6 +463,10 @@ class Parser
                 $found  = $zeRule instanceof Rule\Repetition;
             } elseif ($last instanceof Rule\Token) {
                 $this->_tokenSequence->previous();
+
+                if (false === $this->_tokenSequence->valid()) {
+                    return false;
+                }
             }
         } while (0 < count($this->_trace) && false === $found);
 

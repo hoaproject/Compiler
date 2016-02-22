@@ -116,7 +116,10 @@ class Llk
      * declare a pragma. Currently support pragmas are:
      *
      *   * `lexer.unicode`, used by the lexer to turn the Unicode mode on for
-     *     the regular expressions.
+     *     the regular expressions,
+     *   * `parser.lookahead`, used by the parser to define the `k` in LL(k),
+     *     i.e. number of tokens to lookahead. By default, it is set to 1024.
+     *     Memory can be reduced by using an appropriated value.
      *
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
      *                                             grammar.
@@ -326,7 +329,11 @@ class Llk
                             break;
 
                         default:
-                            $pragmaValue = $matches[2];
+                            if (true === ctype_digit($matches[2])) {
+                                $pragmaValue = intval($matches[2]);
+                            } else {
+                                $pragmaValue = $matches[2];
+                            }
                     }
 
                     $pragmas[$matches[1]] = $pragmaValue;

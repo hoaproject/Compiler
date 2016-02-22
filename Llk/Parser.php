@@ -153,10 +153,16 @@ class Parser
      */
     public function parse($text, $rule = null, $tree = true)
     {
+        $k = 1024;
+
+        if (isset($this->_pragmas['parser.lookahead'])) {
+            $k = max(0, intval($this->_pragmas['parser.lookahead']));
+        }
+
         $lexer                = new Lexer($this->_pragmas);
         $this->_tokenSequence = new Iterator\Buffer(
             $lexer->lexMe($text, $this->_tokens),
-            1024
+            $k
         );
         $this->_tokenSequence->rewind();
 

@@ -93,7 +93,7 @@ class Lexer
      */
     public function __construct(array $pragmas = [])
     {
-        if (!isset($pragmas['unicode']) || true === $pragmas['unicode']) {
+        if (!isset($pragmas['lexer.unicode']) || true === $pragmas['lexer.unicode']) {
             $this->_pcreOptions .= 'u';
         }
 
@@ -167,6 +167,7 @@ class Lexer
                 $nextToken['offset'] = $offset;
                 yield $nextToken;
             }
+
 
             $offset += strlen($nextToken['value']);
         }

@@ -112,10 +112,11 @@ class Llk
      *         <inner>
      *         ::lt:: ::slash:: ::tagname[0]:: ::gt::
      *
-     * In addition to `%skip` and `%token`, we have the `%pragma` keyword to declare a
-     * pragma. Currently support pragmas are:
-     *   * `unicode`, used by the lexer to turn the Unicode mode on for the
-     *     regular expressions.
+     * In addition to `%skip` and `%token`, we have the `%pragma` keyword to
+     * declare a pragma. Currently support pragmas are:
+     *
+     *   * `lexer.unicode`, used by the lexer to turn the Unicode mode on for
+     *     the regular expressions.
      *
      * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
      *                                             grammar.

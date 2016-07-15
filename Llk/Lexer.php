@@ -41,7 +41,7 @@ use Hoa\Compiler;
 /**
  * Class \Hoa\Compiler\Llk\Lexer.
  *
- * PP lexer.
+ * Lexical analyser, i.e. split a string into a set of lexeme, i.e. tokens.
  *
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
@@ -168,7 +168,6 @@ class Lexer
                 yield $nextToken;
             }
 
-
             $offset += strlen($nextToken['value']);
         }
 
@@ -216,7 +215,7 @@ class Lexer
                         if ($i > ($c = count($this->_nsStack))) {
                             throw new Compiler\Exception\Lexer(
                                 'Cannot shift namespace %d-times, from token ' .
-                                '%s in namespace %s,  because the stack ' .
+                                '%s in namespace %s, because the stack ' .
                                 'contains only %d namespaces.',
                                 1,
                                 [

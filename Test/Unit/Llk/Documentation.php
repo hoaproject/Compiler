@@ -48,7 +48,7 @@ use Hoa\Test;
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
-class Llk extends Test\Unit\Suite
+class Documentation extends Test\Unit\Suite
 {
     public function case_without_unification()
     {

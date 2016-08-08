@@ -423,11 +423,11 @@ class Lexer extends Test\Unit\Suite
         $this
             ->given(
                 $lexer  = new SUT(),
-                $datum  = '😄💩',
+                $datum  = '…ß',
                 $tokens = [
                     'default' => [
-                        'hi'  => '😄',
-                        'poo' => '💩'
+                        'foo' => '…',
+                        'bar' => '\w'
                     ]
                 ]
             )
@@ -436,20 +436,20 @@ class Lexer extends Test\Unit\Suite
                 ->array(iterator_to_array($result))
                     ->isEqualTo([
                         [
-                            'token'     => 'hi',
-                            'value'     => '😄',
+                            'token'     => 'foo',
+                            'value'     => '…',
                             'length'    => 1,
                             'namespace' => 'default',
                             'keep'      => true,
                             'offset'    => 0
                         ],
                         [
-                            'token'     => 'poo',
-                            'value'     => '💩',
+                            'token'     => 'bar',
+                            'value'     => 'ß',
                             'length'    => 1,
                             'namespace' => 'default',
                             'keep'      => true,
-                            'offset'    => 4
+                            'offset'    => 3
                         ],
                         [
                             'token'     => 'EOF',
@@ -457,7 +457,7 @@ class Lexer extends Test\Unit\Suite
                             'length'    => 0,
                             'namespace' => 'default',
                             'keep'      => true,
-                            'offset'    => 8
+                            'offset'    => 5
                         ]
                     ]);
     }
@@ -467,42 +467,33 @@ class Lexer extends Test\Unit\Suite
         $this
             ->given(
                 $lexer  = new SUT(['lexer.unicode' => false]),
-                $datum  = '😄💩',
+                $datum  = '…ß',
                 $tokens = [
                     'default' => [
-                        'hi'  => '😄',
-                        'poo' => '💩'
+                        'foo' => '…',
+                        'bar' => '\w'
                     ]
                 ]
             )
             ->when($result = $lexer->lexMe($datum, $tokens))
             ->then
-                ->array(iterator_to_array($result))
+                ->array($result->current())
                     ->isEqualTo([
-                        [
-                            'token'     => 'hi',
-                            'value'     => '😄',
-                            'length'    => 1,
-                            'namespace' => 'default',
-                            'keep'      => true,
-                            'offset'    => 0
-                        ],
-                        [
-                            'token'     => 'poo',
-                            'value'     => '💩',
-                            'length'    => 1,
-                            'namespace' => 'default',
-                            'keep'      => true,
-                            'offset'    => 4
-                        ],
-                        [
-                            'token'     => 'EOF',
-                            'value'     => 'EOF',
-                            'length'    => 0,
-                            'namespace' => 'default',
-                            'keep'      => true,
-                            'offset'    => 8
-                        ]
-                    ]);
+                        'token'     => 'foo',
+                        'value'     => '…',
+                        'length'    => 1,
+                        'namespace' => 'default',
+                        'keep'      => true,
+                        'offset'    => 0
+                    ])
+                ->exception(function () use ($result) {
+                    $result->next();
+                })
+                    ->isInstanceOf(LUT\Exception\UnrecognizedToken::class)
+                    ->hasMessage(
+                        'Unrecognized token "ß" at line 1 and column 4:' . "\n" .
+                        '…ß'. "\n" .
+                        ' ↑'
+                    );
     }
 }

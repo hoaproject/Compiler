@@ -243,7 +243,10 @@ class TreeNode implements Visitor\Element
      */
     public function getChild($i)
     {
-        return $this->_children[$i];
+        return
+            true === $this->childExists($i)
+                ? $this->_children[$i]
+                : null;
     }
 
     /**

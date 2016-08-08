@@ -34,12 +34,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Llk;
+namespace Hoa\Compiler\Test\Integration\Llk;
 
 use Hoa\Json;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Llk\Soundness.
+ * Class \Hoa\Compiler\Test\Integration\Llk\Soundness.
  *
  * Check soundness of the LL(k) compiler.
  *

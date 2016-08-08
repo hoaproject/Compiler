@@ -58,9 +58,9 @@ class TreeNode implements Visitor\Element
     /**
      * Value of the node (non-null for token nodes).
      *
-     * @var string
+     * @var array
      */
-    protected $_value    = null;
+    protected $_value    = [];
 
     /**
      * Children.
@@ -89,16 +89,16 @@ class TreeNode implements Visitor\Element
      * Constructor.
      *
      * @param   string                      $id          ID.
-     * @param   string                      $value       Value.
+     * @param   array                       $value       Value.
      * @param   array                       $children    Children.
      * @param   \Hoa\Compiler\Llk\TreeNode  $parent    Parent.
      * @return  void
      */
     public function __construct(
         $id,
-        $value             = null,
-        array    $children = [],
-        TreeNode $parent   = null
+        array $value    = [],
+        array $children = [],
+        self  $parent   = null
     ) {
         $this->setId($id);
         $this->setValue($value);
@@ -141,7 +141,7 @@ class TreeNode implements Visitor\Element
      * @param   array  $value    Value (token & value).
      * @return  array
      */
-    public function setValue($value)
+    public function setValue(array $value)
     {
         $old          = $this->_value;
         $this->_value = $value;
@@ -186,7 +186,7 @@ class TreeNode implements Visitor\Element
      */
     public function isToken()
     {
-        return null !== $this->_value;
+        return !empty($this->_value);
     }
 
     /**

@@ -116,12 +116,12 @@ GRAMMAR;
             ->exception(function () use (&$compiler) {
                 $compiler->parse('\'foo"', null, false);
             })
-                ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken')
+                ->isInstanceOf(LUT\Exception\UnexpectedToken::class)
 
             ->exception(function () use (&$compiler) {
                 $compiler->parse('"foo\'', null, false);
             })
-                ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken');
+                ->isInstanceOf(LUT\Exception\UnexpectedToken::class);
     }
 
     public function case_unification_palindrome()
@@ -162,6 +162,6 @@ GRAMMAR;
             ->exception(function () use (&$compiler) {
                 $compiler->parse('abcdcba', null, false);
             })
-                ->isInstanceOf('Hoa\Compiler\Exception\UnexpectedToken');
+                ->isInstanceOf(LUT\Exception\UnexpectedToken::class);
     }
 }

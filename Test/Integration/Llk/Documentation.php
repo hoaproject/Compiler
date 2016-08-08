@@ -34,21 +34,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Llk;
+namespace Hoa\Compiler\Test\Integration\Llk;
 
 use Hoa\Compiler as LUT;
 use Hoa\File;
 use Hoa\Test;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Documentation.
+ * Class \Hoa\Compiler\Test\Integration\Documentation.
  *
  * Test suite of the examples in the documentation.
  *
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
-class Documentation extends Test\Unit\Suite
+class Documentation extends Test\Integration\Suite
 {
     public function case_without_unification()
     {

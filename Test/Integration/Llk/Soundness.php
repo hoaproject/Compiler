@@ -46,6 +46,6 @@ use Hoa\Json;
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
-class Soundness extends Json\Test\Unit\Soundness
+class Soundness extends Json\Test\Integration\Soundness
 {
 }

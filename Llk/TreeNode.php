@@ -166,7 +166,10 @@ class TreeNode implements Visitor\Element
      */
     public function getValueToken()
     {
-        return $this->_value['token'];
+        return
+            isset($this->_value['token'])
+                ? $this->_value['token']
+                : null;
     }
 
     /**
@@ -176,7 +179,10 @@ class TreeNode implements Visitor\Element
      */
     public function getValueValue()
     {
-        return $this->_value['value'];
+        return
+            isset($this->_value['value'])
+                ? $this->_value['value']
+                : null;
     }
 
     /**

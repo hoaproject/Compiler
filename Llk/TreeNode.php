@@ -60,7 +60,7 @@ class TreeNode implements Visitor\Element
      *
      * @var array
      */
-    protected $_value    = [];
+    protected $_value    = null;
 
     /**
      * Children.
@@ -96,12 +96,16 @@ class TreeNode implements Visitor\Element
      */
     public function __construct(
         $id,
-        array $value    = [],
+        array $value    = null,
         array $children = [],
         self  $parent   = null
     ) {
         $this->setId($id);
-        $this->setValue($value);
+
+        if (!empty($value)) {
+            $this->setValue($value);
+        }
+
         $this->setChildren($children);
 
         if (null !== $parent) {

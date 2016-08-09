@@ -67,8 +67,8 @@ class TreeNode extends Test\Unit\Suite
             ->then
                 ->string($node->getId())
                     ->isEqualTo($id)
-                ->array($node->getValue())
-                    ->isEmpty()
+                ->variable($node->getValue())
+                    ->isNull()
                 ->integer($node->getChildrenNumber())
                     ->isEqualTo(0)
                 ->array($node->getChildren())

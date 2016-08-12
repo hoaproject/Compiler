@@ -110,7 +110,7 @@ abstract class Rule
     /**
      * Constructor.
      *
-     * @param   string  $name        Name.
+     * @param   string  $name        Rule name.
      * @param   mixed   $children    Children.
      * @param   string  $nodeId      Node ID.
      * @return  void

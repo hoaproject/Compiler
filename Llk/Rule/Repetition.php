@@ -36,6 +36,8 @@
 
 namespace Hoa\Compiler\Llk\Rule;
 
+use Hoa\Compiler;
+
 /**
  * Class \Hoa\Compiler\Llk\Rule\Repetition.
  *
@@ -75,6 +77,18 @@ class Repetition extends Rule
     public function __construct($name, $min, $max, $children, $nodeId)
     {
         parent::__construct($name, $children, $nodeId);
+
+        $min = max(0, (int) $min);
+        $max = max(0, (int) $max);
+
+        if ($min > $max) {
+            throw new Compiler\Exception\Rule(
+                'Cannot repeat with a min (%d) greater than max (%d).',
+                0,
+                [$min, $max]
+            );
+        }
+
         $this->_min = $min;
         $this->_max = $max;
 

@@ -80,7 +80,6 @@ class Token extends Test\Unit\Suite
                     ->isEqualTo($unification)
                 ->boolean($result->isKept())
                     ->isFalse();
-
     }
 
     public function case_constructor_with_kept_flag()

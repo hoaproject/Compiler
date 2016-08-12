@@ -83,7 +83,6 @@ class Repetition extends Test\Unit\Suite
                     ->isEqualTo($id)
                 ->boolean($result->isInfinite())
                     ->isFalse();
-
     }
 
     public function case_constructor_min_and_max_are_casted_and_bounded()
@@ -104,7 +103,6 @@ class Repetition extends Test\Unit\Suite
                     ->isEqualTo(42)
                 ->boolean($result->isInfinite())
                     ->isFalse();
-
     }
 
     public function case_constructor_min_is_greater_than_max()

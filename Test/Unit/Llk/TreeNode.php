@@ -439,7 +439,6 @@ class TreeNode extends Test\Unit\Suite
 
     public function case_get_data_by_reference()
     {
-
         $this
             ->given($node = new SUT('foo'))
             ->when($result = &$node->getData())

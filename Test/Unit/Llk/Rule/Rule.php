@@ -36,9 +36,8 @@
 
 namespace Hoa\Compiler\Test\Unit\Llk\Rule;
 
-use Hoa\Compiler as LUT;
-use Mock\Hoa\Compiler\Llk\Rule as SUT;
 use Hoa\Test;
+use Mock\Hoa\Compiler\Llk\Rule as SUT;
 
 /**
  * Class \Hoa\Compiler\Test\Unit\Llk\Rule\Rule.

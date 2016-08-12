@@ -268,7 +268,6 @@ class Llk
                 '                ' . $arguments['name'] . ' => new \\' . get_class($rule) . '(' .
                 implode(', ', $arguments) .
                 '),';
-
         }
 
         foreach ($parser->getPragmas() as $pragmaName => $pragmaValue) {
@@ -279,7 +278,7 @@ class Llk
                     ? (true === $pragmaValue ? 'true' : 'false')
                     : (is_int($pragmaValue)
                         ? $pragmaValue
-                        : '\'' .$pragmaValue . '\'')) .
+                        : '\'' . $pragmaValue . '\'')) .
                 ',';
         }
 
@@ -353,7 +352,7 @@ class Llk
                     }
 
                     $pragmas[$matches[1]] = $pragmaValue;
-                } else if (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                } elseif (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }

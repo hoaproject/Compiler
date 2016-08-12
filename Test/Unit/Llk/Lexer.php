@@ -492,7 +492,7 @@ class Lexer extends Test\Unit\Suite
                     ->isInstanceOf(LUT\Exception\UnrecognizedToken::class)
                     ->hasMessage(
                         'Unrecognized token "ß" at line 1 and column 4:' . "\n" .
-                        '…ß'. "\n" .
+                        '…ß' . "\n" .
                         ' ↑'
                     );
     }

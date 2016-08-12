@@ -84,7 +84,6 @@ simple:
   | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?
     ::_kept:: #kept
   | <token> ::named::
-    ( ::unification_:: <unification> ::_unification:: )? #named
 
 quantifier:
     <zero_or_one>

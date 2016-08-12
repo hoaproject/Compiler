@@ -483,7 +483,7 @@ class Analyzer
                 throw new Compiler\Exception(
                     'Token <%s> does not exist in %s.',
                     4,
-                    [$tokenName, $this->_rule]
+                    [$tokenName, $this->_ruleName]
                 );
             }
 

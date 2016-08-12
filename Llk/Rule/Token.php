@@ -50,7 +50,7 @@ use Hoa\File;
 class Token extends Rule
 {
     /**
-     * LL(k) compiler of hoa://Library/Regex/Grammar.pp
+     * LL(k) compiler of hoa://Library/Regex/Grammar.pp.
      *
      * @var \Hoa\Compiler\Llk\Parser
      */
@@ -117,9 +117,15 @@ class Token extends Rule
      * @param   bool    $kept           Whether the token is kept or not in the AST.
      * @return  void
      */
-    public function __construct($name, $tokenName, $nodeId, $unification, $kept = false)
-    {
+    public function __construct(
+        $name,
+        $tokenName,
+        $nodeId,
+        $unification,
+        $kept = false
+    ) {
         parent::__construct($name, null, $nodeId);
+
         $this->_tokenName   = $tokenName;
         $this->_unification = $unification;
         $this->setKept($kept);

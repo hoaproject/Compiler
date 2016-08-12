@@ -78,10 +78,10 @@ class Repetition extends Rule
     {
         parent::__construct($name, $children, $nodeId);
 
-        $min = max(0, (int) $min);
-        $max = max(0, (int) $max);
+        $min = max( 0, (int) $min);
+        $max = max(-1, (int) $max);
 
-        if ($min > $max) {
+        if (-1 !== $max && $min > $max) {
             throw new Compiler\Exception\Rule(
                 'Cannot repeat with a min (%d) greater than max (%d).',
                 0,
@@ -113,5 +113,15 @@ class Repetition extends Rule
     public function getMax()
     {
         return $this->_max;
+    }
+
+    /**
+     * Check whether the maximum repetition is unbounded.
+     *
+     * @return   bool
+     */
+    public function isInfinite()
+    {
+        return -1 === $this->getMax();
     }
 }

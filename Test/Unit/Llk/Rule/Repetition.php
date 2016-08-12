@@ -80,7 +80,9 @@ class Repetition extends Test\Unit\Suite
                 ->array($result->getChildren())
                     ->isEqualTo($children)
                 ->string($result->getNodeId())
-                    ->isEqualTo($id);
+                    ->isEqualTo($id)
+                ->boolean($result->isInfinite())
+                    ->isFalse();
 
     }
 
@@ -99,7 +101,9 @@ class Repetition extends Test\Unit\Suite
                 ->integer($result->getMin())
                     ->isEqualTo(0)
                 ->integer($result->getMax())
-                    ->isEqualTo(42);
+                    ->isEqualTo(42)
+                ->boolean($result->isInfinite())
+                    ->isFalse();
 
     }
 
@@ -118,6 +122,26 @@ class Repetition extends Test\Unit\Suite
             })
                 ->isInstanceOf(LUT\Exception\Rule::class)
                 ->hasMessage('Cannot repeat with a min (2) greater than max (1).');
+    }
+
+    public function case_constructor_infinite_max()
+    {
+        $this
+            ->given(
+                $name     = 'foo',
+                $min      = 2,
+                $max      = -1,
+                $children = [],
+                $id       = 'bar'
+            )
+            ->when($result = new SUT($name, $min, $max, $children, $id))
+            ->then
+                ->integer($result->getMin())
+                    ->isEqualTo(2)
+                ->integer($result->getMax())
+                    ->isEqualTo(-1)
+                ->boolean($result->isInfinite())
+                    ->isTrue();
     }
 
     public function case_get_min()

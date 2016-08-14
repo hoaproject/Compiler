@@ -150,7 +150,7 @@ class Analyzer
             $this->_lexer = new Iterator\Lookahead($lexer->lexMe($value, static::$_ppLexemes));
             $this->_lexer->rewind();
 
-            $this->_ruleName = $value;
+            $this->_ruleName = $key;
             $nodeId          = null;
 
             if ('#' === $key[0]) {

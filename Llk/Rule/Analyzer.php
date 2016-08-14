@@ -369,9 +369,10 @@ class Analyzer
 
         if (-1 != $max && $max < $min) {
             throw new Compiler\Exception(
-                'Upper bound of iteration must be greater of ' .
-                'equal to lower bound',
-                2
+                'Upper bound %d must be greater or ' .
+                'equal to lower bound %d in rule %s.',
+                2,
+                [$max, $min, $this->_ruleName]
             );
         }
 
@@ -438,7 +439,7 @@ class Analyzer
 
             if (false == $exists) {
                 throw new Compiler\Exception(
-                    'Token ::%s:: does not exist in %s.',
+                    'Token ::%s:: does not exist in rule %s.',
                     3,
                     [$tokenName, $this->_ruleName]
                 );
@@ -481,7 +482,7 @@ class Analyzer
 
             if (false == $exists) {
                 throw new Compiler\Exception(
-                    'Token <%s> does not exist in %s.',
+                    'Token <%s> does not exist in rule %s.',
                     4,
                     [$tokenName, $this->_ruleName]
                 );
@@ -507,9 +508,9 @@ class Analyzer
             if (false === array_key_exists($tokenName, $this->_rules) &&
                 false === array_key_exists('#' . $tokenName, $this->_rules)) {
                 throw new Compiler\Exception\Rule(
-                    'Rule %s() does not exist.',
+                    'Cannot call rule %s() in rule %s because it does not exist.',
                     5,
-                    $tokenName
+                    [$tokenName, $this->_ruleName]
                 );
             }
 

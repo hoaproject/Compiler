@@ -136,12 +136,12 @@ abstract class Llk
             if ($stream instanceof Stream\IStream\Pointable) {
                 if (0 < $stream->tell()) {
                     $message .=
-                        ': the stream ' . $stream->getStreamName() .
+                        ': The stream ' . $stream->getStreamName() .
                         ' is pointable and not rewinded, maybe it ' .
                         'could be the reason';
                 } else {
                     $message .=
-                        ': nothing to read on the stream ' .
+                        ': Nothing to read on the stream ' .
                         $stream->getStreamName();
                 }
             }

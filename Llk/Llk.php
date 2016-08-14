@@ -331,7 +331,7 @@ abstract class Llk
             }
 
             if ('%' == $line[0]) {
-                if (0 !== preg_match('#^%pragma\s+([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                if (0 !== preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches)) {
                     switch ($matches[2]) {
                         case 'true':
                             $pragmaValue = true;
@@ -352,7 +352,7 @@ abstract class Llk
                     }
 
                     $pragmas[$matches[1]] = $pragmaValue;
-                } elseif (0 !== preg_match('#^%skip\s+(?:([^:]+):)?([^\s]+)\s+(.*)$#u', $line, $matches)) {
+                } elseif (0 !== preg_match('#^%skip\h+(?:([^:]+):)?([^\h]+)\h+(.*)$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }
@@ -370,7 +370,7 @@ abstract class Llk
                                 $matches[3] .
                             ')';
                     }
-                } elseif (0 !== preg_match('#^%token\s+(?:([^:]+):)?([^\s]+)\s+(.*?)(?:\s+->\s+(.*))?$#u', $line, $matches)) {
+                } elseif (0 !== preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }

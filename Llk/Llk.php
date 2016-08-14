@@ -365,8 +365,10 @@ abstract class Llk
                         $tokens[$matches[1]]['skip'] = $matches[3];
                     } else {
                         $tokens[$matches[1]]['skip'] =
-                            '(?:' . $matches[3] . ')|' .
-                            $tokens[$matches[1]]['skip'];
+                            '(?:' .
+                                $tokens[$matches[1]]['skip'] . '|' .
+                                $matches[3] .
+                            ')';
                     }
                 } elseif (0 !== preg_match('#^%token\s+(?:([^:]+):)?([^\s]+)\s+(.*?)(?:\s+->\s+(.*))?$#u', $line, $matches)) {
                     if (empty($matches[1])) {

@@ -53,7 +53,7 @@ use Hoa\Stream;
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
  */
-class Llk
+abstract class Llk
 {
     /**
      * Load parser from a file that contains the grammar.

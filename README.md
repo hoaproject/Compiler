@@ -6,7 +6,8 @@ Moreover, Hoa aims at being a bridge between industrial and research worlds.
 # Hoa\Compiler ![state](http://central.hoa-project.net/State/Compiler)
 
 This library allows to manipulate LL(1) and LL(k) compiler compilers. A
-dedicated grammar language is provided for the last one: the PP language.
+dedicated grammar description language is provided for the last one: the PP
+language.
 
 ## Installation
 
@@ -37,7 +38,7 @@ the documentation for an introduction to the language theory). The PP language
 declares tokens with the following construction:
 
 ```
-%token [namespace:]name value [-> namespace]
+%token [source_namespace:]name value [-> destination_namespace]
 ```
 
 The default namespace is `default`. The value of a token is represented by a
@@ -124,20 +125,20 @@ is the unification of XML tags name.
 
 ### LL(k) compiler compiler
 
-The `Hoa\Compiler\Llk\Llk` class will transform a grammar into a compiler. The
-following code will use the previous grammar to create a compiler, and we will
-parse a JSON string. If the parsing succeed, it will produce an AST (stands for
-Abstract Syntax Tree) we can visit, for example to dump the AST:
+The `Hoa\Compiler\Llk\Llk` class provide helpers to manipulate (load or save) a
+compiler. The following code will use the previous grammar to create a compiler,
+and we will parse a JSON string. If the parsing succeed, it will produce an AST
+(stands for Abstract Syntax Tree) we can visit, for example to dump the AST:
 
 ```php
 // 1. Load grammar.
 $compiler = Hoa\Compiler\Llk\Llk::load(new Hoa\File\Read('Json.pp'));
 
 // 2. Parse a data.
-$ast      = $compiler->parse('{"foo": true, "bar": [null, 42]}');
+$ast = $compiler->parse('{"foo": true, "bar": [null, 42]}');
 
 // 3. Dump the AST.
-$dump     = new Hoa\Compiler\Visitor\Dump();
+$dump = new Hoa\Compiler\Visitor\Dump();
 echo $dump->visit($ast);
 
 /**

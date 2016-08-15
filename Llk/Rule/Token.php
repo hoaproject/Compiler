@@ -115,7 +115,6 @@ class Token extends Rule
      * @param   string  $nodeId         Node ID.
      * @param   int     $unification    Unification index.
      * @param   bool    $kept           Whether the token is kept or not in the AST.
-     * @return  void
      */
     public function __construct(
         $name,

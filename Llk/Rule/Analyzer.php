@@ -120,7 +120,6 @@ class Analyzer
      * Constructor.
      *
      * @param   array  $tokens    Tokens.
-     * @return  void
      */
     public function __construct(array $tokens)
     {

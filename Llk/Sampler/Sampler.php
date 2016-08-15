@@ -105,7 +105,6 @@ abstract class Sampler
      *
      * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
      * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
-     * @return  void
      */
     public function __construct(
         Compiler\Llk\Parser $compiler,

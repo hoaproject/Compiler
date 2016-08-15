@@ -113,7 +113,6 @@ abstract class Rule
      * @param   string  $name        Rule name.
      * @param   mixed   $children    Children.
      * @param   string  $nodeId      Node ID.
-     * @return  void
      */
     public function __construct($name, $children, $nodeId = null)
     {

@@ -63,7 +63,6 @@ class UnrecognizedToken extends Exception
      * @param   array   $arg        RaiseError string arguments.
      * @param   int     $line       Line.
      * @param   int     $column     Column.
-     * @return  void
      */
     public function __construct($message, $code, $arg, $line, $column)
     {

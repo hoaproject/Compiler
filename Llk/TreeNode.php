@@ -92,7 +92,6 @@ class TreeNode implements Visitor\Element
      * @param   array                       $value       Value.
      * @param   array                       $children    Children.
      * @param   \Hoa\Compiler\Llk\TreeNode  $parent    Parent.
-     * @return  void
      */
     public function __construct(
         $id,

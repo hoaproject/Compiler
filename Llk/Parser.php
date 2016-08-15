@@ -128,7 +128,6 @@ class Parser
      * @param   array  $tokens     Tokens.
      * @param   array  $rules      Rules.
      * @param   array  $pragmas    Pragmas.
-     * @return  void
      */
     public function __construct(
         array $tokens  = [],

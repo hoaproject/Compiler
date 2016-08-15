@@ -89,7 +89,6 @@ class Lexer
      * Constructor.
      *
      * @param   array  $pragmas    Pragmas.
-     * @return  void
      */
     public function __construct(array $pragmas = [])
     {

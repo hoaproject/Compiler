@@ -330,8 +330,8 @@ OUTPUT
                     ' single space' . "\n" .
                     ' single space' . "\n" .
                     'ruleB:' . "\n" .
-                    '    many spaces'. "\n" .
-                    "\t" . 'single tab'. "\n" .
+                    '    many spaces' . "\n" .
+                    "\t" . 'single tab' . "\n" .
                     'ruleC:' . "\n" .
                     "\t\t" . 'many tabs' . "\n"
             )

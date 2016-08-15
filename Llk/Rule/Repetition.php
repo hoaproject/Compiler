@@ -72,7 +72,6 @@ class Repetition extends Rule
      * @param   int     $max         Maximum bound.
      * @param   mixed   $children    Children.
      * @param   string  $nodeId      Node ID.
-     * @return  void
      */
     public function __construct($name, $min, $max, $children, $nodeId)
     {

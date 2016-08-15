@@ -91,7 +91,6 @@ abstract class Invocation
      * @param   mixed   $data     Data.
      * @param   array   $todo     Todo.
      * @param   int     $depth    Depth.
-     * @return  void
      */
     public function __construct(
         $rule,

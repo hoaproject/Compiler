@@ -330,7 +330,6 @@ abstract class Ll1
      * @param   array   $transitions    Transitions table.
      * @param   array   $actions        Actions table.
      * @param   array   $names          Names of automata.
-     * @return  void
      */
     public function __construct(
         array $skip,

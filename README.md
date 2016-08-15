@@ -226,6 +226,14 @@ foreach ($sampler as $i => $data) {
 Different documentations can be found on the website:
 [http://hoa-project.net/](http://hoa-project.net/).
 
+## Research papers
+
+* *[Grammar-Based Testing using Realistic Domains in PHP](http://hoa-project.net/En/Literature/Research/Amost12.pdf)*,
+  presented at
+  [A-MOST 2012](https://sites.google.com/site/amost2012/) (Montréal, Canada),
+  [presentation](http://keynote.hoa-project.net/Amost12/EDGB12.pdf) and
+  [details](http://hoa-project.net/En/Event/Amost12.html).
+
 ## License
 
 Hoa is under the New BSD License (BSD-3-Clause). Please, see

@@ -215,9 +215,9 @@ foreach ($sampler as $i => $data) {
 /**
  * Will output:
  *     0 => true
- *     1 => { " )o?bz " : null , " %3W) " : [ false , 130 , " 6 " ] }
- *     2 => [ { " ny  " : true } ]
- *     3 => { " Ne;[3 " : [ true , true ] , " th: " : true , " C[8} " : true }
+ *     1 => {" )o?bz " : null , " %3W) " : [false, 130    , " 6"   ]  }
+ *     2 => [{" ny  " : true } ]
+ *     3 => {" Ne;[3 " :[ true , true ] , " th: " : true," C[8} " :   true }
  */
 ```
 

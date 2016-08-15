@@ -43,12 +43,8 @@ use Hoa\Stream;
 /**
  * Class \Hoa\Compiler\Llk.
  *
- * Provide a generic LL(k) compiler compiler using the PP language.
- * Support: skip (%skip), token (%token), token namespace (ns1:token name value
- * -> ns2), rule (rule:), disjunction (|), capturing (operators ( and )),
- * quantifiers (?, +, * and {n,m}), node (#node) with options (#node:options),
- * skipped token (::token::), kept token (<token>), token unification (token[i])
- * and rule unification (rule()[j]).
+ * This class provides a set of static helpers to manipulate (load and save) a
+ * compiler more easily.
  *
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License
@@ -56,73 +52,11 @@ use Hoa\Stream;
 abstract class Llk
 {
     /**
-     * Load parser from a file that contains the grammar.
-     * Example:
-     *     %skip  space     \s
+     * Load in-memory parser from a grammar description file.
+     * The grammar description language is PP. See
+     * `hoa://Library/Compiler/Llk/Llk.pp` for an example, or the documentation.
      *
-     *     %token word      [a-zA-Z]+
-     *     %token number    [0-9]+(\.[0-9]+)?
-     *     %token open_par  \(
-     *     %token close_par \)
-     *     %token equal     =
-     *     %token plus      \+
-     *     %token minus     \-
-     *     %token divide    \/
-     *     %token times     \*
-     *
-     *     #equation:
-     *         formula() ::equal:: <number>
-     *
-     *     formula:
-     *         factor()
-     *         (
-     *             ::plus::  formula() #addition
-     *           | ::minus:: formula() #substraction
-     *         )?
-     *
-     *     factor:
-     *         operand()
-     *         (
-     *             ::times::  factor() #product
-     *           | ::divide:: factor() #division
-     *         )?
-     *
-     *     operand:
-     *           <word>
-     *         | ::minus::? <number> #number
-     *         | ::open_par:: formula() ::close_par::
-     *
-     * Use tabs or spaces, it does not matter.
-     * Instructions follow the form: %<instruction>. Only %skip and %token are
-     * supported.
-     * Rules follow the form: <rule name>:<new line>[<space><rule><new line>]*.
-     * Contexts are useful to set specific skips and tokens. We give a full
-     * example with context + unification (for fun) to parse <a>b</a>:
-     *     %skip   space         \s
-     *     %token  lt             <        ->  in_tag
-     *     %token  inner          [^<]*
-     *
-     *     %skip   in_tag:space   \s
-     *     %token  in_tag:slash   /
-     *     %token  in_tag:tagname [^>]+
-     *     %token  in_tag:gt      >        ->  default
-     *
-     *     #foo:
-     *         ::lt:: <tagname[0]> ::gt::
-     *         <inner>
-     *         ::lt:: ::slash:: ::tagname[0]:: ::gt::
-     *
-     * In addition to `%skip` and `%token`, we have the `%pragma` keyword to
-     * declare a pragma. Currently support pragmas are:
-     *
-     *   * `lexer.unicode`, used by the lexer to turn the Unicode mode on for
-     *     the regular expressions,
-     *   * `parser.lookahead`, used by the parser to define the `k` in LL(k),
-     *     i.e. number of tokens to lookahead. By default, it is set to 1024.
-     *     Memory can be reduced by using an appropriated value.
-     *
-     * @param   \Hoa\Stream\IStream\In  $stream    Stream that contains the
-     *                                             grammar.
+     * @param   \Hoa\Stream\IStream\In  $stream    Stream to read to grammar.
      * @return  \Hoa\Compiler\Llk\Parser
      * @throws  \Hoa\Compiler\Exception
      */
@@ -157,6 +91,16 @@ abstract class Llk
         return new Parser($tokens, $rules, $pragmas);
     }
 
+    /**
+     * Save in-memory parser to PHP code.
+     * The generated PHP code will load the same in-memory parser. The state
+     * will be reset. The parser will be saved as a class, named after
+     * `$className`. To retrieve the parser, one must instanciate this class.
+     *
+     * @param   \Hoa\Compiler\Llk\Parser  $parser       Parser to save.
+     * @param   string                    $className    Parser classname.
+     * @return  string
+     */
     public static function save(Parser $parser, $className)
     {
         $out        = null;
@@ -306,13 +250,13 @@ abstract class Llk
     }
 
     /**
-     * Parse PP.
+     * Parse the grammar description language.
      *
-     * @param   string  $pp            PP.
+     * @param   string  $pp            Grammar description.
      * @param   array   $tokens        Extracted tokens.
      * @param   array   $rules         Extracted raw rules.
      * @param   array   $pragmas       Extracted raw pragmas.
-     * @param   string  $streamName    The name of the stream that contains the grammar.
+     * @param   string  $streamName    The name of the stream containing the grammar.
      * @return  void
      * @throws  \Hoa\Compiler\Exception
      */

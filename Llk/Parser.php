@@ -42,7 +42,7 @@ use Hoa\Iterator;
 /**
  * Class \Hoa\Compiler\Llk\Parser.
  *
- * PP parser.
+ * LL(k) parser.
  *
  * @copyright  Copyright © 2007-2016 Hoa community
  * @license    New BSD License

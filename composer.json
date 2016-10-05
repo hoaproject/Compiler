@@ -7,7 +7,7 @@
                     "parser", "token", "rule", "pp", "ast", "trace", "syntax",
                     "sampler", "isotropic", "random", "uniform", "exhaustive",
                     "coverage"],
-    "homepage"   : "http://hoa-project.net/",
+    "homepage"   : "https://hoa-project.net/",
     "license"    : "BSD-3-Clause",
     "authors"    : [
         {
@@ -16,13 +16,15 @@
         },
         {
             "name"    : "Hoa community",
-            "homepage": "http://hoa-project.net/"
+            "homepage": "https://hoa-project.net/"
         }
     ],
     "support": {
-        "email" : "support@lists.hoa-project.net",
-        "irc"   : "irc://irc.freenode.org/hoaproject",
-        "source": "http://git.hoa-project.net/"
+        "email" : "support@hoa-project.net",
+        "irc"   : "irc://chat.freenode.net/hoaproject",
+        "forum" : "https://users.hoa-project.net/",
+        "docs"  : "https://central.hoa-project.net/Documentation/Library/Bench",
+        "source": "https://central.hoa-project.net/Resource/Library/Bench"
     },
     "require": {
         "hoa/consistency": "~1.0",

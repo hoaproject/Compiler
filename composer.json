@@ -23,8 +23,8 @@
         "email" : "support@hoa-project.net",
         "irc"   : "irc://chat.freenode.net/hoaproject",
         "forum" : "https://users.hoa-project.net/",
-        "docs"  : "https://central.hoa-project.net/Documentation/Library/Bench",
-        "source": "https://central.hoa-project.net/Resource/Library/Bench"
+        "docs"  : "https://central.hoa-project.net/Documentation/Library/Compiler",
+        "source": "https://central.hoa-project.net/Resource/Library/Compiler"
     },
     "require": {
         "hoa/consistency": "~1.0",

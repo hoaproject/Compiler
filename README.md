@@ -254,6 +254,14 @@ foreach ($sampler as $i => $data) {
  */
 ```
 
+## Research papers
+
+  * *Grammar-Based Testing using Realistic Domains in PHP*,
+    presented at [A-MOST 2012](https://sites.google.com/site/amost2012/) (Montréal, Canada)
+    ([article](https://hoa-project.net/En/Literature/Research/Amost12.pdf),
+     [presentation](http://keynote.hoa-project.net/Amost12/EDGB12.pdf),
+     [details](https://hoa-project.net/En/Event/Amost12.html)).
+
 ## Documentation
 
 The

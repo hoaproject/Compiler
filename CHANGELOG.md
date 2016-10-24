@@ -1,3 +1,11 @@
+# 3.16.10.24
+
+  * Documentation: New `README.md` file. (Ivan Enderlin, 2016-10-17T20:49:41+02:00)
+  * Documentation: Fix `docs` and `source` links. (Ivan Enderlin, 2016-10-05T20:22:48+02:00)
+  * Documentation: Update `support` properties. (Ivan Enderlin, 2016-10-05T15:54:31+02:00)
+  * Documentation: Add the Research papers Section. (Ivan Enderlin, 2016-08-15T14:13:30+02:00)
+  * Documentation: Update possibly generated data. (Ivan Enderlin, 2016-08-15T14:05:42+02:00)
+
 # 3.16.08.15
 
   * Quality: Run `hoa devtools:cs`. (Ivan Enderlin, 2016-08-15T11:23:34+02:00)

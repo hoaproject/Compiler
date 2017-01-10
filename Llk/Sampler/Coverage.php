@@ -59,9 +59,7 @@ use Hoa\Iterator;
  * @copyright  Copyright © 2007-2017 Hoa community
  * @license    New BSD License
  */
-class          Coverage
-    extends    Sampler
-    implements Iterator
+class Coverage extends Sampler implements Iterator
 {
     /**
      * Stack of rules to explore.

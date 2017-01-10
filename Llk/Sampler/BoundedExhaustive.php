@@ -51,9 +51,7 @@ use Hoa\Visitor;
  * @copyright  Copyright © 2007-2017 Hoa community
  * @license    New BSD License
  */
-class          BoundedExhaustive
-    extends    Sampler
-    implements Iterator
+class BoundedExhaustive extends Sampler implements Iterator
 {
     /**
      * Stack of rules to explore.

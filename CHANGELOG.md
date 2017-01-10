@@ -1,3 +1,10 @@
+# 3.17.01.10
+
+  * Quality: Fix CS. (Ivan Enderlin, 2017-01-10T10:25:16+01:00)
+  * Quality: Happy new year! (Ivan Enderlin, 2017-01-09T15:21:06+01:00)
+  * Test: Add the `Decorrelated` interface. (Ivan Enderlin, 2016-10-25T07:49:56+02:00)
+  * Documentation: Add a Research papers Section. (Ivan Enderlin, 2016-10-24T16:07:32+02:00)
+
 # 3.16.10.24
 
   * Documentation: New `README.md` file. (Ivan Enderlin, 2016-10-17T20:49:41+02:00)

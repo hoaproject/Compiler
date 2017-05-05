@@ -26,6 +26,9 @@
         "docs"  : "https://central.hoa-project.net/Documentation/Library/Compiler",
         "source": "https://central.hoa-project.net/Resource/Library/Compiler"
     },
+    "require-dev": {
+        "atoum/atoum" : "dev-master"
+    },
     "require": {
         "hoa/consistency": "~1.0",
         "hoa/exception"  : "~1.0",

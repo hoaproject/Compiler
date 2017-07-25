@@ -192,7 +192,7 @@ class Parser
                 $column = 1;
 
                 if (!empty($text)) {
-                    if (0 === $offset) {
+                    if (0 === $offset || null === $offset) {
                         $leftnl = 0;
                     } else {
                         $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;

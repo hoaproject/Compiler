@@ -187,12 +187,17 @@ class Parser
 
             if (false === $this->backtrack()) {
                 $token  = $this->_errorToken;
+
+                if (null === $this->_errorToken) {
+                    $token = $this->_tokenSequence->current();
+                }
+
                 $offset = $token['offset'];
                 $line   = 1;
                 $column = 1;
 
                 if (!empty($text)) {
-                    if (0 === $offset || null === $offset) {
+                    if (0 === $offset) {
                         $leftnl = 0;
                     } else {
                         $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;

@@ -176,6 +176,19 @@ class TreeNode implements Visitor\Element
     }
 
     /**
+     * Get token offset.
+     *
+     * @return int
+     */
+    public function getOffset()
+    {
+        return
+            isset($this->_value['offset'])
+                ? $this->_value['offset']
+                : 0;
+    }
+
+    /**
      * Get value value.
      *
      * @return  string

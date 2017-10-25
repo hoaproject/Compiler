@@ -5,8 +5,8 @@
 ---
 
 <p align="center">
-  <a href="https://travis-ci.org/hoaproject/compiler"><img src="https://img.shields.io/travis/hoaproject/compiler/master.svg" alt="Build status" /></a>
-  <a href="https://coveralls.io/github/hoaproject/compiler?branch=master"><img src="https://img.shields.io/coveralls/hoaproject/compiler/master.svg" alt="Code coverage" /></a>
+  <a href="https://travis-ci.org/hoaproject/Compiler"><img src="https://img.shields.io/travis/hoaproject/Compiler/master.svg" alt="Build status" /></a>
+  <a href="https://coveralls.io/github/hoaproject/Compiler?branch=master"><img src="https://img.shields.io/coveralls/hoaproject/Compiler/master.svg" alt="Code coverage" /></a>
   <a href="https://packagist.org/packages/hoa/compiler"><img src="https://img.shields.io/packagist/dt/hoa/compiler.svg" alt="Packagist" /></a>
   <a href="https://hoa-project.net/LICENSE"><img src="https://img.shields.io/packagist/l/hoa/compiler.svg" alt="License" /></a>
 </p>

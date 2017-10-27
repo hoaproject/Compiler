@@ -245,12 +245,15 @@ class Token extends Rule
     /**
      * Set token offset.
      *
-     * @param int $offset
-     * @return void
+     * @param   int  $offset    Offset.
+     * @return  int
      */
     public function setOffset($offset)
     {
+        $old           = $this->_offset;
         $this->_offset = $offset;
+
+        return $old;
     }
 
     /**

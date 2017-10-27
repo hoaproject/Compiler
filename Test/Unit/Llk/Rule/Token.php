@@ -240,18 +240,53 @@ class Token extends Test\Unit\Suite
     {
         $this
             ->given(
-                $name           = 'foo',
-                $tokenName      = 'bar',
-                $nodeId         = 'baz',
-                $unification    = 0,
-                $value = 'qux',
-                $token          = new SUT($name, $tokenName, $nodeId, $unification),
+                $name        = 'foo',
+                $tokenName   = 'bar',
+                $nodeId      = 'baz',
+                $unification = 0,
+                $value       = 'qux',
+                $token       = new SUT($name, $tokenName, $nodeId, $unification),
                 $token->setValue($value)
             )
             ->when($result = $token->getValue())
             ->then
                 ->string($result)
                     ->isEqualTo($value);
+    }
+
+    public function case_set_offset()
+    {
+        $this
+            ->given(
+                $name        = 'foo',
+                $tokenName   = 'bar',
+                $nodeId      = 'baz',
+                $unification = 0,
+                $offset      = 42,
+                $token       = new SUT($name, $tokenName, $nodeId, $unification)
+            )
+            ->when($result = $token->setOffset($offset))
+            ->then
+                ->integer($result)
+                    ->isZero();
+    }
+
+    public function case_get_offset()
+    {
+        $this
+            ->given(
+                $name        = 'foo',
+                $tokenName   = 'bar',
+                $nodeId      = 'baz',
+                $unification = 0,
+                $offset      = 42,
+                $token       = new SUT($name, $tokenName, $nodeId, $unification),
+                $token->setOffset($offset)
+            )
+            ->when($result = $token->getOffset())
+            ->then
+                ->integer($result)
+                    ->isEqualTo($offset);
     }
 
     public function case_set_kept()

@@ -229,6 +229,26 @@ class TreeNode extends Test\Unit\Suite
                     ->isNull();
     }
 
+    public function case_get_offset()
+    {
+        $this
+            ->given($node = new SUT('foo', ['offset' => 42]))
+            ->when($result = $node->getOffset())
+            ->then
+                ->integer($result)
+                    ->isEqualTo(42);
+    }
+
+    public function case_get_offset_undefined()
+    {
+        $this
+            ->given($node = new SUT('foo', ['bar']))
+            ->when($result = $node->getOffset())
+            ->then
+                ->integer($result)
+                    ->isZero();
+    }
+
     public function case_is_token()
     {
         $this

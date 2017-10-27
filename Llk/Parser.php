@@ -324,8 +324,10 @@ class Parser
                 }
             }
 
-            $namespace = $this->_tokenSequence->current()['namespace'];
-            $offset = $this->_tokenSequence->current()['offset'];
+            $current = $this->_tokenSequence->current();
+
+            $namespace = $current['namespace'];
+            $offset = $current['offset'];
 
             $zzeRule   = clone $zeRule;
             $zzeRule->setValue($value);

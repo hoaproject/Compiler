@@ -49,6 +49,8 @@ use Hoa\Iterator;
  */
 class Parser
 {
+    use Compiler\Exception\ExceptionHelper;
+
     /**
      * List of pragmas.
      *
@@ -192,39 +194,21 @@ class Parser
                     $token = $this->_tokenSequence->current();
                 }
 
-                $offset = $token['offset'];
-                $line   = 1;
-                $column = 1;
-
-                if (!empty($text)) {
-                    if (0 === $offset) {
-                        $leftnl = 0;
-                    } else {
-                        $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
-                    }
-
-                    $rightnl = strpos($text, "\n", $offset);
-                    $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
-                    $column  = $offset - $leftnl + (0 === $leftnl);
-
-                    if (false !== $rightnl) {
-                        $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
-                    }
-                }
+                $info = $this->getErrorPositionByOffset($text, $token['offset']);
 
                 throw new Compiler\Exception\UnexpectedToken(
-                    'Unexpected token "%s" (%s) at line %d and column %d:' .
-                    "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
+                    'Unexpected token "%s" (%s) at line %d and column %d: ' . "\n%s\n%s",
                     0,
                     [
                         $token['value'],
                         $token['token'],
-                        $line,
-                        $column,
-                        $text
+                        $info['line'],
+                        $info['column'],
+                        $info['code'],
+                        $info['highlight']
                     ],
-                    $line,
-                    $column
+                    $info['line'],
+                    $info['column']
                 );
             }
         } while (true);

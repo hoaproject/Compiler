@@ -49,8 +49,6 @@ use Hoa\Iterator;
  */
 class Parser
 {
-    use Compiler\Exception\ExceptionHelper;
-
     /**
      * List of pragmas.
      *
@@ -188,28 +186,18 @@ class Parser
             }
 
             if (false === $this->backtrack()) {
-                $token  = $this->_errorToken;
+                $token = $this->_errorToken;
 
                 if (null === $this->_errorToken) {
                     $token = $this->_tokenSequence->current();
                 }
 
-                $info = $this->getErrorPositionByOffset($text, $token['offset']);
+                $error = \vsprintf('Unexpected token "%s" (%s)', [
+                    $token['value'],
+                    $token['token'],
+                ]);
 
-                throw new Compiler\Exception\UnexpectedToken(
-                    'Unexpected token "%s" (%s) at line %d and column %d: ' . "\n%s\n%s",
-                    0,
-                    [
-                        $token['value'],
-                        $token['token'],
-                        $info['line'],
-                        $info['column'],
-                        $info['code'],
-                        $info['highlight']
-                    ],
-                    $info['line'],
-                    $info['column']
-                );
+                throw Compiler\Exception\UnexpectedToken::fromOffset($error, $text, $token['offset']);
             }
         } while (true);
 

@@ -54,18 +54,18 @@ trait ExceptionHelper
      * @param   int    $bytesOffset Offset in bytes
      * @return  array
      */
-    protected function getErrorPositionByOffset($text, $bytesOffset)
+    protected static function getErrorPositionByOffset($text, $bytesOffset)
     {
-        $result = $this->getErrorInfo($text, $bytesOffset);
-        $code   = $this->getAffectedCodeAsString($result['trace']);
+        $result = self::getErrorInfo($text, $bytesOffset);
+        $code   = self::getAffectedCodeAsString($result['trace']);
 
-        $column = $this->getMbColumnPosition($code, $result['column']);
+        $column = self::getMbColumnPosition($code, $result['column']);
 
         return [
             'line'      => $result['line'],
             'code'      => $code,
             'column'    => $column,
-            'highlight' => $this->getStringHighligher($column),
+            'highlight' => self::getStringHighligher($column),
         ];
     }
 
@@ -77,7 +77,7 @@ trait ExceptionHelper
      * @param array|string[] $textLines List of code lines
      * @return string
      */
-    private function getAffectedCodeAsString(array $textLines)
+    private static function getAffectedCodeAsString(array $textLines)
     {
         $result = '';
         $i = 0;
@@ -100,7 +100,7 @@ trait ExceptionHelper
      * @param  int $charsOffset Error offset in symbols
      * @return string
      */
-    private function getStringHighligher($charsOffset)
+    private static function getStringHighligher($charsOffset)
     {
         $prefix = '';
 
@@ -118,7 +118,7 @@ trait ExceptionHelper
      * @param  int    $bytesOffset Length of offset in bytes
      * @return int
      */
-    private function getMbColumnPosition($line, $bytesOffset)
+    private static function getMbColumnPosition($line, $bytesOffset)
     {
         $slice = \substr($line, 0, $bytesOffset);
 
@@ -132,7 +132,7 @@ trait ExceptionHelper
      * @param int    $bytesOffset Offset in bytes relative to the beginning of the source code
      * @return array
      */
-    private function getErrorInfo($text, $bytesOffset)
+    private static function getErrorInfo($text, $bytesOffset)
     {
         $result = [
             'line'   => 1,

@@ -48,8 +48,6 @@ use Hoa\Compiler;
  */
 class Lexer
 {
-    use Compiler\Exception\ExceptionHelper;
-
     /**
      * Lexer state.
      *
@@ -147,21 +145,9 @@ class Lexer
             $nextToken = $this->nextToken($offset);
 
             if (null === $nextToken) {
-                $info = $this->getErrorPositionByOffset($text, $offset);
+                $error = \sprintf('Unrecognized token "%s"', \mb_substr(\substr($text, $offset), 0, 1));
 
-                throw new Compiler\Exception\UnrecognizedToken(
-                    'Unrecognized token "%s" at line %d and column %d: ' . "\n%s\n%s",
-                    0,
-                    [
-                        \mb_substr(\substr($text, $offset), 0, 1),
-                        $info['line'],
-                        $info['column'],
-                        $info['code'],
-                        $info['highlight']
-                    ],
-                    $info['line'],
-                    $info['column']
-                );
+                throw Compiler\Exception\UnrecognizedToken::fromOffset($error, $text, $offset);
             }
 
             if (true === $nextToken['keep']) {

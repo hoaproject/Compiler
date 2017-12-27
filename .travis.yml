@@ -7,9 +7,6 @@ matrix:
     - php: 7.0
     - php: 7.1
       env:
-        - ENABLE_XDEBUG=true
-    - php: 7.1
-      env:
         - ENABLE_DEVTOOLS=true
     - php: nightly
     - php: hhvm-3.12

@@ -1,3 +1,8 @@
+# 3.17.08.08
+
+## Fixes
+
+  * `llk/parser` Use current token if no error token. (Kirill Nesmeyanov, 2017-08-08T09:35:08+02:00)
 # 3.17.01.10
 
   * Quality: Fix CS. (Ivan Enderlin, 2017-01-10T10:25:16+01:00)

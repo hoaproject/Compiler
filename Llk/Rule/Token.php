@@ -105,7 +105,12 @@ class Token extends Rule
      */
     protected $_unification          = -1;
 
-
+    /**
+     * Token offset.
+     *
+     * @var int
+     */
+    protected $_offset               = 0;
 
     /**
      * Constructor.
@@ -235,6 +240,30 @@ class Token extends Rule
     public function getValue()
     {
         return $this->_value;
+    }
+
+    /**
+     * Set token offset.
+     *
+     * @param   int  $offset    Offset.
+     * @return  int
+     */
+    public function setOffset($offset)
+    {
+        $old           = $this->_offset;
+        $this->_offset = $offset;
+
+        return $old;
+    }
+
+    /**
+     * Get token offset.
+     *
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->_offset;
     }
 
     /**

@@ -37,7 +37,7 @@
   is a <strong>sequence</strong> of <strong>symbols</strong> belonging to an
   <strong>alphabet</strong>. A symbol represents the smallest <strong>lexical
   unit</strong> of a language, it is atomic and we will call it a
-  <strong>lexeme</strong> (also often mentionned as a token). These sequences of
+  <strong>lexeme</strong> (also often mentioned as a token). These sequences of
   lexemes representing words are built with <strong>rules</strong>. From a word
   and a root rule, we will try to <strong>derive</strong> its sub-rules. If a
   derivation exists, then the word is considered as <strong>valid</strong>, else

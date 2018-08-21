@@ -186,46 +186,18 @@ class Parser
             }
 
             if (false === $this->backtrack()) {
-                $token  = $this->_errorToken;
+                $token = $this->_errorToken;
 
                 if (null === $this->_errorToken) {
                     $token = $this->_tokenSequence->current();
                 }
 
-                $offset = $token['offset'];
-                $line   = 1;
-                $column = 1;
+                $error = \vsprintf('Unexpected token "%s" (%s)', [
+                    $token['value'],
+                    $token['token'],
+                ]);
 
-                if (!empty($text)) {
-                    if (0 === $offset) {
-                        $leftnl = 0;
-                    } else {
-                        $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
-                    }
-
-                    $rightnl = strpos($text, "\n", $offset);
-                    $line    = substr_count($text, "\n", 0, $leftnl + 1) + 1;
-                    $column  = $offset - $leftnl + (0 === $leftnl);
-
-                    if (false !== $rightnl) {
-                        $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
-                    }
-                }
-
-                throw new Compiler\Exception\UnexpectedToken(
-                    'Unexpected token "%s" (%s) at line %d and column %d:' .
-                    "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
-                    0,
-                    [
-                        $token['value'],
-                        $token['token'],
-                        $line,
-                        $column,
-                        $text
-                    ],
-                    $line,
-                    $column
-                );
+                throw Compiler\Exception\UnexpectedToken::fromOffset($error, $text, $token['offset']);
             }
         } while (true);
 

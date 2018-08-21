@@ -46,14 +46,14 @@ namespace Hoa\Compiler\Exception;
  */
 class UnrecognizedToken extends Exception
 {
+    use ExceptionHelper;
+
     /**
      * Column.
      *
      * @var int
      */
     protected $column = 0;
-
-
 
     /**
      * Override line and add column support.
@@ -72,6 +72,25 @@ class UnrecognizedToken extends Exception
         $this->column = $column;
 
         return;
+    }
+
+    /**
+     * @param   string  $message        Formatted message.
+     * @param   string  $text           Source code
+     * @param   int     $offsetInBytes  Error offset in bytes
+     * @param   int     $code           Code (the ID).
+     * @return  static
+     */
+    public static function fromOffset($message, $text, $offsetInBytes, $code = 0)
+    {
+        $info     = self::getErrorPositionByOffset($text, $offsetInBytes);
+
+        // Formatted message
+        $message .= ' at line %s and column %s' . \PHP_EOL .
+            $info['code'] . \PHP_EOL .
+            $info['highlight'];
+
+        return new static($message, $code, [$info['line'], $info['column']], $info['line'], $info['column']);
     }
 
     /**

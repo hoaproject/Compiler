@@ -83,8 +83,6 @@ class Lexer
      */
     protected $_pcreOptions = null;
 
-
-
     /**
      * Constructor.
      *
@@ -147,19 +145,9 @@ class Lexer
             $nextToken = $this->nextToken($offset);
 
             if (null === $nextToken) {
-                throw new Compiler\Exception\UnrecognizedToken(
-                    'Unrecognized token "%s" at line 1 and column %d:' .
-                    "\n" . '%s' . "\n" .
-                    str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑',
-                    0,
-                    [
-                        mb_substr(substr($text, $offset), 0, 1),
-                        $offset + 1,
-                        $text
-                    ],
-                    1,
-                    $offset
-                );
+                $error = \sprintf('Unrecognized token "%s"', \mb_substr(\substr($text, $offset), 0, 1));
+
+                throw Compiler\Exception\UnrecognizedToken::fromOffset($error, $text, $offset);
             }
 
             if (true === $nextToken['keep']) {

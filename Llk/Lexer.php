@@ -273,7 +273,7 @@ class Lexer
     protected function matchLexeme($lexeme, $regex, $offset)
     {
         $_regex = str_replace('#', '\#', $regex);
-        $preg   = preg_match(
+        $preg   = @preg_match(
             '#\G(?|' . $_regex . ')#' . $this->_pcreOptions,
             $this->_text,
             $matches,
@@ -281,6 +281,27 @@ class Lexer
             $offset
         );
 
+        if (false === $preg) {
+            switch (preg_last_error()) {
+                case 1:
+                    throw new Compiler\Exception\Lexer(
+                        'The lexeme "%s" contains invalid regex "%s".',
+                        4,
+                        [$lexeme, $regex]
+                    );                
+                    break;
+                default:
+                    throw new Compiler\Exception\Lexer(
+                        'An error occurred in the PHP regex engine. ' .
+                        'Error code: %d',
+                        5,
+                        [preg_last_error()]
+                    );                
+                    break;
+            }
+
+        }
+        
         if (0 === $preg) {
             return null;
         }

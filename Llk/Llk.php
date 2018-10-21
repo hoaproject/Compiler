@@ -125,7 +125,7 @@ abstract class Llk
                     '                    \'' . $tokenName . '\' => \'' .
                     str_replace(
                         ['\'', '\\\\'],
-                        ['\\\'', '\\\\\\'],
+                        ['\\\'', '\\\\\\\\'],
                         $tokenValue
                     ) . '\',' . "\n";
             }

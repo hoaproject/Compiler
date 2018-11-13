@@ -37,6 +37,7 @@
 namespace Hoa\Compiler\Llk;
 
 use Hoa\Compiler;
+use Hoa\Compiler\Exception\InternalError;
 
 /**
  * Class \Hoa\Compiler\Llk\Lexer.
@@ -110,6 +111,8 @@ class Lexer
      */
     public function lexMe($text, array $tokens)
     {
+        $this->validateInputInUnicodeMode($text);
+
         $this->_text       = $text;
         $this->_tokens     = $tokens;
         $this->_nsStack    = null;
@@ -272,9 +275,9 @@ class Lexer
      */
     protected function matchLexeme($lexeme, $regex, $offset)
     {
-        $_regex = str_replace('#', '\#', $regex);
-        $preg   = preg_match(
-            '#\G(?|' . $_regex . ')#' . $this->_pcreOptions,
+        $_regex = '#\G(?|' . str_replace('#', '\#', $regex) . ')#' . $this->_pcreOptions;
+        $preg   = @preg_match(
+            $_regex,
             $this->_text,
             $matches,
             0,
@@ -283,6 +286,16 @@ class Lexer
 
         if (0 === $preg) {
             return null;
+        }
+
+        if (false === $preg) {
+            throw new Compiler\Exception\InternalError(
+                sprintf(
+                    'Lexer encountered a PCRE error (code: %d), full regex: "%s".',
+                    preg_last_error(),
+                    $_regex
+                )
+            );
         }
 
         if ('' === $matches[0]) {
@@ -299,5 +312,18 @@ class Lexer
             'value'  => $matches[0],
             'length' => mb_strlen($matches[0])
         ];
+    }
+
+    /**
+     * @param string $text
+     * @return bool
+     */
+    private function validateInputInUnicodeMode($text)
+    {
+        if (strpos($this->_pcreOptions, 'u') !== false && !mb_check_encoding($text, 'utf-8')) {
+            throw new Compiler\Exception\Lexer(
+                'Text is not valid utf-8 string, you probably need to switch "lexer.unicode" setting off.'
+            );
+        }
     }
 }

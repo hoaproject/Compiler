@@ -496,4 +496,27 @@ class Lexer extends Test\Unit\Suite
                         ' ↑'
                     );
     }
+
+    public function case_invalid_utf8_with_unicode_mode()
+    {
+        $this
+            ->given(
+                $lexer  = new SUT(['lexer.unicode' => true]),
+                $datum  = "\xFF",
+                $tokens = [
+                    'default' => [
+                        'foo' => "\xFF"
+                    ]
+                ]
+            )
+            ->when($result = $lexer->lexMe($datum, $tokens))
+            ->then
+            ->exception(function () use ($result) {
+                $result->next();
+            })
+            ->isInstanceOf(LUT\Exception\Lexer::class)
+            ->hasMessage(
+                'Text is not valid utf-8 string, you probably need to switch "lexer.unicode" setting off.'
+            );
+    }
 }

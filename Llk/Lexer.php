@@ -320,7 +320,7 @@ class Lexer
      */
     private function validateInputInUnicodeMode($text)
     {
-        if (strpos($this->_pcreOptions, 'u') !== false && !mb_check_encoding($text, 'utf-8')) {
+        if (strpos($this->_pcreOptions, 'u') !== false && preg_match('##u', $text) === 1) {
             throw new Compiler\Exception\Lexer(
                 'Text is not valid utf-8 string, you probably need to switch "lexer.unicode" setting off.'
             );

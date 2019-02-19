@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * Hoa
@@ -45,9 +47,6 @@ use Hoa\File;
  * Class Hoa\Compiler\Bin\Pp.
  *
  * Play with PP.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Pp extends Console\Dispatcher\Kit
 {
@@ -69,10 +68,8 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * The entry method.
-     *
-     * @return  int
      */
-    public function main() : int
+    public function main()
     {
         $visitor       = null;
         $tokenSequence = false;
@@ -163,9 +160,6 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * Print trace.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
-     * @return  void
      */
     protected function printTrace(Compiler\Llk\Parser $compiler)
     {
@@ -200,10 +194,6 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * Print token sequence.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
-     * @param   string                    $data        Data to lex.
-     * @return  void
      */
     protected function printTokenSequence(Compiler\Llk\Parser $compiler, string $data)
     {
@@ -244,10 +234,8 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * The command usage.
-     *
-     * @return  int
      */
-    public function usage() : int
+    public function usage()
     {
         echo
             'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",

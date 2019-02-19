@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * Hoa
@@ -42,9 +44,6 @@ use Hoa\Visitor;
  * Class \Hoa\Compiler\Visitor\Dump.
  *
  * Dump AST produced by LL(k) compiler.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Dump implements Visitor\Visit
 {
@@ -59,11 +58,6 @@ class Dump implements Visitor\Visit
 
     /**
      * Visit an element.
-     *
-     * @param   \Hoa\Visitor\Element  $element    Element to visit.
-     * @param   mixed                 &$handle    Handle (reference).
-     * @param   mixed                 $eldnah     Handle (not reference).
-     * @return  mixed
      */
     public function visit(
         Visitor\Element $element,
@@ -103,11 +97,8 @@ class Dump implements Visitor\Visit
 
     /**
      * Dump data.
-     *
-     * @param   mixed  $data    Data.
-     * @return  string
      */
-    protected function dumpData($data) : string
+    protected function dumpData($data): ?string
     {
         $out = null;
 

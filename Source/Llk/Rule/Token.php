@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,16 +45,13 @@ use Hoa\File;
  * Class \Hoa\Compiler\Llk\Rule\Token.
  *
  * The token rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Token extends Rule
 {
     /**
      * LL(k) compiler of hoa://Library/Regex/Grammar.pp.
      *
-     * @var \Hoa\Compiler\Llk\Parser
+     * @var ?Compiler\Llk\Parser
      */
     protected static $_regexCompiler = null;
 
@@ -66,7 +65,7 @@ class Token extends Rule
     /**
      * Namespace.
      *
-     * @var string
+     * @var ?string
      */
     protected $_namespace            = null;
 
@@ -80,14 +79,14 @@ class Token extends Rule
     /**
      * AST of the regex.
      *
-     * @var \Hoa\Compiler\Llk\TreeNode
+     * @var ?Compiler\Llk\TreeNode
      */
     protected $_ast                  = null;
 
     /**
      * Token value.
      *
-     * @var string
+     * @var ?string
      */
     protected $_value                = null;
 
@@ -114,19 +113,13 @@ class Token extends Rule
 
     /**
      * Constructor.
-     *
-     * @param   string  $name           Name.
-     * @param   string  $tokenName      Token name.
-     * @param   string  $nodeId         Node ID.
-     * @param   int     $unification    Unification index.
-     * @param   bool    $kept           Whether the token is kept or not in the AST.
      */
     public function __construct(
         $name,
-        $tokenName,
-        $nodeId,
-        $unification,
-        $kept = false
+        string $tokenName,
+        ?string $nodeId,
+        int $unification,
+        bool $kept = false
     ) {
         parent::__construct($name, null, $nodeId);
 
@@ -139,21 +132,16 @@ class Token extends Rule
 
     /**
      * Get token name.
-     *
-     * @return  string
      */
-    public function getTokenName()
+    public function getTokenName(): string
     {
         return $this->_tokenName;
     }
 
     /**
      * Set token namespace.
-     *
-     * @param   string  $namespace    Namespace.
-     * @return  string
      */
-    public function setNamespace($namespace)
+    public function setNamespace(string $namespace): ?string
     {
         $old              = $this->_namespace;
         $this->_namespace = $namespace;
@@ -163,21 +151,16 @@ class Token extends Rule
 
     /**
      * Get token namespace.
-     *
-     * @return  string
      */
-    public function getNamespace()
+    public function getNamespace(): ?string
     {
         return $this->_namespace;
     }
 
     /**
      * Set representation.
-     *
-     * @param   string  $regex    Representation.
-     * @return  string
      */
-    public function setRepresentation($regex)
+    public function setRepresentation(string $regex): ?string
     {
         $old          = $this->_regex;
         $this->_regex = $regex;
@@ -187,20 +170,16 @@ class Token extends Rule
 
     /**
      * Get token representation.
-     *
-     * @return  string
      */
-    public function getRepresentation()
+    public function getRepresentation(): ?string
     {
         return $this->_regex;
     }
 
     /**
      * Get AST of the token representation.
-     *
-     * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    public function getAST()
+    public function getAST(): Compiler\Llk\TreeNode
     {
         if (null === static::$_regexCompiler) {
             $stream = new File\Read('hoa://Library/Regex/Grammar.pp');
@@ -220,11 +199,8 @@ class Token extends Rule
 
     /**
      * Set token value.
-     *
-     * @param   string  $value    Value.
-     * @return  string
      */
-    public function setValue($value)
+    public function setValue(string $value): ?string
     {
         $old          = $this->_value;
         $this->_value = $value;
@@ -234,21 +210,16 @@ class Token extends Rule
 
     /**
      * Get token value.
-     *
-     * @return  string
      */
-    public function getValue()
+    public function getValue(): ?string
     {
         return $this->_value;
     }
 
     /**
      * Set token offset.
-     *
-     * @param   int  $offset    Offset.
-     * @return  int
      */
-    public function setOffset($offset)
+    public function setOffset(int $offset): int
     {
         $old           = $this->_offset;
         $this->_offset = $offset;
@@ -258,21 +229,16 @@ class Token extends Rule
 
     /**
      * Get token offset.
-     *
-     * @return int
      */
-    public function getOffset()
+    public function getOffset(): int
     {
         return $this->_offset;
     }
 
     /**
      * Set whether the token is kept or not in the AST.
-     *
-     * @param   bool  $kept    Kept.
-     * @return  bool
      */
-    public function setKept($kept)
+    public function setKept(bool $kept): bool
     {
         $old         = $this->_kept;
         $this->_kept = $kept;
@@ -282,20 +248,16 @@ class Token extends Rule
 
     /**
      * Check whether the token is kept in the AST or not.
-     *
-     * @return  bool
      */
-    public function isKept()
+    public function isKept(): bool
     {
         return $this->_kept;
     }
 
     /**
      * Get unification index.
-     *
-     * @return  int
      */
-    public function getUnificationIndex()
+    public function getUnificationIndex(): int
     {
         return $this->_unification;
     }

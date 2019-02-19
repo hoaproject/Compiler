@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Compiler;
  * Class \Hoa\Compiler\Llk\Sampler\Exception.
  *
  * Extending the \Hoa\Compiler\Exception class.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Exception extends Compiler\Exception
 {

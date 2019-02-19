@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,16 +42,13 @@ namespace Hoa\Compiler\Llk\Rule;
  * Class \Hoa\Compiler\Llk\Rule\Invocation.
  *
  * Parent of entry and ekzit rules.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 abstract class Invocation
 {
     /**
      * Rule.
      *
-     * @var string
+     * @var mixed
      */
     protected $_rule         = null;
 
@@ -65,7 +64,7 @@ abstract class Invocation
      *
      * @var array
      */
-    protected $_todo         = null;
+    protected $_todo         = [];
 
     /**
      * Depth in the trace.
@@ -86,21 +85,16 @@ abstract class Invocation
 
     /**
      * Constructor.
-     *
-     * @param   string  $rule     Rule name.
-     * @param   mixed   $data     Data.
-     * @param   array   $todo     Todo.
-     * @param   int     $depth    Depth.
      */
     public function __construct(
         $rule,
         $data,
-        array $todo = null,
-        $depth      = -1
+        ?array $todo = null,
+        int $depth  = -1
     ) {
         $this->_rule         = $rule;
         $this->_data         = $data;
-        $this->_todo         = $todo;
+        $this->_todo         = $todo ?? [];
         $this->_depth        = $depth;
         $this->_transitional = is_int($rule);
 
@@ -109,8 +103,6 @@ abstract class Invocation
 
     /**
      * Get rule name.
-     *
-     * @return  string
      */
     public function getRule()
     {
@@ -119,8 +111,6 @@ abstract class Invocation
 
     /**
      * Get data.
-     *
-     * @return  mixed
      */
     public function getData()
     {
@@ -129,21 +119,16 @@ abstract class Invocation
 
     /**
      * Get todo sequence.
-     *
-     * @return  array
      */
-    public function getTodo()
+    public function getTodo(): array
     {
         return $this->_todo;
     }
 
     /**
      * Set depth in trace.
-     *
-     * @param   int  $depth    Depth.
-     * @return  int
      */
-    public function setDepth($depth)
+    public function setDepth(int $depth): int
     {
         $old          = $this->_depth;
         $this->_depth = $depth;
@@ -153,20 +138,16 @@ abstract class Invocation
 
     /**
      * Get depth in trace.
-     *
-     * @return  int
      */
-    public function getDepth()
+    public function getDepth(): int
     {
         return $this->_depth;
     }
 
     /**
      * Check whether the rule is transitional or not.
-     *
-     * @return  bool
      */
-    public function isTransitional()
+    public function isTransitional(): bool
     {
         return $this->_transitional;
     }

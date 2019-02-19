@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -47,9 +49,6 @@ use Hoa\Visitor;
  * size n (bounded).
  * This algorithm is based on multiset (set with repetition).
  * Repetition unfolding: upper bound of + and * is set to n.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class BoundedExhaustive extends Sampler implements Iterator
 {
@@ -58,14 +57,14 @@ class BoundedExhaustive extends Sampler implements Iterator
      *
      * @var array
      */
-    protected $_todo    = null;
+    protected $_todo    = [];
 
     /**
      * Stack of rules that have already been covered.
      *
      * @var array
      */
-    protected $_trace   = null;
+    protected $_trace   = [];
 
     /**
      * Current iterator key.
@@ -77,7 +76,7 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Current iterator value.
      *
-     * @var string
+     * @var ?string
      */
     protected $_current = null;
 
@@ -92,46 +91,36 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Construct a generator.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
-     * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
-     * @param   int                       $length          Max data length.
      */
     public function __construct(
         Compiler\Llk\Parser $compiler,
         Visitor\Visit       $tokenSampler,
-        $length = 5
+        int $maximumLength = 5
     ) {
         parent::__construct($compiler, $tokenSampler);
-        $this->setLength($length);
+        $this->setLength($maximumLength);
 
         return;
     }
 
     /**
      * Get the current iterator value.
-     *
-     * @return  string
      */
-    public function current()
+    public function current(): ?string
     {
         return $this->_current;
     }
 
     /**
      * Get the current iterator key.
-     *
-     * @return  int
      */
-    public function key()
+    public function key(): int
     {
         return $this->_key;
     }
 
     /**
      * Useless here.
-     *
-     * @return  void
      */
     public function next()
     {
@@ -140,8 +129,6 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Rewind the internal iterator pointer.
-     *
-     * @return  void
      */
     public function rewind()
     {
@@ -160,10 +147,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Compute the current iterator value, i.e. generate a new solution.
-     *
-     * @return  bool
      */
-    public function valid()
+    public function valid(): bool
     {
         if (false === $this->unfold()) {
             return false;
@@ -185,10 +170,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Unfold rules from the todo stack.
-     *
-     * @return  bool
      */
-    protected function unfold()
+    protected function unfold(): bool
     {
         while (0 < count($this->_todo)) {
             $pop = array_pop($this->_todo);
@@ -212,12 +195,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * The bounded-exhaustive algorithm.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to cover.
-     * @param   int                     $next    Next rule.
-     * @return  bool
      */
-    protected function boundedExhaustive(Compiler\Llk\Rule $rule, $next)
+    protected function boundedExhaustive(Compiler\Llk\Rule $rule, int $next): bool
     {
         $children = $rule->getChildren();
 
@@ -322,10 +301,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Backtrack to the previous choice-point.
-     *
-     * @return  bool
      */
-    protected function backtrack()
+    protected function backtrack(): bool
     {
         $found = false;
 
@@ -359,12 +336,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Set upper-bound, the maximum data length.
-     *
-     * @param   int  $length    Length.
-     * @return  int
-     * @throws  \Hoa\Compiler\Exception
      */
-    public function setLength($length)
+    public function setLength(int $length): int
     {
         if (0 >= $length) {
             throw new Exception(
@@ -382,10 +355,8 @@ class BoundedExhaustive extends Sampler implements Iterator
 
     /**
      * Get upper-bound.
-     *
-     * @return  int
      */
-    public function getLength()
+    public function getLength(): int
     {
         return $this->_length;
     }

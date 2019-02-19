@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Compiler;
  * Class \Hoa\Compiler\Llk\Rule\Repetition.
  *
  * The repetition rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Repetition extends Rule
 {
@@ -66,14 +65,8 @@ class Repetition extends Rule
 
     /**
      * Constructor.
-     *
-     * @param   string  $name        Name.
-     * @param   int     $min         Minimum bound.
-     * @param   int     $max         Maximum bound.
-     * @param   mixed   $children    Children.
-     * @param   string  $nodeId      Node ID.
      */
-    public function __construct($name, $min, $max, $children, $nodeId)
+    public function __construct($name, $min, $max, $children, ?string $nodeId)
     {
         parent::__construct($name, $children, $nodeId);
 
@@ -96,30 +89,24 @@ class Repetition extends Rule
 
     /**
      * Get minimum bound.
-     *
-     * @return  int
      */
-    public function getMin()
+    public function getMin(): int
     {
         return $this->_min;
     }
 
     /**
      * Get maximum bound.
-     *
-     * @return  int
      */
-    public function getMax()
+    public function getMax(): int
     {
         return $this->_max;
     }
 
     /**
      * Check whether the maximum repetition is unbounded.
-     *
-     * @return   bool
      */
-    public function isInfinite()
+    public function isInfinite(): bool
     {
         return -1 === $this->getMax();
     }

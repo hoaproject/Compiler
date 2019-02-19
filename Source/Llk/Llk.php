@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -45,22 +47,16 @@ use Hoa\Stream;
  *
  * This class provides a set of static helpers to manipulate (load and save) a
  * compiler more easily.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 abstract class Llk
 {
     /**
      * Load in-memory parser from a grammar description file.
      * The grammar description language is PP. See
-     * `hoa://Library/Compiler/Llk/Llk.pp` for an example, or the documentation.
-     *
-     * @param   \Hoa\Stream\IStream\In  $stream    Stream to read to grammar.
-     * @return  \Hoa\Compiler\Llk\Parser
-     * @throws  \Hoa\Compiler\Exception
+     * `hoa://Library/Compiler/Source/Llk/Llk.pp` for an example, or the
+     * documentation.
      */
-    public static function load(Stream\IStream\In $stream)
+    public static function load(Stream\IStream\In $stream): Parser
     {
         $pp = $stream->readAll();
 
@@ -96,12 +92,8 @@ abstract class Llk
      * The generated PHP code will load the same in-memory parser. The state
      * will be reset. The parser will be saved as a class, named after
      * `$className`. To retrieve the parser, one must instanciate this class.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $parser       Parser to save.
-     * @param   string                    $className    Parser classname.
-     * @return  string
      */
-    public static function save(Parser $parser, $className)
+    public static function save(Parser $parser, string $className): string
     {
         $out        = null;
         $outTokens  = null;
@@ -251,16 +243,8 @@ abstract class Llk
 
     /**
      * Parse the grammar description language.
-     *
-     * @param   string  $pp            Grammar description.
-     * @param   array   $tokens        Extracted tokens.
-     * @param   array   $rules         Extracted raw rules.
-     * @param   array   $pragmas       Extracted raw pragmas.
-     * @param   string  $streamName    The name of the stream containing the grammar.
-     * @return  void
-     * @throws  \Hoa\Compiler\Exception
      */
-    public static function parsePP($pp, &$tokens, &$rules, &$pragmas, $streamName)
+    public static function parsePP(string $pp, ?array &$tokens, ?array &$rules, ?array &$pragmas, string $streamName)
     {
         $lines   = explode("\n", $pp);
         $pragmas = [];
@@ -376,4 +360,4 @@ abstract class Llk
 /**
  * Flex entity.
  */
-Consistency::flexEntity('Hoa\Compiler\Llk\Llk');
+Consistency::flexEntity(Llk::class);

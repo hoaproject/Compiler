@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Iterator;
  * Class \Hoa\Compiler\Llk\Parser.
  *
  * LL(k) parser.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Parser
 {
@@ -54,14 +53,14 @@ class Parser
      *
      * @var array
      */
-    protected $_pragmas       = null;
+    protected $_pragmas       = [];
 
     /**
      * List of skipped tokens.
      *
      * @var array
      */
-    protected $_skip          = null;
+    protected $_skip          = [];
 
     /**
      * Associative array (token name => token regex), to be defined in
@@ -69,19 +68,19 @@ class Parser
      *
      * @var array
      */
-    protected $_tokens        = null;
+    protected $_tokens        = [];
 
     /**
      * Rules, to be defined as associative array, name => Rule object.
      *
      * @var array
      */
-    protected $_rules         = null;
+    protected $_rules         = [];
 
     /**
      * Lexer iterator.
      *
-     * @var \Hoa\Iterator\Lookahead
+     * @var Iterator\Lookahead
      */
     protected $_tokenSequence = null;
 
@@ -90,7 +89,7 @@ class Parser
      *
      * @var array
      */
-    protected $_errorToken    = null;
+    protected $_errorToken    = [];
 
     /**
      * Trace of activated rules.
@@ -104,12 +103,12 @@ class Parser
      *
      * @var array
      */
-    protected $_todo          = null;
+    protected $_todo          = [];
 
     /**
      * AST.
      *
-     * @var \Hoa\Compiler\Llk\TreeNode
+     * @var TreeNode
      */
     protected $_tree          = null;
 
@@ -124,10 +123,6 @@ class Parser
 
     /**
      * Construct the parser.
-     *
-     * @param   array  $tokens     Tokens.
-     * @param   array  $rules      Rules.
-     * @param   array  $pragmas    Pragmas.
      */
     public function __construct(
         array $tokens  = [],
@@ -143,14 +138,8 @@ class Parser
 
     /**
      * Parse :-).
-     *
-     * @param   string  $text    Text to parse.
-     * @param   string  $rule    The axiom, i.e. root rule.
-     * @param   bool    $tree    Whether build tree or not.
-     * @return  mixed
-     * @throws  \Hoa\Compiler\Exception\UnexpectedToken
      */
-    public function parse($text, $rule = null, $tree = true)
+    public function parse(string $text, ?string $rule = null, bool $tree = true)
     {
         $k = 1024;
 
@@ -180,7 +169,7 @@ class Parser
         do {
             $out = $this->unfold();
 
-            if (null  !== $out &&
+            if (false  !== $out &&
                 'EOF' === $this->_tokenSequence->current()['token']) {
                 break;
             }
@@ -247,10 +236,8 @@ class Parser
 
     /**
      * Unfold trace.
-     *
-     * @return  mixed
      */
-    protected function unfold()
+    private function unfold(): bool
     {
         while (0 < count($this->_todo)) {
             $rule = array_pop($this->_todo);
@@ -269,7 +256,7 @@ class Parser
                 $out      = $this->_parse($zeRule, $next);
 
                 if (false === $out && false === $this->backtrack()) {
-                    return null;
+                    return false;
                 }
             }
         }
@@ -279,12 +266,8 @@ class Parser
 
     /**
      * Parse current rule.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule  $zeRule    Current rule.
-     * @param   int                     $next      Next rule index.
-     * @return  bool
      */
-    protected function _parse(Rule $zeRule, $next)
+    private function _parse(Rule $zeRule, int $next): bool
     {
         if ($zeRule instanceof Rule\Token) {
             $name = $this->_tokenSequence->current()['token'];
@@ -454,10 +437,8 @@ class Parser
 
     /**
      * Backtrack the trace.
-     *
-     * @return  bool
      */
-    protected function backtrack()
+    private function backtrack(): bool
     {
         $found = false;
 
@@ -495,12 +476,8 @@ class Parser
     /**
      * Build AST from trace.
      * Walk through the trace iteratively and recursively.
-     *
-     * @param   int      $i            Current trace index.
-     * @param   array    &$children    Collected children.
-     * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    protected function _buildTree($i = 0, &$children = [])
+    private function _buildTree(int $i = 0, &$children = [])
     {
         $max = count($this->_trace);
 
@@ -613,20 +590,13 @@ class Parser
 
     /**
      * Try to merge directly children into an existing node.
-     *
-     * @param   array   &$children    Current children being gathering.
-     * @param   array   &$handle      Children of the new node.
-     * @param   string  $cId          Node ID.
-     * @param   bool    $recursive    Whether we should merge recursively or
-     *                                not.
-     * @return  bool
      */
     protected function mergeTree(
         &$children,
         &$handle,
-        $cId,
-        $recursive = false
-    ) {
+        string $cId,
+        bool $recursive = false
+    ): bool {
         end($children);
         $last = current($children);
 
@@ -657,10 +627,6 @@ class Parser
     /**
      * Merge recursively.
      * Please, see self::mergeTree() to know the context.
-     *
-     * @param   \Hoa\Compiler\Llk\TreeNode  $node       Node that receives.
-     * @param   \Hoa\Compiler\Llk\TreeNode  $newNode    Node to merge.
-     * @return  void
      */
     protected function mergeTreeRecursive(TreeNode $node, TreeNode $newNode)
     {
@@ -693,61 +659,48 @@ class Parser
 
     /**
      * Get AST.
-     *
-     * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    public function getTree()
+    public function getTree(): ?TreeNode
     {
         return $this->_tree;
     }
 
     /**
      * Get trace.
-     *
-     * @return  array
      */
-    public function getTrace()
+    public function getTrace(): array
     {
         return $this->_trace;
     }
 
     /**
      * Get pragmas.
-     *
-     * @return  array
      */
-    public function getPragmas()
+    public function getPragmas(): array
     {
         return $this->_pragmas;
     }
 
     /**
      * Get tokens.
-     *
-     * @return  array
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         return $this->_tokens;
     }
 
     /**
      * Get the lexer iterator.
-     *
-     * @return  \Hoa\Iterator\Buffer
      */
-    public function getTokenSequence()
+    public function getTokenSequence(): ?Iterator\Buffer
     {
         return $this->_tokenSequence;
     }
 
     /**
      * Get rule by name.
-     *
-     * @param   string  $name    Rule name.
-     * @return  \Hoa\Compiler\Llk\Rule
      */
-    public function getRule($name)
+    public function getRule($name): ?Rule
     {
         if (!isset($this->_rules[$name])) {
             return null;
@@ -758,21 +711,21 @@ class Parser
 
     /**
      * Get rules.
-     *
-     * @return  array
      */
-    public function getRules()
+    public function getRules(): array
     {
         return $this->_rules;
     }
 
     /**
      * Get root rule.
-     *
-     * @return  string
      */
-    public function getRootRule()
+    public function getRootRule(): ?string
     {
+        if (empty($this->_rules)) {
+            return null;
+        }
+
         foreach ($this->_rules as $rule => $_) {
             if (!is_int($rule)) {
                 break;

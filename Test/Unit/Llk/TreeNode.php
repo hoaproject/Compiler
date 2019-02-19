@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,9 +46,6 @@ use Hoa\Visitor;
  * Class \Hoa\Compiler\Test\Unit\Llk\TreeNode.
  *
  * Test suite of the tree node.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class TreeNode extends Test\Unit\Suite
 {

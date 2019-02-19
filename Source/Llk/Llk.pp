@@ -35,9 +35,6 @@
 //
 // Provide grammar for the LL(k) parser.
 //
-// @copyright  Copyright © 2007-2017, Hoa community.
-// @license    New BSD License
-//
 
 
 %skip   space          \s

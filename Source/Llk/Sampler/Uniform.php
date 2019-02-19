@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -48,9 +50,6 @@ use Hoa\Visitor;
  * size n. The counting helps to compute cumulative distribution functions,
  * which guide the exploration.
  * Repetition unfolding: upper bound of + and * is set to n.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Uniform extends Sampler
 {
@@ -72,9 +71,6 @@ class Uniform extends Sampler
 
     /**
      * Construct a generator.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
-     * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
      */
     public function __construct(
         Compiler\Llk\Parser $compiler,
@@ -95,12 +91,8 @@ class Uniform extends Sampler
 
     /**
      * The random and uniform algorithm.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to start.
-     * @param   int                     $n       Size.
-     * @return  string
      */
-    public function uniform(Compiler\Llk\Rule $rule = null, $n = -1)
+    public function uniform(Compiler\Llk\Rule $rule = null, int $n = -1): ?string
     {
         if (null === $rule && -1 === $n) {
             $rule = $this->_rules[$this->_rootRuleName];
@@ -170,12 +162,8 @@ class Uniform extends Sampler
 
     /**
      * Recursive method applied to our problematic.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to start.
-     * @param   int                     $n       Size.
-     * @return  int
      */
-    public function count(Compiler\Llk\Rule $rule = null, $n = -1)
+    public function count(Compiler\Llk\Rule $rule = null, int $n = -1): int
     {
         if (null === $rule || -1 === $n) {
             return 0;
@@ -265,12 +253,8 @@ class Uniform extends Sampler
 
     /**
      * Set upper-bound, the maximum data length.
-     *
-     * @param   int  $length    Length.
-     * @return  int
-     * @throws  \Hoa\Compiler\Exception
      */
-    public function setLength($length)
+    public function setLength(int $length): int
     {
         if (0 >= $length) {
             throw new Exception(
@@ -292,10 +276,8 @@ class Uniform extends Sampler
 
     /**
      * Get upper-bound.
-     *
-     * @return  int
      */
-    public function getLength()
+    public function getLength(): int
     {
         return $this->_length;
     }

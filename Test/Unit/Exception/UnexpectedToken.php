@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,9 +46,6 @@ use Hoa\Test;
  * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
  *
  * Test suite of the unexpected token exception.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class UnexpectedToken extends Test\Unit\Suite
 {

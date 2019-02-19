@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Hoa
@@ -72,7 +72,7 @@ class Pp extends Console\Dispatcher\Kit
      *
      * @return  int
      */
-    public function main()
+    public function main() : int
     {
         $visitor       = null;
         $tokenSequence = false;
@@ -205,7 +205,7 @@ class Pp extends Console\Dispatcher\Kit
      * @param   string                    $data        Data to lex.
      * @return  void
      */
-    protected function printTokenSequence(Compiler\Llk\Parser $compiler, $data)
+    protected function printTokenSequence(Compiler\Llk\Parser $compiler, string $data)
     {
         $lexer    = new Compiler\Llk\Lexer();
         $sequence = $lexer->lexMe($data, $compiler->getTokens());
@@ -247,7 +247,7 @@ class Pp extends Console\Dispatcher\Kit
      *
      * @return  int
      */
-    public function usage()
+    public function usage() : int
     {
         echo
             'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",

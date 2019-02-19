@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -55,9 +57,6 @@ use Hoa\Iterator;
  *      • * is bounded to 0, 1 or 2;
  *      • + is unfolded 1 or 2 times;
  *      • {x,y} is unfolded x, x + 1, y - 1 and y times.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Coverage extends Sampler implements Iterator
 {
@@ -66,21 +65,21 @@ class Coverage extends Sampler implements Iterator
      *
      * @var array
      */
-    protected $_todo         = null;
+    protected $_todo         = [];
 
     /**
      * Stack of rules that have already been covered.
      *
      * @var array
      */
-    protected $_trace        = null;
+    protected $_trace        = [];
 
     /**
      * Produced test cases.
      *
      * @var array
      */
-    protected $_tests        = null;
+    protected $_tests        = [];
 
     /**
      * Covered rules: ruleName to structure that contains the choice point and
@@ -88,7 +87,7 @@ class Coverage extends Sampler implements Iterator
      *
      * @var array
      */
-    protected $_coveredRules = null;
+    protected $_coveredRules = [];
 
     /**
      * Current iterator key.
@@ -100,7 +99,7 @@ class Coverage extends Sampler implements Iterator
     /**
      * Current iterator value.
      *
-     * @var string
+     * @var ?string
      */
     protected $_current      = null;
 
@@ -108,28 +107,22 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Get the current iterator value.
-     *
-     * @return  string
      */
-    public function current()
+    public function current(): ?string
     {
         return $this->_current;
     }
 
     /**
      * Get the current iterator key.
-     *
-     * @return  int
      */
-    public function key()
+    public function key(): int
     {
         return $this->_key;
     }
 
     /**
      * Useless here.
-     *
-     * @return  void
      */
     public function next()
     {
@@ -138,8 +131,6 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Rewind the internal iterator pointer.
-     *
-     * @return  void
      */
     public function rewind()
     {
@@ -179,10 +170,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Compute the current iterator value, i.e. generate a new solution.
-     *
-     * @return  bool
      */
-    public function valid()
+    public function valid(): bool
     {
         $ruleName = $this->_rootRuleName;
 
@@ -228,10 +217,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Unfold rules from the todo stack.
-     *
-     * @return  bool
      */
-    protected function unfold()
+    protected function unfold(): bool
     {
         while (0 < count($this->_todo)) {
             $pop = array_pop($this->_todo);
@@ -253,11 +240,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * The coverage algorithm.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to cover.
-     * @return  bool
      */
-    protected function coverage(Compiler\Llk\Rule $rule)
+    protected function coverage(Compiler\Llk\Rule $rule): bool
     {
         $children = $rule->getChildren();
 
@@ -457,11 +441,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Extract a given sequence from existing traces.
-     *
-     * @param   array  $rules    Rules to consider.
-     * @return  array
      */
-    protected function extract(array $rules)
+    protected function extract(array $rules): ?array
     {
         $out = [];
 
@@ -521,10 +502,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Backtrack to the previous choice-point.
-     *
-     * @return  bool
      */
-    protected function backtrack()
+    protected function backtrack(): bool
     {
         $found = false;
 
@@ -556,9 +535,6 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Update coverage of a rule.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule\Ekzit  $rule    Rule to consider.
-     * @return  void
      */
     protected function updateCoverage(Compiler\Llk\Rule\Ekzit $Rule)
     {
@@ -611,11 +587,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Check if all rules have been entirely covered.
-     *
-     * @param   string  $ruleName    Rule name.
-     * @return  bool
      */
-    protected function allCovered($ruleName)
+    protected function allCovered($ruleName): bool
     {
         foreach ($this->_coveredRules[$ruleName] as $value) {
             if (1 !== $value) {
@@ -628,11 +601,8 @@ class Coverage extends Sampler implements Iterator
 
     /**
      * Check if a rule is a root rule that is currently being processed.
-     *
-     * @param   string  $ruleName    Rule name.
-     * @return  bool
      */
-    protected function checkRuleRoot($ruleName)
+    protected function checkRuleRoot($ruleName): bool
     {
         if (true === $this->_rules[$ruleName]->isTransitional()) {
             return false;

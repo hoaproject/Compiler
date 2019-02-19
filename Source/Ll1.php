@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Hoa
@@ -359,7 +359,7 @@ abstract class Ll1
      * @throws  \Hoa\Compiler\Exception\FinalStateHasNotBeenReached
      * @throws  \Hoa\Compiler\Exception\IllegalToken
      */
-    public function compile($in)
+    public function compile(string $in)
     {
         $cacheId = md5($in);
 
@@ -657,7 +657,7 @@ abstract class Ll1
      * @param   int  $action    Action.
      * @return  void
      */
-    abstract protected function consume($action);
+    abstract protected function consume(int $action);
 
     /**
      * Compute source code before compiling it.
@@ -675,7 +675,7 @@ abstract class Ll1
      *
      * @return  bool
      */
-    protected function end()
+    protected function end() : bool
     {
         return true;
     }
@@ -693,7 +693,7 @@ abstract class Ll1
      * @param   int     $line    Initial line.
      * @return  int
      */
-    public function setInitialLine($line)
+    public function setInitialLine(int $line) : int
     {
         $old                = $this->_initialLine;
         $this->_initialLine = $line;
@@ -707,7 +707,7 @@ abstract class Ll1
      * @param   array   $skip    Skip.
      * @return  array
      */
-    public function setSkip(array $skip)
+    public function setSkip(array $skip) : array
     {
         $old         = $this->_skip;
         $this->_skip = $skip;
@@ -722,7 +722,7 @@ abstract class Ll1
      * @param   array   $tokens    Tokens.
      * @return  array
      */
-    public function setTokens(array $tokens)
+    public function setTokens(array $tokens) : array
     {
         $old           = $this->_tokens;
         $this->_tokens = $tokens;
@@ -736,7 +736,7 @@ abstract class Ll1
      * @param   array   $states    States.
      * @return  array
      */
-    public function setStates(array $states)
+    public function setStates(array $states) : array
     {
         $old           = $this->_states;
         $this->_states = $states;
@@ -750,7 +750,7 @@ abstract class Ll1
      * @param   array   $terminal    Terminal states.
      * @return  array
      */
-    public function setTerminal(array $terminal)
+    public function setTerminal(array $terminal) : array
     {
         $old             = $this->_terminal;
         $this->_terminal = $terminal;
@@ -764,7 +764,7 @@ abstract class Ll1
      * @param   array   $transitions    Transitions table.
      * @return  array
      */
-    public function setTransitions(array $transitions)
+    public function setTransitions(array $transitions) : array
     {
         $old                = $this->_transitions;
         $this->_transitions = $transitions;
@@ -778,7 +778,7 @@ abstract class Ll1
      * @param   array   $actions    Actions table.
      * @return  array
      */
-    public function setActions(array $actions)
+    public function setActions(array $actions) : array
     {
         foreach ($actions as $e => $automata) {
             foreach ($automata as $i => $state) {
@@ -802,7 +802,7 @@ abstract class Ll1
      * @param   array   $names    Names of automata.
      * @return  array
      */
-    public function setNames(array $names)
+    public function setNames(array $names) : array
     {
         $old          = $this->_names;
         $this->_names = $names;
@@ -815,7 +815,7 @@ abstract class Ll1
      *
      * @return  int
      */
-    public function getInitialLine()
+    public function getInitialLine() : int
     {
         return $this->_initialLine;
     }
@@ -825,7 +825,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getSkip()
+    public function getSkip() : array
     {
         return $this->_skip;
     }
@@ -835,7 +835,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getTokens()
+    public function getTokens() : array
     {
         return $this->_tokens;
     }
@@ -845,7 +845,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getStates()
+    public function getStates() : array
     {
         return $this->_states;
     }
@@ -855,7 +855,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getTerminal()
+    public function getTerminal() : array
     {
         return $this->_terminal;
     }
@@ -865,7 +865,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getTransitions()
+    public function getTransitions() : array
     {
         return $this->_transitions;
     }
@@ -875,7 +875,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getActions()
+    public function getActions() : array
     {
         return $this->_actions;
     }
@@ -885,7 +885,7 @@ abstract class Ll1
      *
      * @return  array
      */
-    public function getNames()
+    public function getNames() : array
     {
         return $this->_names;
     }
@@ -895,7 +895,7 @@ abstract class Ll1
      *
      * @return  bool
      */
-    public static function enableCache()
+    public static function enableCache() : bool
     {
         $old                 = self::$_cacheEnabled;
         self::$_cacheEnabled = true;
@@ -908,7 +908,7 @@ abstract class Ll1
      *
      * @return  bool
      */
-    public static function disableCache()
+    public static function disableCache() : bool
     {
         $old                 = self::$_cacheEnabled;
         self::$_cacheEnabled = false;

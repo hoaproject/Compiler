@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Iterator;
  * Class \Hoa\Compiler\Llk\Rule\Analyzer.
  *
  * Analyze rules and transform them into atomic rules operations.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Analyzer
 {
@@ -75,7 +74,7 @@ class Analyzer
     /**
      * Lexer iterator.
      *
-     * @var \Hoa\Iterator\Lookahead
+     * @var ?Iterator\Lookahead
      */
     protected $_lexer                   = null;
 
@@ -84,19 +83,19 @@ class Analyzer
      *
      * @var array
      */
-    protected $_tokens                  = null;
+    protected $_tokens                  = [];
 
     /**
      * Rules.
      *
      * @var array
      */
-    protected $_rules                   = null;
+    protected $_rules                   = [];
 
     /**
      * Rule name being analyzed.
      *
-     * @var string
+     * @var ?string
      */
     private $_ruleName                  = null;
 
@@ -105,7 +104,7 @@ class Analyzer
      *
      * @var array
      */
-    protected $_parsedRules             = null;
+    protected $_parsedRules             = [];
 
     /**
      * Counter to auto-name transitional rules.
@@ -118,8 +117,6 @@ class Analyzer
 
     /**
      * Constructor.
-     *
-     * @param   array  $tokens    Tokens.
      */
     public function __construct(array $tokens)
     {
@@ -130,10 +127,6 @@ class Analyzer
 
    /**
      * Build the analyzer of the rules (does not analyze the rules).
-     *
-     * @param   array  $rules    Rule to be analyzed.
-     * @return  void
-     * @throws  \Hoa\Compiler\Exception
      */
     public function analyzeRules(array $rules)
     {
@@ -185,8 +178,6 @@ class Analyzer
 
     /**
      * Implementation of “rule”.
-     *
-     * @return  mixed
      */
     protected function rule(&$pNodeId)
     {
@@ -195,8 +186,6 @@ class Analyzer
 
     /**
      * Implementation of “choice”.
-     *
-     * @return  mixed
      */
     protected function choice(&$pNodeId)
     {
@@ -249,8 +238,6 @@ class Analyzer
 
     /**
      * Implementation of “concatenation”.
-     *
-     * @return  mixed
      */
     protected function concatenation(&$pNodeId)
     {
@@ -288,9 +275,6 @@ class Analyzer
 
     /**
      * Implementation of “repetition”.
-     *
-     * @return  mixed
-     * @throws  \Hoa\Compiler\Exception
      */
     protected function repetition(&$pNodeId)
     {
@@ -389,10 +373,6 @@ class Analyzer
 
     /**
      * Implementation of “simple”.
-     *
-     * @return  mixed
-     * @throws  \Hoa\Compiler\Exception
-     * @throws  \Hoa\Compiler\Exception\Rule
      */
     protected function simple(&$pNodeId)
     {
@@ -428,7 +408,7 @@ class Analyzer
             foreach ($this->_tokens as $namespace => $tokens) {
                 foreach ($tokens as $token => $value) {
                     if ($token === $tokenName ||
-                        substr($token, 0, strpos($token, ':')) === $tokenName) {
+                        substr($token, 0, (int) strpos($token, ':')) === $tokenName) {
                         $exists = true;
 
                         break 2;
@@ -470,8 +450,8 @@ class Analyzer
 
             foreach ($this->_tokens as $namespace => $tokens) {
                 foreach ($tokens as $token => $value) {
-                    if ($token === $tokenName
-                       || substr($token, 0, strpos($token, ':')) === $tokenName) {
+                    if ($token === $tokenName ||
+                        substr($token, 0, (int) strpos($token, ':')) === $tokenName) {
                         $exists = true;
 
                         break 2;

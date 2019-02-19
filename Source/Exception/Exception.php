@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Exception as HoaException;
  * Class \Hoa\Compiler\Exception.
  *
  * Extending the \Hoa\Exception\Exception class.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Exception extends HoaException
 {
@@ -54,4 +53,4 @@ class Exception extends HoaException
 /**
  * Flex entity.
  */
-Consistency::flexEntity('Hoa\Compiler\Exception\Exception');
+Consistency::flexEntity(Exception::class);

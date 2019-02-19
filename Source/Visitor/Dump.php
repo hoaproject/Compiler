@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Hoa
@@ -107,7 +107,7 @@ class Dump implements Visitor\Visit
      * @param   mixed  $data    Data.
      * @return  string
      */
-    protected function dumpData($data)
+    protected function dumpData($data) : string
     {
         $out = null;
 

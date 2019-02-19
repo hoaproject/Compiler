@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,9 +46,6 @@ use Hoa\Test;
  * Class \Hoa\Compiler\Test\Unit\Llk\Rule\Choice.
  *
  * Test suite of the choice rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Choice extends Test\Unit\Suite
 {

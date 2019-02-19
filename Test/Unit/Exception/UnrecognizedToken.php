@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,9 +46,6 @@ use Hoa\Test;
  * Class \Hoa\Compiler\Test\Unit\Exception\UnrecognizedToken.
  *
  * Test suite of the unrecognized token exception.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class UnrecognizedToken extends Test\Unit\Suite
 {

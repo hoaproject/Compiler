@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,9 +42,6 @@ namespace Hoa\Compiler\Exception;
  * Class \Hoa\Compiler\Exception\IllegalToken.
  *
  * Extending the \Hoa\Compiler\Exception class.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class IllegalToken extends Exception
 {
@@ -57,14 +56,8 @@ class IllegalToken extends Exception
 
     /**
      * Override line and add column support.
-     *
-     * @param   string  $message    Formatted message.
-     * @param   int     $code       Code (the ID).
-     * @param   array   $arg        RaiseError string arguments.
-     * @param   int     $line       Line.
-     * @param   int     $column     Column.
      */
-    public function __construct($message, $code, $arg, $line, $column)
+    public function __construct(string $message, int $code, $arg, int $line, int $column)
     {
         parent::__construct($message, $code, $arg);
 
@@ -76,10 +69,8 @@ class IllegalToken extends Exception
 
     /**
      * Get column.
-     *
-     * @return  int
      */
-    public function getColumn()
+    public function getColumn(): int
     {
         return $this->column;
     }

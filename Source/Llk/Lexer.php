@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,23 +44,20 @@ use Hoa\Compiler;
  * Class \Hoa\Compiler\Llk\Lexer.
  *
  * Lexical analyser, i.e. split a string into a set of lexeme, i.e. tokens.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Lexer
 {
     /**
      * Lexer state.
      *
-     * @var array
+     * @var ?string
      */
     protected $_lexerState  = null;
 
     /**
      * Text.
      *
-     * @var string
+     * @var ?string
      */
     protected $_text        = null;
 
@@ -79,7 +78,7 @@ class Lexer
     /**
      * PCRE options.
      *
-     * @var string
+     * @var ?string
      */
     protected $_pcreOptions = null;
 
@@ -87,8 +86,6 @@ class Lexer
 
     /**
      * Constructor.
-     *
-     * @param   array  $pragmas    Pragmas.
      */
     public function __construct(array $pragmas = [])
     {
@@ -102,13 +99,8 @@ class Lexer
     /**
      * Text tokenizer: splits the text in parameter in an ordered array of
      * tokens.
-     *
-     * @param   string  $text      Text to tokenize.
-     * @param   array   $tokens    Tokens to be returned.
-     * @return  \Generator
-     * @throws  \Hoa\Compiler\Exception\UnrecognizedToken
      */
-    public function lexMe($text, array $tokens)
+    public function lexMe(string $text, array $tokens): \Generator
     {
         $this->_text       = $text;
         $this->_tokens     = $tokens;
@@ -182,12 +174,8 @@ class Lexer
 
     /**
      * Compute the next token recognized at the beginning of the string.
-     *
-     * @param   int  $offset    Offset.
-     * @return  array
-     * @throws  \Hoa\Compiler\Exception\Lexer
      */
-    protected function nextToken($offset)
+    protected function nextToken(int $offset): ?array
     {
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
@@ -263,14 +251,8 @@ class Lexer
 
     /**
      * Check if a given lexeme is matched at the beginning of the text.
-     *
-     * @param   string  $lexeme    Name of the lexeme.
-     * @param   string  $regex     Regular expression describing the lexeme.
-     * @param   int     $offset    Offset.
-     * @return  array
-     * @throws  \Hoa\Compiler\Exception\Lexer
      */
-    protected function matchLexeme($lexeme, $regex, $offset)
+    protected function matchLexeme(string $lexeme, string $regex, int $offset): ?array
     {
         $_regex = str_replace('#', '\#', $regex);
         $preg   = preg_match(

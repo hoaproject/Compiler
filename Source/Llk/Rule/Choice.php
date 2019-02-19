@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,9 +42,6 @@ namespace Hoa\Compiler\Llk\Rule;
  * Class \Hoa\Compiler\Llk\Rule\Choice.
  *
  * The choice rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Choice extends Rule
 {

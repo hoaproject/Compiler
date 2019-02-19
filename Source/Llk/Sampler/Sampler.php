@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,16 +46,13 @@ use Hoa\Visitor;
  * Class \Hoa\Compiler\Llk\Sampler.
  *
  * Sampler parent.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 abstract class Sampler
 {
     /**
      * Compiler.
      *
-     * @var \Hoa\Compiler\Llk\Parser
+     * @var Compiler\Llk\Parser
      */
     protected $_compiler         = null;
 
@@ -62,26 +61,26 @@ abstract class Sampler
      *
      * @var array
      */
-    protected $_tokens           = null;
+    protected $_tokens           = [];
 
     /**
      * All rules (from the compiler).
      *
      * @var array
      */
-    protected $_rules            = null;
+    protected $_rules            = [];
 
     /**
      * Token sampler.
      *
-     * @var \Hoa\Visitor\Visit
+     * @var Visitor\Visit
      */
     protected $_tokenSampler     = null;
 
     /**
      * Root rule name.
      *
-     * @var string
+     * @var ?string
      */
     protected $_rootRuleName     = null;
 
@@ -102,9 +101,6 @@ abstract class Sampler
 
     /**
      * Construct a generator.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
-     * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
      */
     public function __construct(
         Compiler\Llk\Parser $compiler,
@@ -121,20 +117,16 @@ abstract class Sampler
 
     /**
      * Get compiler.
-     *
-     * @return  \Hoa\Compiler\Llk\Parser
      */
-    public function getCompiler()
+    public function getCompiler(): Compiler\Llk\Parser
     {
         return $this->_compiler;
     }
 
     /**
      * Get the AST of the current namespace skip token.
-     *
-     * @return  \Hoa\Compiler\Llk\TreeNode
      */
-    protected function getSkipTokenAST()
+    protected function getSkipTokenAST(): Compiler\Llk\TreeNode
     {
         if (!isset($this->_skipTokenAST[$this->_currentNamespace])) {
             $token = new Compiler\Llk\Rule\Token(
@@ -157,11 +149,8 @@ abstract class Sampler
     /**
      * Complete a token (namespace and representation).
      * It returns the next namespace.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
-     * @return  string
      */
-    protected function completeToken(Compiler\Llk\Rule\Token $token)
+    protected function completeToken(Compiler\Llk\Rule\Token $token): string
     {
         if (null !== $token->getRepresentation()) {
             return $this->_currentNamespace;
@@ -196,11 +185,8 @@ abstract class Sampler
 
     /**
      * Set current token namespace.
-     *
-     * @param   string  $namespace    Token namespace.
-     * @return  string
      */
-    protected function setCurrentNamespace($namespace)
+    protected function setCurrentNamespace(string $namespace): string
     {
         $old                     = $this->_currentNamespace;
         $this->_currentNamespace = $namespace;
@@ -211,11 +197,8 @@ abstract class Sampler
     /**
      * Generate a token value.
      * Complete and set next token namespace.
-     *
-     * @param   \Hoa\Compiler\Llk\Rule\Token  $token    Token.
-     * @return  string
      */
-    protected function generateToken(Compiler\Llk\Rule\Token $token)
+    protected function generateToken(Compiler\Llk\Rule\Token $token): string
     {
         $toNamespace = $this->completeToken($token);
         $this->setCurrentNamespace($toNamespace);
@@ -233,4 +216,4 @@ abstract class Sampler
 /**
  * Flex entity.
  */
-Consistency::flexEntity('Hoa\Compiler\Llk\Sampler\Sampler');
+Consistency::flexEntity(Sampler::class);

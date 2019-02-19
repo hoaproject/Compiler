@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -39,9 +41,6 @@ namespace Hoa\Compiler\Llk\Rule;
  * Class \Hoa\Compiler\Llk\Rule\Ekzit.
  *
  * The ekzit (exit) rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Ekzit extends Invocation
 {

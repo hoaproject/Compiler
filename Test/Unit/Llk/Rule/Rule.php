@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Mock\Hoa\Compiler\Llk\Rule as SUT;
  * Class \Hoa\Compiler\Test\Unit\Llk\Rule\Rule.
  *
  * Test suite of a rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Rule extends Test\Unit\Suite
 {

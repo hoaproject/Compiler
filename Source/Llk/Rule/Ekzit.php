@@ -35,34 +35,13 @@ declare(strict_types=1);
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-namespace Hoa\Compiler\Test\Unit\Exception;
-
-use Hoa\Compiler as LUT;
-use Hoa\Compiler\Exception\UnexpectedToken as SUT;
-use Hoa\Test;
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
+ * Class \Hoa\Compiler\Llk\Rule\Ekzit.
  *
- * Test suite of the unexpected token exception.
+ * The ekzit (exit) rule.
  */
-class UnexpectedToken extends Test\Unit\Suite
+class Ekzit extends Invocation
 {
-    public function case_constructor_and_get_column()
-    {
-        $this
-            ->given(
-                $line   = 7,
-                $column = 42
-            )
-            ->when($result = new SUT('foo', 0, 'bar', $line, $column))
-            ->then
-                ->object($result)
-                    ->isInstanceOf(LUT\Exception::class)
-                ->integer($result->getLine())
-                    ->isEqualTo($line)
-                ->integer($result->getColumn())
-                    ->isEqualTo($column);
-    }
 }

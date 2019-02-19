@@ -36,33 +36,13 @@ declare(strict_types=1);
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Exception;
-
-use Hoa\Compiler as LUT;
-use Hoa\Compiler\Exception\UnexpectedToken as SUT;
-use Hoa\Test;
+namespace Hoa\Compiler\Llk\Rule;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
+ * Class \Hoa\Compiler\Llk\Rule\Concatenation.
  *
- * Test suite of the unexpected token exception.
+ * The concatenation rule.
  */
-class UnexpectedToken extends Test\Unit\Suite
+class Concatenation extends Rule
 {
-    public function case_constructor_and_get_column()
-    {
-        $this
-            ->given(
-                $line   = 7,
-                $column = 42
-            )
-            ->when($result = new SUT('foo', 0, 'bar', $line, $column))
-            ->then
-                ->object($result)
-                    ->isInstanceOf(LUT\Exception::class)
-                ->integer($result->getLine())
-                    ->isEqualTo($line)
-                ->integer($result->getColumn())
-                    ->isEqualTo($column);
-    }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -45,9 +47,6 @@ use Hoa\Test;
  * Class \Hoa\Compiler\Test\Unit\Llk\Llk.
  *
  * Test suite of the LL(k) helper class.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Llk extends Test\Unit\Suite
 {
@@ -104,7 +103,7 @@ class Llk extends Test\Unit\Suite
     {
         $this
             ->given(
-                $stream = new File\Read('hoa://Library/Compiler/Llk/Llk.pp'),
+                $stream = new File\Read('hoa://Library/Compiler/Source/Llk/Llk.pp'),
                 $parser = SUT::load($stream)
             )
             ->when($result = SUT::save($parser, 'Foobar'))

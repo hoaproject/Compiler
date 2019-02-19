@@ -36,33 +36,78 @@ declare(strict_types=1);
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Exception;
+namespace Hoa\Compiler\Llk\Rule;
 
-use Hoa\Compiler as LUT;
-use Hoa\Compiler\Exception\UnexpectedToken as SUT;
-use Hoa\Test;
+use Hoa\Compiler;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
+ * Class \Hoa\Compiler\Llk\Rule\Repetition.
  *
- * Test suite of the unexpected token exception.
+ * The repetition rule.
  */
-class UnexpectedToken extends Test\Unit\Suite
+class Repetition extends Rule
 {
-    public function case_constructor_and_get_column()
+    /**
+     * Minimum bound.
+     *
+     * @var int
+     */
+    protected $_min = 0;
+
+    /**
+     * Maximum bound.
+     *
+     * @var int
+     */
+    protected $_max = 0;
+
+
+
+    /**
+     * Constructor.
+     */
+    public function __construct($name, $min, $max, $children, ?string $nodeId)
     {
-        $this
-            ->given(
-                $line   = 7,
-                $column = 42
-            )
-            ->when($result = new SUT('foo', 0, 'bar', $line, $column))
-            ->then
-                ->object($result)
-                    ->isInstanceOf(LUT\Exception::class)
-                ->integer($result->getLine())
-                    ->isEqualTo($line)
-                ->integer($result->getColumn())
-                    ->isEqualTo($column);
+        parent::__construct($name, $children, $nodeId);
+
+        $min = max(0, (int) $min);
+        $max = max(-1, (int) $max);
+
+        if (-1 !== $max && $min > $max) {
+            throw new Compiler\Exception\Rule(
+                'Cannot repeat with a min (%d) greater than max (%d).',
+                0,
+                [$min, $max]
+            );
+        }
+
+        $this->_min = $min;
+        $this->_max = $max;
+
+        return;
+    }
+
+    /**
+     * Get minimum bound.
+     */
+    public function getMin(): int
+    {
+        return $this->_min;
+    }
+
+    /**
+     * Get maximum bound.
+     */
+    public function getMax(): int
+    {
+        return $this->_max;
+    }
+
+    /**
+     * Check whether the maximum repetition is unbounded.
+     */
+    public function isInfinite(): bool
+    {
+        return -1 === $this->getMax();
     }
 }

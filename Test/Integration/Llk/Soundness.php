@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Json;
  * Class \Hoa\Compiler\Test\Integration\Llk\Soundness.
  *
  * Check soundness of the LL(k) compiler.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Soundness extends Json\Test\Integration\Soundness
 {

@@ -36,33 +36,80 @@ declare(strict_types=1);
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Exception;
+namespace Hoa\Compiler\Visitor;
 
-use Hoa\Compiler as LUT;
-use Hoa\Compiler\Exception\UnexpectedToken as SUT;
-use Hoa\Test;
+use Hoa\Visitor;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
+ * Class \Hoa\Compiler\Visitor\Dump.
  *
- * Test suite of the unexpected token exception.
+ * Dump AST produced by LL(k) compiler.
  */
-class UnexpectedToken extends Test\Unit\Suite
+class Dump implements Visitor\Visit
 {
-    public function case_constructor_and_get_column()
+    /**
+     * Indentation depth.
+     *
+     * @var int
+     */
+    protected static $_i = 0;
+
+
+
+    /**
+     * Visit an element.
+     */
+    public function visit(
+        Visitor\Element $element,
+        &$handle = null,
+        $eldnah  = null
+    ) {
+        ++self::$_i;
+
+        $out  = str_repeat('>  ', self::$_i) . $element->getId();
+
+        if (null !== $value = $element->getValue()) {
+            $out .=
+                '(' .
+                ('default' !== $value['namespace']
+                    ? $value['namespace'] . ':'
+                    : '') .
+                $value['token'] . ', ' .
+                $value['value'] . ')';
+        }
+
+        $data = $element->getData();
+
+        if (!empty($data)) {
+            $out .= ' ' . $this->dumpData($data);
+        }
+
+        $out .= "\n";
+
+        foreach ($element->getChildren() as $child) {
+            $out .= $child->accept($this, $handle, $eldnah);
+        }
+
+        --self::$_i;
+
+        return $out;
+    }
+
+    /**
+     * Dump data.
+     */
+    protected function dumpData($data): ?string
     {
-        $this
-            ->given(
-                $line   = 7,
-                $column = 42
-            )
-            ->when($result = new SUT('foo', 0, 'bar', $line, $column))
-            ->then
-                ->object($result)
-                    ->isInstanceOf(LUT\Exception::class)
-                ->integer($result->getLine())
-                    ->isEqualTo($line)
-                ->integer($result->getColumn())
-                    ->isEqualTo($column);
+        $out = null;
+
+        if (!is_array($data)) {
+            return $data;
+        }
+
+        foreach ($data as $key => $value) {
+            $out .= '[' . $key . ' => ' . $this->dumpData($value) . ']';
+        }
+
+        return $out;
     }
 }

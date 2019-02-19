@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -45,9 +47,6 @@ use Hoa\File;
  * Class Hoa\Compiler\Bin\Pp.
  *
  * Play with PP.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Pp extends Console\Dispatcher\Kit
 {
@@ -69,8 +68,6 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * The entry method.
-     *
-     * @return  int
      */
     public function main()
     {
@@ -163,9 +160,6 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * Print trace.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
-     * @return  void
      */
     protected function printTrace(Compiler\Llk\Parser $compiler)
     {
@@ -200,12 +194,8 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * Print token sequence.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
-     * @param   string                    $data        Data to lex.
-     * @return  void
      */
-    protected function printTokenSequence(Compiler\Llk\Parser $compiler, $data)
+    protected function printTokenSequence(Compiler\Llk\Parser $compiler, string $data)
     {
         $lexer    = new Compiler\Llk\Lexer();
         $sequence = $lexer->lexMe($data, $compiler->getTokens());
@@ -244,8 +234,6 @@ class Pp extends Console\Dispatcher\Kit
 
     /**
      * The command usage.
-     *
-     * @return  int
      */
     public function usage()
     {

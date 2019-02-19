@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -45,9 +47,6 @@ use Hoa\Test;
  * Class \Hoa\Compiler\Test\Integration\Llk\Rule\Analyzer.
  *
  * Test suite of the rule analyzer.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Analyzer extends Test\Integration\Suite
 {

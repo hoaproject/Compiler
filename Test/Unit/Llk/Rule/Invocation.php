@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Mock\Hoa\Compiler\Llk\Rule\Invocation as SUT;
  * Class \Hoa\Compiler\Test\Unit\Llk\Rule\Invocation.
  *
  * Test suite of an invocation rule.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Invocation extends Test\Unit\Suite
 {
@@ -62,8 +61,8 @@ class Invocation extends Test\Unit\Suite
                     ->isEqualTo($rule)
                 ->string($result->getData())
                     ->isEqualTo($data)
-                ->variable($result->getTodo())
-                    ->isNull()
+                ->array($result->getTodo())
+                    ->isEmpty()
                 ->integer($result->getDepth())
                     ->isEqualTo(-1)
                 ->boolean($result->isTransitional())

@@ -36,33 +36,15 @@ declare(strict_types=1);
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Test\Unit\Exception;
+namespace Hoa\Compiler\Llk\Sampler;
 
-use Hoa\Compiler as LUT;
-use Hoa\Compiler\Exception\UnexpectedToken as SUT;
-use Hoa\Test;
+use Hoa\Compiler;
 
 /**
- * Class \Hoa\Compiler\Test\Unit\Exception\UnexpectedToken.
+ * Class \Hoa\Compiler\Llk\Sampler\Exception.
  *
- * Test suite of the unexpected token exception.
+ * Extending the \Hoa\Compiler\Exception class.
  */
-class UnexpectedToken extends Test\Unit\Suite
+class Exception extends Compiler\Exception
 {
-    public function case_constructor_and_get_column()
-    {
-        $this
-            ->given(
-                $line   = 7,
-                $column = 42
-            )
-            ->when($result = new SUT('foo', 0, 'bar', $line, $column))
-            ->then
-                ->object($result)
-                    ->isInstanceOf(LUT\Exception::class)
-                ->integer($result->getLine())
-                    ->isEqualTo($line)
-                ->integer($result->getColumn())
-                    ->isEqualTo($column);
-    }
 }

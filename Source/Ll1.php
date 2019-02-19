@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * Hoa
@@ -46,9 +48,6 @@ namespace Hoa\Compiler;
  * Class \Hoa\Compiler\Ll1.
  *
  * Provide an abstract LL(1) compiler, based on sub-automata and stacks.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 abstract class Ll1
 {
@@ -322,14 +321,6 @@ abstract class Ll1
 
     /**
      * Singleton, and set parameters.
-     *
-     * @param   array   $skip           Skip.
-     * @param   array   $tokens         Tokens.
-     * @param   array   $states         States.
-     * @param   array   $terminal       Terminal states.
-     * @param   array   $transitions    Transitions table.
-     * @param   array   $actions        Actions table.
-     * @param   array   $names          Names of automata.
      */
     public function __construct(
         array $skip,
@@ -353,11 +344,6 @@ abstract class Ll1
 
     /**
      * Compile a source code.
-     *
-     * @param   string  $in    Source code.
-     * @return  void
-     * @throws  \Hoa\Compiler\Exception\FinalStateHasNotBeenReached
-     * @throws  \Hoa\Compiler\Exception\IllegalToken
      */
     public function compile(string $in)
     {
@@ -653,17 +639,11 @@ abstract class Ll1
     /**
      * Consume actions.
      * Please, see the actions table definition to learn more.
-     *
-     * @param   int  $action    Action.
-     * @return  void
      */
     abstract protected function consume(int $action);
 
     /**
      * Compute source code before compiling it.
-     *
-     * @param   string  &$in    Source code.
-     * @return  void
      */
     protected function pre(&$in)
     {
@@ -672,28 +652,21 @@ abstract class Ll1
 
     /**
      * Verify compiler state when ending the source code.
-     *
-     * @return  bool
      */
-    protected function end() : bool
+    protected function end(): bool
     {
         return true;
     }
 
     /**
      * Get the result of the compiling.
-     *
-     * @return  mixed
      */
     abstract public function getResult();
 
     /**
      * Set initial line.
-     *
-     * @param   int     $line    Initial line.
-     * @return  int
      */
-    public function setInitialLine(int $line) : int
+    public function setInitialLine(int $line): int
     {
         $old                = $this->_initialLine;
         $this->_initialLine = $line;
@@ -703,11 +676,8 @@ abstract class Ll1
 
     /**
      * Set tokens to skip.
-     *
-     * @param   array   $skip    Skip.
-     * @return  array
      */
-    public function setSkip(array $skip) : array
+    public function setSkip(array $skip): array
     {
         $old         = $this->_skip;
         $this->_skip = $skip;
@@ -718,11 +688,8 @@ abstract class Ll1
 
     /**
      * Set tokens.
-     *
-     * @param   array   $tokens    Tokens.
-     * @return  array
      */
-    public function setTokens(array $tokens) : array
+    public function setTokens(array $tokens): array
     {
         $old           = $this->_tokens;
         $this->_tokens = $tokens;
@@ -732,11 +699,8 @@ abstract class Ll1
 
     /**
      * Set states.
-     *
-     * @param   array   $states    States.
-     * @return  array
      */
-    public function setStates(array $states) : array
+    public function setStates(array $states): array
     {
         $old           = $this->_states;
         $this->_states = $states;
@@ -746,11 +710,8 @@ abstract class Ll1
 
     /**
      * Set terminal states.
-     *
-     * @param   array   $terminal    Terminal states.
-     * @return  array
      */
-    public function setTerminal(array $terminal) : array
+    public function setTerminal(array $terminal): array
     {
         $old             = $this->_terminal;
         $this->_terminal = $terminal;
@@ -760,11 +721,8 @@ abstract class Ll1
 
     /**
      * Set transitions table.
-     *
-     * @param   array   $transitions    Transitions table.
-     * @return  array
      */
-    public function setTransitions(array $transitions) : array
+    public function setTransitions(array $transitions): array
     {
         $old                = $this->_transitions;
         $this->_transitions = $transitions;
@@ -774,11 +732,8 @@ abstract class Ll1
 
     /**
      * Set actions table.
-     *
-     * @param   array   $actions    Actions table.
-     * @return  array
      */
-    public function setActions(array $actions) : array
+    public function setActions(array $actions): array
     {
         foreach ($actions as $e => $automata) {
             foreach ($automata as $i => $state) {
@@ -798,11 +753,8 @@ abstract class Ll1
 
     /**
      * Set names of automata.
-     *
-     * @param   array   $names    Names of automata.
-     * @return  array
      */
-    public function setNames(array $names) : array
+    public function setNames(array $names): array
     {
         $old          = $this->_names;
         $this->_names = $names;
@@ -812,90 +764,72 @@ abstract class Ll1
 
     /**
      * Get initial line.
-     *
-     * @return  int
      */
-    public function getInitialLine() : int
+    public function getInitialLine(): int
     {
         return $this->_initialLine;
     }
 
     /**
      * Get skip tokens.
-     *
-     * @return  array
      */
-    public function getSkip() : array
+    public function getSkip(): array
     {
         return $this->_skip;
     }
 
     /**
      * Get tokens.
-     *
-     * @return  array
      */
-    public function getTokens() : array
+    public function getTokens(): array
     {
         return $this->_tokens;
     }
 
     /**
      * Get states.
-     *
-     * @return  array
      */
-    public function getStates() : array
+    public function getStates(): array
     {
         return $this->_states;
     }
 
     /**
      * Get terminal states.
-     *
-     * @return  array
      */
-    public function getTerminal() : array
+    public function getTerminal(): array
     {
         return $this->_terminal;
     }
 
     /**
      * Get transitions table.
-     *
-     * @return  array
      */
-    public function getTransitions() : array
+    public function getTransitions(): array
     {
         return $this->_transitions;
     }
 
     /**
      * Get actions table.
-     *
-     * @return  array
      */
-    public function getActions() : array
+    public function getActions(): array
     {
         return $this->_actions;
     }
 
     /**
      * Get names of automata.
-     *
-     * @return  array
      */
-    public function getNames() : array
+    public function getNames(): array
     {
         return $this->_names;
     }
 
     /**
      * Enable cache
-     *
-     * @return  bool
      */
-    public static function enableCache() : bool
+    public static function enableCache(): bool
     {
         $old                 = self::$_cacheEnabled;
         self::$_cacheEnabled = true;
@@ -905,10 +839,8 @@ abstract class Ll1
 
     /**
      * Disable cache
-     *
-     * @return  bool
      */
-    public static function disableCache() : bool
+    public static function disableCache(): bool
     {
         $old                 = self::$_cacheEnabled;
         self::$_cacheEnabled = false;
@@ -918,8 +850,6 @@ abstract class Ll1
 
     /**
      * Transform automatas into DOT language.
-     *
-     * @return  void
      */
     public function __toString()
     {

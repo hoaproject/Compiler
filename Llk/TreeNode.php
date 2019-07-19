@@ -336,14 +336,16 @@ class TreeNode implements Visitor\Element
      * @param   \Hoa\Visitor\Visit  $visitor    Visitor.
      * @param   mixed               &$handle    Handle (reference).
      * @param   mixed               $eldnah     Handle (no reference).
+     * @param   array               $context
      * @return  mixed
      */
     public function accept(
         Visitor\Visit $visitor,
         &$handle = null,
-        $eldnah  = null
+        $eldnah  = null,
+        array $context = []
     ) {
-        return $visitor->visit($this, $handle, $eldnah);
+        return $visitor->visit($this, $handle, $eldnah, $context);
     }
 
     /**

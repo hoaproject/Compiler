@@ -35,7 +35,8 @@
         "hoa/math"       : "~1.0",
         "hoa/protocol"   : "~1.0",
         "hoa/regex"      : "~1.0",
-        "hoa/visitor"    : "~2.0"
+        "hoa/visitor"    : "~2.0",
+        "cweagans/composer-patches": "^1.6"
     },
     "require-dev": {
         "hoa/json": "~2.0",
@@ -49,6 +50,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "3.x-dev"
+        },
+        "patches": {
+            "hoa/visitor": {
+                "Add a 4th argument to Element#accept() and Visit#visit()": "https://patch-diff.githubusercontent.com/raw/hoaproject/Visitor/pull/25.patch"
+            }
         }
     }
 }

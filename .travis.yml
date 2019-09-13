@@ -13,6 +13,8 @@ matrix:
     - php: 7.1
       env:
         - ENABLE_DEVTOOLS=true
+    - php: 7.2
+    - php: 7.3
     - php: nightly
     - php: hhvm-3.12
       sudo: required

@@ -1,5 +1,5 @@
 {
-    "name": "sanmai/hoa-compiler",
+    "name": "hoa/compiler",
     "type": "library",
     "description": "The Hoa\\Compiler library.",
     "license": "BSD-3-Clause",
@@ -15,9 +15,6 @@
         "php": "^7.0",
         "hoa/iterator": "^2.17",
         "hoa/visitor": "^2.17"
-    },
-    "replace": {
-        "hoa/compiler": "3.17.08.08"
     },
     "require-dev": {
         "atoum/atoum": "^3",

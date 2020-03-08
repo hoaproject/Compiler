@@ -1,59 +1,29 @@
 language: php
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
 
-branches:
-  only:
-    - staging
-    - trying
-    - master
-
-matrix:
-  include:
-    - php: 5.6
-    - php: 7.0
-    - php: 7.1
-      env:
-        - ENABLE_DEVTOOLS=true
-    - php: nightly
-    - php: hhvm-3.12
-      sudo: required
-      dist: trusty
-      group: edge
-    - php: hhvm
-      sudo: required
-      dist: trusty
-      group: edge
+jobs:
+  fast_finish: true
   allow_failures:
     - php: nightly
-    - php: hhvm-3.12
-    - php: hhvm
-  fast_finish: true
-
-os:
-  - linux
-
-notifications:
-  irc: "chat.freenode.net#hoaproject"
-
-sudo: false
-
-env:
-  global:
-    - secure: "AAAAB3NzaC1yc2EAAAADAQABAAAAgQCoAO780/K7xbK3aPnHJmAyw9B3OGRFx2sSnl6umenksq4kmlzmPaUF9g3cHGcXpM5O33P8Tux//iYGASy5W8f5vbxbWSvlwV/aWFW9oSM6G/01gyW9vRFK0MnXpUMyCF9B4K/RJumGxm9BSxkAFFo2gPHIJrd08SOQeiDLygpcEQ=="
 
 cache:
   directories:
-    - vendor/
+    - $HOME/.composer
+    - build/cache
 
-before_script:
-  - export PATH="$PATH:$HOME/.composer/vendor/bin"
-  - if [[ ! $ENABLE_XDEBUG ]]; then
-      phpenv config-rm xdebug.ini || echo "ext-xdebug is not available, cannot remove it.";
-    fi
+install:
+  - composer install --prefer-dist
+  - pecl install pcov || true
 
 script:
-  - composer install
-  - vendor/bin/hoa test:run
-  - if [[ $ENABLE_DEVTOOLS ]]; then
-      composer global require friendsofphp/php-cs-fixer;
-      vendor/bin/hoa devtools:cs --diff --dry-run .;
-    fi
+  - php vendor/bin/phpunit --coverage-clover build/logs/clover.xml || php vendor/bin/phpunit
+  - phpenv config-rm xdebug.ini || true
+  - vendor/bin/atoum -ncc -d atoum/
+
+after_success:
+  - travis_retry php vendor/bin/php-coveralls -v

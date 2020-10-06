@@ -15,6 +15,7 @@ jobs:
 #        - ENABLE_DEVTOOLS=true
     - php: 7.2
     - php: 7.3
+    - php: 7.4
     - php: nightly
   allow_failures:
     # @todo hoa/test has to be adjusted/raised first concerning PHP 7.4 compatibility

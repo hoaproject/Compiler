@@ -314,7 +314,7 @@ abstract class Llk
                                 $matches[3] .
                             ')';
                     }
-                } elseif (0 !== preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches)) {
+                } elseif (0 !== preg_match('#^%token\h+(?:([^:\h]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }

@@ -6,26 +6,21 @@ branches:
     - trying
     - master
 
-matrix:
+jobs:
   include:
     - php: 5.6
     - php: 7.0
     - php: 7.1
-      env:
-        - ENABLE_DEVTOOLS=true
+#      env:
+#        - ENABLE_DEVTOOLS=true
+    - php: 7.2
+    - php: 7.3
+    - php: 7.4
     - php: nightly
-    - php: hhvm-3.12
-      sudo: required
-      dist: trusty
-      group: edge
-    - php: hhvm
-      sudo: required
-      dist: trusty
-      group: edge
   allow_failures:
+    # @todo hoa/test has to be adjusted/raised first concerning PHP 7.4 compatibility
+    - php: 7.4
     - php: nightly
-    - php: hhvm-3.12
-    - php: hhvm
   fast_finish: true
 
 os:
@@ -33,8 +28,6 @@ os:
 
 notifications:
   irc: "chat.freenode.net#hoaproject"
-
-sudo: false
 
 env:
   global:
@@ -53,7 +46,10 @@ before_script:
 script:
   - composer install
   - vendor/bin/hoa test:run
+  # @todo:
+  # php-cs-fixer ^2.0 requires additional attribute `--allow-risky`, triggered by hoa/devtools
+  # php-cs-fixer ^1.13 is supported until PHP 7.1 max (hard-coded internally)
   - if [[ $ENABLE_DEVTOOLS ]]; then
-      composer global require friendsofphp/php-cs-fixer;
+      composer global require require friendsofphp/php-cs-fixer:^1.13.0;
       vendor/bin/hoa devtools:cs --diff --dry-run .;
     fi

@@ -147,14 +147,25 @@ class Lexer
             $nextToken = $this->nextToken($offset);
 
             if (null === $nextToken) {
+                $line = 1;
+                $column = $offset;
+                $offsetText = substr($text, 0, $offset);
+                $pointerSpacing = mb_strlen($offsetText);
+                $previousLineBreak = strrpos($offsetText, "\n");
+                if ($previousLineBreak !== false) {
+                    $line = substr_count($offsetText, "\n") + 1;
+                    $column = mb_strlen($offsetText) - $previousLineBreak - 1;
+                    $pointerSpacing = $column;
+                }
                 throw new Compiler\Exception\UnrecognizedToken(
-                    'Unrecognized token "%s" at line 1 and column %d:' .
+                    'Unrecognized token "%s" at line %d and column %d:' .
                     "\n" . '%s' . "\n" .
-                    str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑',
+                    str_repeat(' ', $pointerSpacing) . '↑',
                     0,
                     [
                         mb_substr(substr($text, $offset), 0, 1),
-                        $offset + 1,
+                        $line,
+                        $column + 1,
                         $text
                     ],
                     1,

@@ -214,7 +214,8 @@ OUTPUT
                     '%token  foobar1            bazqux1' . "\n" .
                     '%token  sourceNS1:foobar2  bazqux2' . "\n" .
                     '%token  sourceNS2:foobar3  bazqux3  -> destinationNS' . "\n" .
-                    '%token  foobar4            barqux4  -> destinationNS'
+                    '%token  foobar4            barqux4  -> destinationNS' . "\n" .
+                    '%token  foobar5            ns:bar   -> destinationNS'
             )
             ->when($result = SUT::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo'))
             ->then
@@ -224,7 +225,8 @@ OUTPUT
                     ->isEqualTo([
                         'default' => [
                             'foobar1'               => 'bazqux1',
-                            'foobar4:destinationNS' => 'barqux4'
+                            'foobar4:destinationNS' => 'barqux4',
+                            'foobar5:destinationNS' => 'ns:bar',
                         ],
                         'sourceNS1' => [
                             'foobar2' => 'bazqux2'

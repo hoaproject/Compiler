@@ -213,11 +213,12 @@ class Parser
                 }
 
                 throw new Compiler\Exception\UnexpectedToken(
-                    'Unexpected token "%s" (%s) at line %d and column %d:' .
+                    'Unexpected token "%s" (%s:%s) at line %d and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
                     0,
                     [
                         $token['value'],
+                        $token['namespace'],
                         $token['token'],
                         $line,
                         $column,

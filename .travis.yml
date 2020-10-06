@@ -15,9 +15,10 @@ jobs:
         - ENABLE_DEVTOOLS=true
     - php: 7.2
     - php: 7.3
-    - php: 7.4
     - php: nightly
   allow_failures:
+    # @todo hoa/test has to be adjusted/raised first concerning PHP 7.4 compatibility
+    - php: 7.4
     - php: nightly
   fast_finish: true
 
@@ -45,6 +46,9 @@ script:
   - composer install
   - vendor/bin/hoa test:run
   - if [[ $ENABLE_DEVTOOLS ]]; then
-      composer global require friendsofphp/php-cs-fixer;
+      # @todo:
+      # php-cs-fixer ^2.0 requires additional attribute `--allow-risky`, triggered by hoa/devtools
+      # php-cs-fixer ^1.13 is supported until PHP 7.1 max (hard-coded internally)
+      composer global require require friendsofphp/php-cs-fixer:^1.13.0;
       vendor/bin/hoa devtools:cs --diff --dry-run .;
     fi

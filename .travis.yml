@@ -45,10 +45,10 @@ before_script:
 script:
   - composer install
   - vendor/bin/hoa test:run
+  # @todo:
+  # php-cs-fixer ^2.0 requires additional attribute `--allow-risky`, triggered by hoa/devtools
+  # php-cs-fixer ^1.13 is supported until PHP 7.1 max (hard-coded internally)
   - if [[ $ENABLE_DEVTOOLS ]]; then
-      # @todo:
-      # php-cs-fixer ^2.0 requires additional attribute `--allow-risky`, triggered by hoa/devtools
-      # php-cs-fixer ^1.13 is supported until PHP 7.1 max (hard-coded internally)
       composer global require require friendsofphp/php-cs-fixer:^1.13.0;
       vendor/bin/hoa devtools:cs --diff --dry-run .;
     fi
